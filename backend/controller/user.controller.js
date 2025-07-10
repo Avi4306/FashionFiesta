@@ -8,7 +8,6 @@ const createUser =( async(req, res) => {
     return res.status(400).json({ success: false ,message: 'Name and price are required' });
   }
   const newUser = new User(user);
-  console.log(user.name,user.email,user.password)
   try {
     await newUser.save();
     res.status(201).json({ success: true, data: user });
