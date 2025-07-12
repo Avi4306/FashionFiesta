@@ -6,16 +6,19 @@
   "license": "ISC",
   "author": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
-  },
+"scripts": {
+  "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\"",
+  "server": "nodemon backend/index.js",
+  "flask": "cd flask && python recomend.py"
+},
   "dependencies": {
+    "axios": "^1.10.0",
     "dotenv": "^17.1.0",
     "express": "^5.1.0",
     "mongoose": "^8.16.2"
   },
   "devDependencies": {
+    "concurrently": "^9.2.0",
     "nodemon": "^3.1.10"
   },
   "keywords": []

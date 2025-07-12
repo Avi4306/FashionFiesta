@@ -5,7 +5,7 @@ import Product from '../models/products.models.js'
 const createProduct =( async(req, res) => {
   const product = req.body;
   
-  if(!product.name || !product.price || !product.category || !product.stock || !product.images) {
+  if(!product.title || !product.price || !product.category || !product.stock || !product.images) {
     return res.status(400).json({ success: false ,message: 'Name and price are required' });
   }
   const newProduct = new Product(product);
@@ -34,14 +34,14 @@ const deleteProduct = ( async(req,res) =>
 });
 
 const getProduct = async (req, res) => {
-  const { name } = req.params;
+  const { title } = req.params;
 
   try {
-    if (!name || name.trim().length === 0) {
+    if (!title || title.trim().length === 0) {
       return res.status(400).json({ message: 'Invalid product name' });
     }
 
-    const product = await Product.find({ name });
+    const product = await Product.find({ title });
 
     if (product.length === 0) {
       return res.status(404).json({ message: 'Product not found' });
