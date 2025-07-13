@@ -11,13 +11,13 @@ import "swiper/css/pagination";
 import { Heart, MessageCircle, Bookmark } from "lucide-react";
 
 // Images
-import hero1 from "../src/assets/hero1.jpeg";
-import hero2 from "../src/assets/hero2.jpeg";
-import hero3 from "../src/assets/hero3.jpeg";
-import hero4 from "../src/assets/hero4.jpeg";
-import hero5 from "../src/assets/hero5.jpeg";
-import fashion1 from "../src/assets/fashion1.png";
-import fashion2 from "../src/assets/fashion2.png";
+import blog1 from "../src/assets/street_wear.jpeg";
+import blog2 from "../src/assets/vintage.jpeg";
+import blog3 from "../src/assets/minimalist.jpeg";
+import blog4 from "../src/assets/vibrant.jpeg";
+import blog5 from "../src/assets/urban.jpeg";
+import blog6 from "../src/assets/boho.jpeg";
+import blog7 from "../src/assets/glam.jpeg";
 
 const Card = ({ imgSrc, username, title, content, likes = 54, comments = 12 }) => {
   return (
@@ -55,50 +55,51 @@ const Card = ({ imgSrc, username, title, content, likes = 54, comments = 12 }) =
 };
 
 export default function BlogCarousel() {
-  const cards = [
-    {
-      imgSrc: hero1,
-      username: "manthan_laddha",
-      title: "Street Style Vibes",
-      content: "Discover the latest trends straight from the city sidewalks.",
-    },
-    {
-      imgSrc: hero2,
-      username: "sara_rai",
-      title: "Vintage Revival",
-      content: "Retro is back! See how to rock old-school looks with confidence.",
-    },
-    {
-      imgSrc: hero3,
-      username: "rahul_kumar",
-      title: "Minimalist Fashion",
-      content: "Simplicity never goes out of style — learn to master minimalism.",
-    },
-    {
-      imgSrc: hero4,
-      username: "nisha_verma",
-      title: "Bold & Bright",
-      content: "Turn heads with these vibrant colors and bold prints.",
-    },
-    {
-      imgSrc: hero5,
-      username: "nisha_verma",
-      title: "Bold & Bright",
-      content: "Turn heads with these vibrant colors and bold prints.",
-    },
-    {
-      imgSrc: fashion1,
-      username: "nisha_verma",
-      title: "Bold & Bright",
-      content: "Turn heads with these vibrant colors and bold prints.",
-    },
-    {
-      imgSrc: fashion2,
-      username: "nisha_verma",
-      title: "Bold & Bright",
-      content: "Turn heads with these vibrant colors and bold prints.",
-    },
-  ];
+ const cards = [
+  {
+    imgSrc: blog1,
+    username: "manthan_laddha",
+    title: "Street Style Vibes",
+    content: "Discover the latest trends straight from the city sidewalks.",
+  },
+  {
+    imgSrc: blog2,
+    username: "sara_rai",
+    title: "Vintage Revival",
+    content: "Retro is back! See how to rock old-school looks with confidence.",
+  },
+  {
+    imgSrc: blog3,
+    username: "rahul_kumar",
+    title: "Minimalist Fashion",
+    content: "Simplicity never goes out of style — learn to master minimalism.",
+  },
+  {
+    imgSrc: blog4,
+    username: "nisha_verma",
+    title: "Bold & Bright",
+    content: "Turn heads with vibrant colors, loud patterns, and fearless energy.",
+  },
+  {
+    imgSrc:blog5,
+    username: "aarav_mehta",
+    title: "Urban Edge",
+    content: "Mix raw attitude with tailored pieces for the ultimate city-ready look.",
+  },
+  {
+    imgSrc: blog6,
+    username: "kiara_bansal",
+    title: "Boho Dream",
+    content: "Floaty fabrics, earthy tones, and free-spirited layering define this style.",
+  },
+  {
+    imgSrc: blog7,
+    username: "zoya_sheikh",
+    title: "Glam Night Out",
+    content: "Sparkle and shimmer take the spotlight — perfect looks for late hours.",
+  },
+];
+
 
   return (
     <div className="flex justify-center items-center h-screen bg-white overflow-visible ">
