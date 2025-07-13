@@ -1,0 +1,29 @@
+
+.hero.swiper{
+    background: transparent;
+    width:100vw;
+    height: 52rem;
+    max-width:100vw;
+    overflow:hidden;
+    top:50px;
+}
+.hero>.swiper-wrapper{
+    background-color:transparent;
+    width:100vw;
+    height: 60vh;
+}
+.slide-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit:cover;
+  border-radius: 12px;
+  display: block;
+}
+

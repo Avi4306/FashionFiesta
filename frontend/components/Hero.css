@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap');
+
+@import "tailwindcss";
+.hero {
+  height: 70vh;
+  background-color: #faf7f3;
+  background-size: 300% auto;
+  animation: waveScroll 10s linear infinite;;
+  font-size: 2.5rem;
+  font-family: 'Cinzel Decorative', serif;
+  z-index: 1;
+}
+
+@keyframes waveScroll {
+  0% {
+    background-position-x: 0%;
+  }
+  100% {
+    background-position-x: 100%;
+  }
+}
+.wavy-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1440 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23dcc5b2' fill-opacity='0.5' d='M0,224L60,208C120,192,240,160,360,144C480,128,600,128,720,138.7C840,149,960,171,1080,181.3C1200,192,1320,192,1380,192L1440,192L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z'/%3E%3C/svg%3E");
+  background-position: center;
+  background-size: cover;
+  opacity: 1;
+}
+
+/* Optional smooth animation */
+@keyframes waveAnim {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 1000px;
+  }
+}
+
+.animate-wave {
+  animation: waveAnim 15s linear infinite;
+}
+
