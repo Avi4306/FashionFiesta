@@ -47,6 +47,18 @@ Fashion Fiesta’s backend service handles CRUD operations for design submission
 
 > **Note:** Backend is currently a standalone service and not yet connected to the frontend.
 
+## 🤖 AI Chatbot for Fashion Fiesta
+
+Fashion Fiesta includes an AI-powered chatbot designed to enhance user interaction by providing personalized fashion advice and support.
+
+### Features
+
+- **Style Recommendations:** Suggest outfits and accessories based on user preferences and occasions.
+- **Trend Updates:** Deliver the latest trending categories and styles.
+- **Design Submission Assistance:** Guide users through the design submission process.
+- **Fashion Tips:** Answer common fashion-related questions.
+- **Interactive Style Diaries:** Help users explore and engage with real-world fashion looks.
+- 
 ## ⚡ Special Note
 
 This project is part of a student initiative aimed at blending fashion and creativity into a unified digital experience.
