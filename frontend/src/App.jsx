@@ -9,9 +9,9 @@ import TrendingSection from '../components/TrendingSection'
 import BlogSection from '../components/Blog'
 import Designers from '../components/Designers'
 import Footer from '../components/Footer'
-function App() {
 
-  return (<div>
+function App() {
+  return (<>
     <Header />
     <NavBar />
     <Hero/>
@@ -20,7 +20,7 @@ function App() {
     <BlogSection/>
     <Designers/>
     <Footer/>
-  </div>)
+  </>)
 }
 
 export default App;
