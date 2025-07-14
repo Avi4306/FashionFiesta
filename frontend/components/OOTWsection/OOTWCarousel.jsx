@@ -6,11 +6,11 @@ import { EffectCards, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-cards";
 
-import fashion1 from "../src/assets/design1.jpeg";
-import fashion2 from "../src/assets/design2.jpeg";
-import fashion3 from "../src/assets/design3.jpeg";
+import fashion1 from "../../src/assets/design1.jpeg";
+import fashion2 from "../../src/assets/design2.jpeg";
+import fashion3 from "../../src/assets/design3.jpeg";
 
-import "../src/App.css";
+import "../../src/App.css";
 
 export default function OOTWCarousel() {
   return (

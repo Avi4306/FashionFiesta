@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import './App.css'
-import Header from '../components/Header'
-import NavBar from '../components/NavBar'
-import OOTW from '../components/OOTW'
-import Hero from '../components/Hero'
+import Header from '../components/Header/Header'
+import NavBar from '../components//Header/NavBar'
+import OOTW from '../components/OOTWsection/OOTW'
+import Hero from '../components/Hero/Hero'
 // import AnimatedBackground from '../components/TSWave'
-import TrendingSection from '../components/TrendingSection'
-import BlogSection from '../components/Blog'
-import Designers from '../components/Designers'
-import Footer from '../components/Footer'
+import TrendingSection from '../components/Categories/TrendingSection'
+import BlogSection from '../components/Blog/Blog'
+import Designers from '../components/Designer/Designers'
+import Footer from '../components/Footer/Footer'
 
 function App() {
   return (<>
