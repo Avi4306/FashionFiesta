@@ -9,18 +9,39 @@ import TrendingSection from '../components/TrendingSection'
 import BlogSection from '../components/Blog'
 import Designers from '../components/Designers'
 import Footer from '../components/Footer'
-function App() {
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-  return (<div>
+import {useEffect} from "react";
+import { useDispatch } from "react-redux";
+import {getPosts} from "./actions/posts";
+import Community from "../components/Community/Community.jsx";
+
+function App() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    // Dispatch an action to fetch posts or any other initial data
+    dispatch(getPosts());
+  }, [dispatch]);
+  return (<>
+    <Router>
     <Header />
     <NavBar />
-    <Hero/>
-    <OOTW/>
-    <TrendingSection />
-    <BlogSection/>
-    <Designers/>
+    <Routes>
+      <Route path="/" element={
+            <>
+              <Hero />
+              <OOTW />
+              <TrendingSection />
+              <BlogSection />
+              <Designers />
+            </>
+       }
+       />
+      <Route path="/community" element={<Community />} />
+    </Routes>
     <Footer/>
-  </div>)
+    </Router>
+  </>)
 }
 
 export default App;

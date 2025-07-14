@@ -6,6 +6,7 @@ import { PiShoppingCartThin } from "react-icons/pi";
 import { CiUser } from "react-icons/ci";
 // import { MDBInput } from 'mdb-react-ui-kit';
 import { CiSearch } from "react-icons/ci";
+import { Link } from 'react-router-dom';
 
 export default function NavBar() {
     const[isactive, setActive] = useState(false);
@@ -13,12 +14,14 @@ export default function NavBar() {
         setActive(!isactive);
     }
     return (
-        <div className="NavBar ">
+        <nav className="NavBar ">
             <div className="nav-links">
-                <a href="#index" className="text-3lg font-bold" >Home</a>
-                <a href="#index" className="text-3lg font-bold">Trending Styles</a>
-                <a href="#index" className="text-3lg font-bold">Featured Designers</a>
-            </div>  
+            <Link to="/" className="text-3lg font-bold">Home</Link>
+            <Link to="/trending" className="text-3lg font-bold">Trending Styles</Link>
+            <Link to="/designers" className="text-3lg font-bold">Featured Designers</Link>
+            <Link to="/community" className="text-3lg font-bold">Community</Link>
+            </div>
+ 
            <div className="nav-icons">
             <div className={`${isactive?"search-container active":"search-container"}`} onClick= {HandleClick} >
             <CiSearch/>
@@ -29,6 +32,6 @@ export default function NavBar() {
                 <PiShoppingCartThin />
                 <CiUser /></div>
            </div>
-        </div>
+        </nav>
     )
 };
