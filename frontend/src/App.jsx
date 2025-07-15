@@ -5,10 +5,10 @@ import NavBar from '../components//Header/NavBar'
 import OOTW from '../components/OOTWsection/OOTW'
 import Hero from '../components/Hero/Hero'
 // import AnimatedBackground from '../components/TSWave'
-import TrendingSection from '../components/TrendingSection'
-import BlogSection from '../components/Blog'
-import Designers from '../components/Designers'
-import Footer from '../components/Footer'
+import TrendingSection from '../components/Categories/TrendingSection'
+import BlogSection from '../components/Blog/Blog'
+import Designers from '../components/Designer/Designers'
+import Footer from '../components/Footer/Footer'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import {useEffect} from "react";
