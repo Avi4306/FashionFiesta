@@ -4,7 +4,6 @@ import Posts from '../Posts/Posts.jsx'
 const Community = () => {
   return (
     <>
-      <h1>Community Page</h1>
       <Form/>
       <Posts/>
     </>

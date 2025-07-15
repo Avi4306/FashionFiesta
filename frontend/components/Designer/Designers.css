@@ -4,7 +4,7 @@
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-h2{
+.designer-container>h2{
   font-family: 'Homemade Apple','Cursive';
   font-size:3rem;
   background-color: #dcc5b2;

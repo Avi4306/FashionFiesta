@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { TextField, Button } from '@mui/material';
+import { TextField} from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { createPost } from '../../src/actions/posts';
+import './styles.css'
 const Form = () => {
     const [postData, setPostData] = useState({
         title: '',
@@ -46,28 +47,157 @@ const Form = () => {
         });
     }
     return (
-        <>
-        <h2>Forms Component</h2>
-        <form 
+        <div className='community-container  grid grid-cols-1 grid-rows-[10rem,30rem] gap-5 text-center '>
+        <h2 className='text-4xl tracking-[0.4rem] text-shadow-lg/30 '>Got a idea, Share it with world</h2>
+        <form className='Form-container grid grid-cols-2 grid-rows-[1rem,3rem,1rem,0.5rem] gap-5'
         autoComplete="off" 
         noValidate
         onSubmit={handleSubmit}>
-            <TextField name ="title" variant="outlined" label="Title" fullWidth
-            value={postData.title}
-            onChange={e => setPostData({ ...postData, title: e.target.value })}
-            />
-            <TextField name ="content" variant="outlined" label="Content" fullWidth
-            value={postData.content}
-            onChange={e => setPostData({ ...postData, content: e.target.value })}
-            />
-            <TextField name ="tags" variant="outlined" label="Tags" fullWidth
-            value={postData.tags}
-            onChange={e => setPostData({ ...postData, tags: e.target.value })}
-            />
+           {/* Title Field */}
+<TextField
+  name="title"
+  label="Title"
+  variant="outlined"
+  fullWidth
+  value={postData.title}
+  onChange={(e) => setPostData({ ...postData, title: e.target.value })}
+  className="col-start-1 row-start-1"
+  InputLabelProps={{
+    sx: {
+      color: '#2e2e2e',
+      fontFamily: 'Montserrat',
+      backgroundColor: 'transparent',
+      px: '4px', // prevent label flicker over corners
+      '&.Mui-focused': {
+        color: '#000',
+        backgroundColor: 'transparent',
+      },
+    },
+  }}
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '10px',
+      backgroundColor: '#faf7f3',
+      fontFamily: 'Montserrat',
+      transition: 'all 0.3s ease',
+      '& input': {
+        padding: '12px',
+        backgroundColor: '#faf7f3', // patch for corner flicker
+        borderRadius: '10px',
+      },
+      '& fieldset': {
+        borderColor: '#ccc',
+      },
+      '&:hover fieldset': {
+        borderColor: '#999',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#000',
+        boxShadow: '0 0 0 2px rgba(0,0,0,0.15)',
+      },
+    },
+  }}
+/>
+
+{/* Content Field */}
+<TextField
+  name="content"
+  label="Content"
+  variant="outlined"
+  fullWidth
+  multiline
+  rows={4}
+  value={postData.content}
+  onChange={(e) => setPostData({ ...postData, content: e.target.value })}
+  className="col-start-1 row-start-2"
+  InputLabelProps={{
+    sx: {
+      color: '#2e2e2e',
+      fontFamily: 'Montserrat',
+      backgroundColor: 'transparent',
+      px: '4px',
+      '&.Mui-focused': {
+        color: '#000',
+        backgroundColor: 'transparent',
+      },
+    },
+  }}
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '10px',
+      backgroundColor: '#faf7f3',
+      fontFamily: 'Montserrat',
+      transition: 'all 0.3s ease',
+      '& textarea': {
+        padding: '12px',
+        backgroundColor: '#faf7f3',
+        borderRadius: '10px',
+      },
+      '& fieldset': {
+        borderColor: '#ccc',
+      },
+      '&:hover fieldset': {
+        borderColor: '#999',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#000',
+        boxShadow: '0 0 0 2px rgba(0,0,0,0.15)',
+      },
+    },
+  }}
+/>
+
+{/* Tags Field */}
+<TextField
+  name="tags"
+  label="Tags"
+  variant="outlined"
+  fullWidth
+  value={postData.tags}
+  onChange={(e) => setPostData({ ...postData, tags: e.target.value })}
+  className="col-start-1 row-start-3"
+  InputLabelProps={{
+    sx: {
+      color: '#2e2e2e',
+      fontFamily: 'Montserrat',
+      backgroundColor: 'transparent',
+      px: '4px',
+      '&.Mui-focused': {
+        color: '#000',
+        backgroundColor: 'transparent',
+      },
+    },
+  }}
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '10px',
+      backgroundColor: '#faf7f3',
+      fontFamily: 'Montserrat',
+      transition: 'all 0.3s ease',
+      '& input': {
+        padding: '12px',
+        backgroundColor: '#faf7f3',
+        borderRadius: '10px',
+      },
+      '& fieldset': {
+        borderColor: '#ccc',
+      },
+      '&:hover fieldset': {
+        borderColor: '#999',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#000',
+        boxShadow: '0 0 0 2px rgba(0,0,0,0.15)',
+      },
+    },
+  }}
+/>
+
+
             {/* File Upload using Dropzone */}
-            <div {...getRootProps()} style={{ border: '2px dashed #aaa', padding: '20px', marginTop: '10px' }}>
-            <input {...getInputProps()} />
-            <p>Drag & drop an image, or click to select one</p>
+            <div {...getRootProps()} className='row-span-3' style={{ border: '2px dashed #fff', padding: '2rem', margin: '2rem', borderRadius: '20px' }}>
+            <input {...getInputProps()}/>
+            <p className='upload-instruction'>Drag & drop an image, or click to select one</p>
             </div>
 
             {/* Show image preview if a file is selected */}
@@ -75,10 +205,10 @@ const Form = () => {
             <img src={postData.selectedFile} alt="Selected file preview" style={{ marginTop: '20px', width: '100px' }} />
             )}
             
-            <Button type="submit" variant="contained" color="primary" size='large'>Submit</Button>
-            <Button onClick={clear} color="secondary" size ="small">Clear</Button>
+            <button type="submit" className= "font-semibold rounded-lg shadow-md/40 btns">Submit</button>
+            <button onClick={clear} className= "font-semibold rounded-lg shadow-md/40 btns">Clear</button>
             </form>
-        </>
+        </div>
     );
 }
 
