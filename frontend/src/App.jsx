@@ -6,9 +6,9 @@ import OOTW from '../components/OOTWsection/OOTW'
 import Hero from '../components/Hero/Hero'
 // import AnimatedBackground from '../components/TSWave'
 import TrendingSection from '../components/Categories/TrendingSection'
-import BlogSection from '../components/Blog/Blog'
-import Designers from '../components/Designer/Designers'
-import Footer from '../components/Footer/Footer'
+import BlogSection from '../components/Blog/Blog.jsx'
+import Designers from '../components/Designer/Designers.jsx'
+import Footer from '../components/Footer/Footer.jsx'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import {useEffect} from "react";

@@ -21,15 +21,19 @@ const createProduct =( async(req, res) => {
 const deleteProduct = ( async(req,res) =>
 {
      const {id} = req.params;
+     if (!mongoose.Types.ObjectId.isValid(id)) {
+       return res.status(404).json({ success: false, message: 'Invalid Product ID' });
+     }
      try{
        await Product.findByIdAndDelete(id);
+       
        res.status(200).json({ success: true,message:"Product deleted"});
 
      }
      catch(err)
      {
        console.error(err)
-       res.status(404).json({ success: false, message: 'User not found!' })
+       res.status(404).json({ success: false, message: 'Product not found!' })
      }
 });
 

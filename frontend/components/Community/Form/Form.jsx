@@ -8,7 +8,7 @@ const Form = () => {
     const [postData, setPostData] = useState({
         title: '',
         content: '',
-        tags: '',
+        tags: [],
         selectedFile: ''
     });
     const onDrop = (acceptedFiles) => {
@@ -24,14 +24,20 @@ const Form = () => {
         }
     }
     const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
-    accept: 'image/*', // Only accept image files
-  });
+        onDrop,
+        accept: 'image/*', // Only accept image files
+    });
+    const [errorMsg, setErrorMsg] = useState('');
+    const [openSnackbar, setOpenSnackbar] = useState(false);
     const dispatch = useDispatch();
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(postData);
-         try {
+        if (!postData.title || !postData.content || !postData.selectedFile) {
+            setErrorMsg('Title, content, and image are required.');
+            setOpenSnackbar(true);
+            return;
+        }
+        try {
             await dispatch(createPost(postData)); 
       } catch (error) {
       console.error(error);
@@ -42,7 +48,7 @@ const Form = () => {
         setPostData({
             content: '',
             title: '',
-            tags: '',
+            tags: [],
             selectedFile: ''
         });
     }
