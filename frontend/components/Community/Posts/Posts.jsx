@@ -4,7 +4,6 @@ import {useSelector} from "react-redux"
 const Posts = () => {
   const posts = useSelector((state) => state.posts); // Using useSelector to access the posts from the Redux store provided by the reducer
   //posts is the name inside reducer folder, which is the name of the reducer function
-  console.log("Posts from Redux state:", posts);
   if (!posts) {
     return <div>No posts available</div>; // Display a fallback if no posts
   } 

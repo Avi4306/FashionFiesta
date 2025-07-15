@@ -1,6 +1,6 @@
 import React from 'react'
-import Form from '../Form/Form.jsx'
-import Posts from '../Posts/Posts.jsx'
+import Form from './Form/Form.jsx'
+import Posts from './Posts/Posts.jsx'
 const Community = () => {
   return (
     <>
