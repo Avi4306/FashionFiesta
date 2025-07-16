@@ -19,7 +19,7 @@ export default function NavBar() {
             <Link to="/" className="text-3lg font-bold">Home</Link>
             <Link to="/trending" className="text-3lg font-bold">Trending Styles</Link>
             <Link to="/designers" className="text-3lg font-bold">Featured Designers</Link>
-            <Link to="/community" className="text-3lg font-bold">Community</Link>
+            <Link to="/style-diaries" className="text-3lg font-bold">Style Diaries</Link>
             </div>
  
            <div className="nav-icons">

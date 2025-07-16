@@ -11,13 +11,13 @@ import "swiper/css/pagination";
 import { Heart, MessageCircle, Bookmark } from "lucide-react";
 
 // Images
-import blog1 from "../../src/assets/street_wear.jpeg";
-import blog2 from "../../src/assets/vintage.jpeg";
-import blog3 from "../../src/assets/minimalist.jpeg";
-import blog4 from "../../src/assets/vibrant.jpeg";
-import blog5 from "../../src/assets/urban.jpeg";
-import blog6 from "../../src/assets/boho.jpeg";
-import blog7 from "../../src/assets/glam.jpeg";
+import blog1 from "../../../src/assets/street_wear.jpeg";
+import blog2 from "../../../src/assets/vintage.jpeg";
+import blog3 from "../../../src/assets/minimalist.jpeg";
+import blog4 from "../../../src/assets/vibrant.jpeg";
+import blog5 from "../../../src/assets/urban.jpeg";
+import blog6 from "../../../src/assets/boho.jpeg";
+import blog7 from "../../../src/assets/glam.jpeg";
 
 const Card = ({ imgSrc, username, title, content, likes = 54, comments = 12 }) => {
   return (

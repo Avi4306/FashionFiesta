@@ -1,6 +1,6 @@
 import React from "react"
 import { HiChevronDoubleRight } from "react-icons/hi2";
-import "../../src/App.css"; // Adjust the path as necessary
+import "../../../src/App.css"; // Adjust the path as necessary
 import OOTWCarousel from "./OOTWCarousel"
 
 

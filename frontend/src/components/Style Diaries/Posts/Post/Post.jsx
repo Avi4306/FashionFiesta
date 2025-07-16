@@ -9,7 +9,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useDispatch } from "react-redux";
-import { deletePost, likePost } from "../../../../src/actions/posts";
+import { deletePost, likePost } from "../../../../actions/posts";
 
 const Post = ({ post }) => {
   const dispatch = useDispatch();

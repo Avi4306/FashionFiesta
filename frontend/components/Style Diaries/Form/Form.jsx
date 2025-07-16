@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { TextField } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { createPost } from "../../../src/actions/posts";
+import { createPost } from "../../../actions/posts";
 import "./styles.css";
 const Form = () => {
   const [postData, setPostData] = useState({
