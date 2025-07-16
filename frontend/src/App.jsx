@@ -14,7 +14,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {useEffect} from "react";
 import { useDispatch } from "react-redux";
 import {getPosts} from "./actions/posts";
-import styleDiaries from "./components/Style Diaries/StyleDiaries.jsx";
+import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 
 function App() {
   const dispatch = useDispatch();
@@ -37,7 +37,7 @@ function App() {
             </>
        }
        />
-      <Route path="/style-diaries" element={<styleDiaries/>} />
+      <Route path="/style-diaries" element={<StyleDiaries/>} />
     </Routes>
     <Footer/>
     </Router>
