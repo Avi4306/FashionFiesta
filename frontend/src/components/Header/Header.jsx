@@ -1,4 +1,5 @@
 import React from "react";
+<<<<<<< HEAD
 import "./Header.css";
 
 export default function Header() {
@@ -25,3 +26,19 @@ export default function Header() {
     </header>
   );
 }
+=======
+import '/src/index.css';
+import '/src/App.css';
+
+export default function Header(){
+    return (
+        <div className="montserrat-header header ">
+        <img src="/src/assets/Logo.png" alt="Logo" />
+       <h1>Fashion Fiesta
+        <p>Make Fashion your Fiesta</p>
+       </h1>
+       
+        </div>
+    );
+}
+>>>>>>> cb15ae1e83c438a6d394d361e1bc50158cc23ebe
