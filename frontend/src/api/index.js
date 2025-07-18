@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const url = 'http://localhost:3000/community';
+const url = 'http://localhost:3000/style-diaries';
 
 export const fetchPosts = () => axios.get(url);
 

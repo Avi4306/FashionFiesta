@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import '/src/index.css';
 import '/src/App.css';
 import { CiHome } from "react-icons/ci";
@@ -6,13 +6,31 @@ import { PiShoppingCartThin } from "react-icons/pi";
 import { CiUser } from "react-icons/ci";
 // import { MDBInput } from 'mdb-react-ui-kit';
 import { CiSearch } from "react-icons/ci";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import Avatar from '@mui/material/Avatar';
+import {Menu, MenuItem, Typography, Divider} from '@mui/material';
 
 export default function NavBar() {
     const[isactive, setActive] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const dispatch = useDispatch();
     function HandleClick() {
         setActive(!isactive);
     }
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('profile')));
+    console.log(user);
+    useEffect(() => {
+        const profile = JSON.parse(localStorage.getItem('profile'));
+        setUser(profile);
+    }, [location]);
+    const handleLogout = () => {
+        setUser(null);
+        localStorage.removeItem('profile');
+        dispatch({ type: 'LOGOUT' });
+        navigate('/');
+    };
     return (
         <nav className="NavBar ">
             <div className="nav-links">
@@ -30,7 +48,19 @@ export default function NavBar() {
             <div className="Icons">
                 <CiHome />
                 <PiShoppingCartThin />
-                <CiUser /></div>
+                {user?.result ? ( // user !== null && user !== undefined ? user.result : undefined
+                        <Avatar
+                            alt={user.result.name}
+                            src={user.result.imageUrl}
+                            onClick={handleLogout}
+                            sx={{ cursor: 'pointer', width: 40, height: 40 }}
+                        >
+                            {!user.result.imageUrl && user.result.name.charAt(0)}
+                        </Avatar>
+                    ) : (
+                    <Link to="/auth">Login</Link>
+                    )}
+                </div>
            </div>
         </nav>
     )

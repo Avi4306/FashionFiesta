@@ -15,6 +15,7 @@ import {useEffect} from "react";
 import { useDispatch } from "react-redux";
 import {getPosts} from "./actions/posts";
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
+import Auth from './components/Auth/Auth.jsx'
 
 function App() {
   const dispatch = useDispatch();
@@ -38,6 +39,7 @@ function App() {
        }
        />
       <Route path="/style-diaries" element={<StyleDiaries/>} />
+      <Route path="/auth" element={<Auth/>} />
     </Routes>
     <Footer/>
     </Router>

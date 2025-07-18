@@ -25,7 +25,9 @@ const Form = () => {
   };
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: "image/*", // Only accept image files
+    accept: {
+      "image/*": [] // Only accept image files
+    }
   });
   const [errorMsg, setErrorMsg] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -72,18 +74,21 @@ const Form = () => {
           value={postData.title}
           onChange={(e) => setPostData({ ...postData, title: e.target.value })}
           className="col-start-1 row-start-1"
-          InputLabelProps={{
-            sx: {
-              color: "#2e2e2e",
-              fontFamily: "Montserrat",
-              backgroundColor: "transparent",
-              px: "4px", // prevent label flicker over corners
-              "&.Mui-focused": {
-                color: "#000",
-                backgroundColor: "transparent",
-              },
-            },
+          slotProps={{
+            inputLabel:{
+                        sx: {
+                          color: "#2e2e2e",
+                          fontFamily: "Montserrat",
+                          backgroundColor: "transparent",
+                          px: "4px", // prevent label flicker over corners
+                          "&.Mui-focused": {
+                            color: "#000",
+                            backgroundColor: "transparent",
+                          },
+                        },
+                      }
           }}
+          
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "10px",
@@ -110,7 +115,7 @@ const Form = () => {
         />
 
         {/* Content Field */}
-        <TextField
+      <TextField
           name="content"
           label="Content"
           variant="outlined"
@@ -122,15 +127,17 @@ const Form = () => {
             setPostData({ ...postData, content: e.target.value })
           }
           className="col-start-1 row-start-2"
-          InputLabelProps={{
-            sx: {
-              color: "#2e2e2e",
-              fontFamily: "Montserrat",
-              backgroundColor: "transparent",
-              px: "4px",
-              "&.Mui-focused": {
-                color: "#000",
+          slotProps={{
+            inputLabel: {
+              sx: {
+                color: "#2e2e2e",
+                fontFamily: "Montserrat",
                 backgroundColor: "transparent",
+                px: "4px",
+                "&.Mui-focused": {
+                  color: "#000",
+                  backgroundColor: "transparent",
+                },
               },
             },
           }}
@@ -165,18 +172,22 @@ const Form = () => {
           label="Tags"
           variant="outlined"
           fullWidth
-          value={postData.tags}
-          onChange={(e) => setPostData({ ...postData, tags: e.target.value.split(",") })}
+          value={postData.tags.join(",")}  // Join the array to display as comma-separated string
+          onChange={(e) =>
+            setPostData({ ...postData, tags: e.target.value.split(",") })
+          }
           className="col-start-1 row-start-3"
-          InputLabelProps={{
-            sx: {
-              color: "#2e2e2e",
-              fontFamily: "Montserrat",
-              backgroundColor: "transparent",
-              px: "4px",
-              "&.Mui-focused": {
-                color: "#000",
+          slotProps={{
+            inputLabel: {
+              sx: {
+                color: "#2e2e2e",
+                fontFamily: "Montserrat",
                 backgroundColor: "transparent",
+                px: "4px",
+                "&.Mui-focused": {
+                  color: "#000",
+                  backgroundColor: "transparent",
+                },
               },
             },
           }}
@@ -234,6 +245,7 @@ const Form = () => {
         <button
           type="submit"
           className="font-semibold rounded-lg shadow-md/40 btns"
+          onClick={handleSubmit}
         >
           Submit
         </button>
