@@ -1,26 +1,33 @@
-import React from "react"
-import { HiChevronDoubleRight } from "react-icons/hi2";
-import "../../../src/App.css"; // Adjust the path as necessary
-import OOTWCarousel from "./OOTWCarousel"
+import React from "react";
+import "./OOTW.css"; 
+import OOTWCarousel from './OOTWCarousel'
 
 
 export default function OOTW() {
   return (
-    <div className="ootw-container flex flex-row  ">
-      <div className="ootw-text basis-1/3 justify-center">
-        <h1>Outfit of the week</h1>
-      <p>Where student creativity, <br/> meets Fashion trends</p>
-      <div className="icons"><HiChevronDoubleRight/></div>
-      <p>
-        Get Featured!
-        <br />
-        Join the Fiesta & <a href="#index">Submit</a> Your Designs
-      </p>
-      </div>
-        <div  className="carousel basis-1/3">
-            <OOTWCarousel/>
+    <section className="ootw-section">
+      <div className="ootw-text">
+        <h1 className="ootw-title">
+          Outfit of the Week
+        </h1>
+        <p className="ootw-subtitle">
+          Where student creativity meets Fashion trends
+        </p>
+        <div className="ootw-icon">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
+          </svg>
         </div>
-      
-    </div>
+        <p className="ootw-call">
+          Get Featured! <br />
+          Join the Fiesta & <a href="#submit">Submit</a> Your Designs
+        </p>
+      </div>
+
+      <div className="ootw-carousel">
+        <OOTWCarousel />
+      </div>
+    </section>
   );
 }

@@ -11,13 +11,13 @@ import "swiper/css/pagination";
 import { Heart, MessageCircle, Bookmark } from "lucide-react";
 
 // Images
-import blog1 from "../../../src/assets/street_wear.jpeg";
-import blog2 from "../../../src/assets/vintage.jpeg";
-import blog3 from "../../../src/assets/minimalist.jpeg";
-import blog4 from "../../../src/assets/vibrant.jpeg";
-import blog5 from "../../../src/assets/urban.jpeg";
-import blog6 from "../../../src/assets/boho.jpeg";
-import blog7 from "../../../src/assets/glam.jpeg";
+import blog1 from "../../assets/street_wear.jpeg";
+import blog2 from "../../assets/vintage.jpeg";
+import blog3 from "../../assets/minimalist.jpeg";
+import blog4 from "../../assets/vibrant.jpeg";
+import blog5 from "../../assets/urban.jpeg";
+import blog6 from "../../assets/boho.jpeg";
+import blog7 from "../../assets/glam.jpeg";
 
 const Card = ({ imgSrc, username, title, content, likes = 54, comments = 12 }) => {
   return (
@@ -104,34 +104,38 @@ export default function BlogCarousel() {
   return (
     <div className="flex justify-center items-center h-screen bg-white overflow-visible ">
       <Swiper
-        effect={"coverflow"}
-        direction="vertical"
-        grabCursor={true}
-        centeredSlides={true}
-        slidesPerView={5}
-        loop={true}
-        coverflowEffect={{
-          rotate: -10,
-          stretch: -80,
-          depth: 500,
-          modifier: 1,
-          slideShadows: false,
-        }}
-        speed={800}
-        modules={[EffectCoverflow, Autoplay]}
-        className="w-full max-w-sm h-[449px] overflow-visible"
-      >
-        {cards.map((card, index) => (
-          <SwiperSlide key={index} className="flex justify-center items-center h-full shadow-2xl shadow-black overflow-x-visible">
-            <Card
-              imgSrc={card.imgSrc}
-              username={card.username}
-              title={card.title}
-              content={card.content}
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+  effect="coverflow"
+  direction="vertical"
+  grabCursor={true}
+  centeredSlides={true}
+  loop={true}
+  speed={800}
+  autoplay={{
+    delay: 3000,
+    disableOnInteraction: false,
+  }}
+  coverflowEffect={{
+    rotate: -10,
+    stretch: -20,
+    depth: 500,
+    modifier: 1,
+    slideShadows: false,
+  }}
+  slidesPerView={1.5}
+  breakpoints={{
+    640: { slidesPerView: 2 },
+    768: { slidesPerView: 2.5 },
+    1024: { slidesPerView: 3 },
+  }}
+  modules={[EffectCoverflow, Autoplay]}
+  className="w-full max-w-sm h-[480px] overflow-visible"
+>
+  {cards.map((card, index) => (
+    <SwiperSlide key={index} className="flex justify-center items-center h-full overflow-visible z-[1]">
+      <Card {...card} />
+    </SwiperSlide>
+  ))}
+</Swiper>
     </div>
   );
 }

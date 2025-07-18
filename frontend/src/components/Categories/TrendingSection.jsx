@@ -1,52 +1,79 @@
 import React from "react";
-import "./TrendingSection.css";
 import { HiChevronDoubleLeft } from "react-icons/hi2";
-
+import "./TrendingSection.css";
+import TC3 from "../../assets/TC3.jpeg";
+import TC1 from "../../assets/TC1.jpeg";
+import TC2 from "../../assets/TC2.jpeg";
+import TC4 from "../../assets/TC4.jpg";
 export default function TrendingSection() {
   return (
-    <div className="trending-section-container">
-      <div className="trending-section-content grid grid-cols-2 grid-rows-1 gap-4 h-full bg-inherit">
-        <div className="p-4 h-full overflow-hidden flex items-center">
-          <div className="grid grid-cols-4 grid-rows-8 gap-3 w-full h-full">
-            <div className="col-span-2 row-span-3 bg-white rounded-xl shadow card-hover">
-              <img src="../src/assets/TC3.jpeg" alt="" />
-              <div className="card-text">
-                <p>Kid's<br/> Section</p>
-              </div>
-            </div>
-            <div className="col-span-2 row-span-5 col-start-3 bg-white rounded-xl shadow card-hover">
-              <img src="../src/assets/TC1.jpeg" alt="" />
-              <div className="card-text">
-                <p>Women's<br/> Clothing</p>
-              </div>
-            </div>
-            <div className="col-span-2 row-span-3 col-start-3 row-start-6 bg-white rounded-xl shadow card-hover">
-              <img src="../src/assets/TC4.jpg" alt="" />
-              <div className="card-text">
-                <p>Accessories</p>
-              </div>
-            </div>
-            <div className="col-span-2 row-span-5 col-start-1 row-start-4 bg-white rounded-xl shadow card-hover">
-              <img src="../src/assets/TC2.jpeg" alt="" />
-              <div className="card-text">
-                <p>Men's <br/> Apparel</p>
-              </div>
-            </div>
+    <div
+      className="w-full min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 py-8"
+      style={{ backgroundImage: 'url("./src/assets/TSbg.png")' }}
+    >
+      <div className="w-full max-w-7xl bg-[#dcc5b2] rounded-2xl shadow-xl flex flex-col md:flex-row overflow-hidden">
+        {/* Left: Cards Grid */}
+        <div className="w-full md:w-1/2 p-6 flex items-center justify-center">
+          <div className="grid grid-cols-4 grid-rows-8 gap-3 w-full h-[550px]">
+            <Card
+              img={TC3}
+              text="Kid's Section"
+              col="col-span-2"
+              row="row-span-3"
+            />
+            <Card
+              img={TC1}
+              text="Women's Clothing"
+              col="col-span-2 col-start-3"
+              row="row-span-5"
+            />
+            <Card
+              img={TC4}
+              text="Accessories"
+              col="col-span-2 col-start-3 row-start-6"
+              row="row-span-3"
+            />
+            <Card
+              img={TC2}
+              text="Men's Apparel"
+              col="col-span-2 row-start-4"
+              row="row-span-5"
+            />
           </div>
         </div>
 
-        <div className="p-4  flex-col h-full text-right  bg-inherit ">
-          <h2 className="text-6xl font-medium leading-[6rem] p-8">
+        {/* Right: Text Content */}
+        <div className="w-full md:w-1/2 p-[5rem] text-center md:text-right flex flex-col justify-center items-center md:items-end gap-4 ">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-cinzel leading-tight mb-8">
             Trending Categories
           </h2>
-          <p className="text-xl tracking-[0.5rem] leading-[2rem] pr-8">
+          <p className="text-base sm:text-lg md:text-xl tracking-widest max-w-md font-montserrat mb-4">
             Explore the latest <br />
-            Trends across every <br /> style categories
+            Trends across every <br /> style category
           </p>
-          <div className="icons text-8xl ">
-            <HiChevronDoubleLeft className="align-right" />
+          <div className="text-6xl md:text-7xl animate-bounce-right md:rotate-0 rotate-90">
+            <HiChevronDoubleLeft />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Card({ img, text, col, row }) {
+  return (
+    <div
+      className={`${col} ${row} bg-white rounded-xl shadow-lg overflow-hidden relative group`}
+    >
+      <img
+        src={img}
+        alt=""
+        className="w-full h-full object-cover transform group-hover:scale-105 transition duration-500"
+      />
+      <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
+        <p className="text-white text-lg md:text-xl font-semibold opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition duration-500 text-center whitespace-pre-line text-shadow p-4">
+          {text}
+        </p>
       </div>
     </div>
   );

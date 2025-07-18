@@ -1,0 +1,159 @@
+/* src/components/QuotesSection.css */
+
+/* --- Custom Variables for Consistency --- */
+:root {
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Open Sans', sans-serif;
+  --color-dark-grey: #1a1a1a;
+  --color-light-grey: #f8f8f8;
+  --color-gold-accent: #b8914b; /* A sophisticated gold */
+  --transition-speed-slow: 0.8s ease-out;
+  --transition-speed-medium: 0.5s ease-out;
+  --animation-delay-base: 0.2s;
+}
+
+/* --- Base Section Styles (used by Tailwind in JSX) --- */
+/*
+  These are now explicitly defined here since Tailwind config isn't used
+  for custom colors.
+*/
+.quotes-section-base {
+  background-color: #faf7f3; /* Light grey background */
+  color: var(--color-dark-grey); /* Default text color */
+}
+
+/* --- Quote Text Styling --- */
+.quote-text-style {
+  font-family: var(--font-heading);
+  font-size: 2.8rem; /* Desktop default, will be responsive below */
+  font-weight: 500;
+  line-height: 1.3;
+  font-style: italic;
+  margin-bottom: 2rem; /* Tailwind equivalent: mb-8 */
+  position: relative; /* For pseudo-elements */
+  color: var(--color-dark-grey);
+}
+
+/* --- Quote Author Styling --- */
+.quote-author-style {
+  font-family: var(--font-body);
+  font-size: 1.4rem; /* Desktop default, will be responsive below */
+  font-weight: 400;
+  letter-spacing: 0.05em; /* Tailwind equivalent: tracking-wide */
+  color: var(--color-gold-accent);
+  margin-top: 2rem; /* Tailwind equivalent: mt-8 */
+}
+
+/* --- Responsive Adjustments for Fonts & Spacing --- */
+@media (max-width: 1024px) { /* Equivalent to Tailwind's lg */
+  .quote-text-style { font-size: 2.5rem; }
+  .quote-author-style { font-size: 1.3rem; }
+}
+@media (max-width: 768px) { /* Equivalent to Tailwind's md */
+  .quote-text-style { font-size: 2.2rem; margin-bottom: 1.5rem; }
+  .quote-author-style { font-size: 1.2rem; margin-top: 1.5rem; }
+}
+@media (max-width: 640px) { /* Equivalent to Tailwind's sm */
+  .quote-text-style { font-size: 1.8rem; margin-bottom: 1.25rem; }
+  .quote-author-style { font-size: 1rem; margin-top: 1.25rem; }
+}
+
+
+/* --- Keyframe Animations --- */
+@keyframes fadeInSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes textRevealLeft {
+  0% { clip-path: inset(0 100% 0 0); transform: translateY(10px); opacity: 0; }
+  100% { clip-path: inset(0 0 0 0); transform: translateY(0); opacity: 1; }
+}
+
+@keyframes lineDrawLeft {
+  from { transform: scaleX(0); transform-origin: left center; }
+  to { transform: scaleX(1); transform-origin: left center; }
+}
+
+@keyframes lineDrawRight {
+  from { transform: scaleX(0); transform-origin: right center; }
+  to { transform: scaleX(1); transform-origin: right center; }
+}
+
+/* --- Animation Application Classes --- */
+
+/* Initial state for elements that will animate */
+.quote-text-animation,
+.quote-author-animation {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.quote-text-animation {
+  clip-path: inset(0 100% 0 0); /* Hides text initially for reveal effect */
+}
+
+/* Pseudo-elements for lines - initial hidden state */
+.quote-text-style::before,
+.quote-text-style::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background-color: var(--color-gold-accent);
+  opacity: 0.6;
+  position: absolute;
+  left: 50%; /* Center the line */
+  transform: translateX(-50%) scaleX(0); /* Hide and center */
+  transform-origin: center; /* Ensures scaling from center */
+}
+
+/* Positioning for the top line */
+.quote-text-style::before {
+  width: 100px; /* Length of the line */
+  top: -30px; /* Spacing above the text */
+}
+
+/* Positioning for the bottom line */
+.quote-text-style::after {
+  width: 100px; /* Length of the line */
+  bottom: -30px; /* Spacing below the text */
+}
+
+
+/* --- Triggering Animations with quotes-section-active class --- */
+
+.quotes-section-active .quote-text-animation {
+  animation: textRevealLeft 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards var(--animation-delay-base);
+}
+
+.quotes-section-active .quote-author-animation {
+  animation: fadeInSlideUp var(--transition-speed-slow) forwards calc(var(--animation-delay-base) + 1s); /* Delayed after text */
+}
+
+.quotes-section-active .quote-text-style::before {
+  animation: lineDrawLeft var(--transition-speed-medium) forwards calc(var(--animation-delay-base) + 1.6s); /* After author */
+  transform-origin: left center; /* For the 'draw from left' effect */
+}
+
+.quotes-section-active .quote-text-style::after {
+  animation: lineDrawRight var(--transition-speed-medium) forwards calc(var(--animation-delay-base) + 1.6s); /* After author */
+  transform-origin: right center; /* For the 'draw from right' effect */
+}
+
+
+/* Responsive line adjustments */
+@media (max-width: 768px) {
+  .quote-text-style::before,
+  .quote-text-style::after {
+    width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quote-text-style::before,
+  .quote-text-style::after {
+    width: 60px;
+  }
+  .quote-text-style::before { top: -20px; }
+  .quote-text-style::after { bottom: -20px; }
+}

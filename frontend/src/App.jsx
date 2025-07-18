@@ -1,5 +1,11 @@
 import { useState } from 'react'
 import './App.css'
+import Header from './components/Header/Header'
+import NavBar from './components//Header/NavBar'
+import OOTW from './components/OOTWsection/OOTW'
+import Hero from './components/Hero/Hero'
+import Quotes from './components/quotes/quotescard.jsx'
+import TrendingSection from './components/Categories/TrendingSection'
 import Header from './components/Header/Header.jsx'
 import NavBar from './components/Header/NavBar.jsx'
 import OOTW from './components/OOTWsection/OOTW.jsx'
@@ -14,6 +20,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {useEffect} from "react";
 import { useDispatch } from "react-redux";
 import {getPosts} from "./actions/posts";
+import Community from "./components/Community/Community.jsx";
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import Auth from './components/Auth/Auth.jsx'
 
@@ -31,10 +38,13 @@ function App() {
       <Route path="/" element={
             <>
               <Hero />
+              <Quotes />
               <OOTW />
+              <Quotes />
               <TrendingSection />
               <BlogSection />
               <Designers />
+              <Quotes />
             </>
        }
        />

@@ -1,256 +1,28 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap');
-@import "tailwindcss";
 
-.trending-section-container{
-height:90vh;
-width:100%;
-background-image: url("./src/assets/TSbg.png");
-display:flex;
-align-items: center;
-justify-content: center;
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
 }
-.trending-section-content{
-    width:80%;
-    height:70vh;
-    border-radius: 20px;
-    background-color: #dcc5b2;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+
+.font-cinzel {
+  font-family: 'Cinzel Decorative', cursive;
 }
-.trending-section-content h2{
-    font-family: "Cinzel Decorative", serif;
-    background: transparent;
-    
+
+.text-shadow {
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
 }
-.trending-section-content p{
-    font-family: "Montserrat", sans-serif;
-    background: transparent;
-    margin-bottom:20px;
-    margin-top:15px;
-    
-}
-.trending-section-content .icons {
-  font-size: 6rem;
-  color: #000;
-  margin: 10px 0;
-  margin-left:250px;
-  animation: bounceRight 3s infinite;
-  background-color:#f0e4d3;
-  background: transparent;
-}
+
+/* Custom bounce animation */
 @keyframes bounceRight {
   0%, 100% {
     transform: translateX(0);
   }
   50% {
-    transform: translateX(40px);
-  }
-}
-.trending-section-content .icons>*{
-    background: transparent;
-}
-.trending-section-content > div:nth-child(2) {
-  /* This is the right side */
-  border-bottom-right-radius: 20px;
-  border-top-right-radius: 20px;
-  background-color:#dcc5b2;
-  padding-right:50px;
-  padding-top:50px;
-}
-.trending-section-content > div:nth-child(1) {
-  /* This is the right side */
-  border-bottom-left-radius: 20px;
-  border-top-left-radius: 20px;
-  background-color:#dcc5b2;
-  
-}
-.trending-section-content > div:nth-child(1)>*{
-  /* This is the right side */
-  padding:25px 0px 25px 50px ;
-
-  background-color:#dcc5b2; 
-  /* background: transparent; */
-}
-.card-hover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 10px;
-  transition: transform 0.6s ease;
-  transform: scale(1);
-}
-
-.card-hover:hover img {
-  transform: scale(1.05);
-}
-.card-hover {
-  transition: box-shadow 0.5s ease;
-}
-
-.card-hover:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-.card-hover {
-  position: relative;
-  transition: box-shadow 0.5s ease;
-}
-
-.card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 10px;
-  transition: transform 0.6s ease;
-}
-
-.card-hover:hover .card-image {
-  transform: scale(1.05);
-}
-
-.card-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  pointer-events: none;
-  background: transparent;
-}
-
-.card-text p {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: white;
-  opacity: 0;
-  background: transparent;
-  transform: translateY(20px);
-  text-shadow:  4px 4px 10px rgba(0, 0, 0, 0.7);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.card-hover:hover .card-text p {
-  opacity: 10;
-  transform: translateY(0);
-  background: transparent;
-}
-/* ================= FINAL RESPONSIVE POLISH ================= */
-
-/* Tablets (≤1024px) */
-@media screen and (max-width: 1024px) {
-  .trending-section-container {
-    flex-direction: column;
-    height: auto;
-    padding: 40px 20px;
-  }
-
-  .trending-section-content {
-    flex-direction: column;
-    height: auto;
-    width: 95%;
-    border-radius: 20px;
-    padding: 30px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .trending-section-content > div:nth-child(1),
-  .trending-section-content > div:nth-child(2) {
-    width: 100%;
-    padding: 20px;
-    border-radius: 0 !important;
-    text-align: center;
-  }
-
-  .trending-section-content h2 {
-    font-size: 2rem;
-    line-height: 2.5rem;
-    font-weight: bolder;
-  }
-
-  .trending-section-content p {
-    font-size: 1rem;
-    margin: 10px auto 15px;
-    max-width: 90%;
-  }
-
-  .trending-section-content .icons {
-    font-size: 3.5rem;
-    margin: 10px auto 0;
-    display: block;
-    position: static;
-    transform: rotate(90deg); /* ➝ to ↓ */
-    animation: bounceDown 2s infinite;
-  }
-
-  .card-hover {
-    max-width: 100%;
-    margin-top: 10px;
-  }
-
-  .card-image {
-    max-height: 300px;
-    width: 100%;
-    object-fit: cover;
-  }
-
-  .card-text p {
-    font-size: 1.2rem;
+    transform: translateX(30px);
   }
 }
 
-/* Mobiles (≤640px) */
-@media screen and (max-width: 640px) {
-  .trending-section-container {
-    padding: 20px 10px;
-  }
-
-  .trending-section-content {
-    padding: 20px 10px;
-    width: 100%;
-  }
-
-  .trending-section-content h2 {
-    font-size: 1.6rem;
-    line-height: 2.2rem;
-    margin-bottom: 10px;
-    font-weight:bolder;
-  }
-
-  .trending-section-content p {
-    font-size: 0.95rem;
-    line-height: 1.5rem;
-    margin-bottom: 15px;
-  }
-
-  .trending-section-content .icons {
-    font-size: 2.8rem;
-    margin: 20px auto 10px;
-    transform: rotate(90deg); /* ➝ to ↓ */
-    position: relative;
-  }
-
-  .card-hover {
-    width: 100%;
-    height: auto;
-    margin: 0 auto;
-  }
-
-  .card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    max-height: 250px;
-    border-radius: 10px;
-  }
-
-  .card-text p {
-    font-size: 1rem;
-  }
-}
-
-/* Arrow bounce-down keyframes */
 @keyframes bounceDown {
   0%, 100% {
     transform: translateY(0) rotate(90deg);
@@ -258,4 +30,8 @@ justify-content: center;
   50% {
     transform: translateY(15px) rotate(90deg);
   }
+}
+
+.animate-bounce-right {
+  animation: bounceRight 2.5s infinite;
 }

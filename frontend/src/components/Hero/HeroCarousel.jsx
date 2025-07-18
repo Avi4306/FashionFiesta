@@ -1,20 +1,20 @@
 import React, { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import hero1 from "../../../src/assets/hero1.jpeg";
-import hero2 from "../../../src/assets/hero2.jpeg";
-import hero3 from "../../../src/assets/hero3.jpeg";
-import hero4 from "../../../src/assets/hero4.jpeg";
-import hero5 from "../../../src/assets/hero5.jpeg";
-import hero6 from "../../../src/assets/hero6.jpeg";
-import hero7 from "../../../src/assets/hero7.jpeg";
-import hero8 from "../../../src/assets/hero8.jpeg";
-import herovid1 from "../../../src/assets/hero1.mp4";
-import herovid2 from "../../../src/assets/hero2.mp4";
-import herovid3 from "../../../src/assets/hero3.mp4";
-import herovid4 from "../../../src/assets/hero4.mp4";
-import herovid5 from "../../../src/assets/hero5.mp4";
-import herovid6 from "../../../src/assets/hero6.mp4";
-import herovid7 from "../../../src/assets/hero7.mp4";
+import hero1 from "../../assets/hero1.jpeg";
+import hero2 from "../../assets/hero2.jpeg";
+import hero3 from "../../assets/hero3.jpeg";
+import hero4 from "../../assets/hero4.jpeg";
+import hero5 from "../../assets/hero5.jpeg";
+import hero6 from "../../assets/hero6.jpeg";
+import hero7 from "../../assets/hero7.jpeg";
+import hero8 from "../../assets/hero8.jpeg";
+import herovid1 from "../../assets/hero1.mp4";
+import herovid2 from "../../assets/hero2.mp4";
+import herovid3 from "../../assets/hero3.mp4";
+import herovid4 from "../../assets/hero4.mp4";
+import herovid5 from "../../assets/hero5.mp4";
+import herovid6 from "../../assets/hero6.mp4";
+import herovid7 from "../../assets/hero7.mp4";
 // Import Swiper styles import
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -30,7 +30,7 @@ export default function HeroCarousel() {
         effect={"coverflow"}
         grabCursor={true}
         centeredSlides={true}
-        slidesPerView={5}
+        slidesPerView={2}
         loop={true}
         coverflowEffect={{
           rotate: 10,
@@ -39,6 +39,16 @@ export default function HeroCarousel() {
           modifier: 1,
           slideShadows: false,
         }}
+        breakpoints={{
+            648: {
+      slidesPerView: 3.5,
+    },
+    768: {
+      slidesPerView: 4,
+    },
+    1024: {
+      slidesPerView: 5,
+    },}}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         speed={800}
         modules={[EffectCoverflow, Autoplay]}
