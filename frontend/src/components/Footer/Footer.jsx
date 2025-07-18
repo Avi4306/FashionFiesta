@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Instagram,
   Twitter,
@@ -33,7 +34,7 @@ const Footer = () => {
               <h3 className="text-lg font-semibold mb-4 uppercase tracking-widest text-[#5b3c2a]">Explore</h3>
               <ul className="space-y-3">
                 <li className="flex items-center justify-center md:justify-start gap-2 hover:text-[#895e3b] transition">
-                  <Globe className="w-5 h-5" /> <span>About Us</span>
+                  <Globe className="w-5 h-5" /> <Link to="/aboutus">About Us</Link>
                 </li>
                 <li className="flex items-center justify-center md:justify-start gap-2 hover:text-[#895e3b] transition">
                   <Newspaper className="w-5 h-5" /> <span>News & Events</span>

@@ -1,7 +1,26 @@
 {
+  "name": "fashion-fiesta",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\"",
+    "server": "nodemon backend/index.js",
+    "flask": "cd flask && python recomend.py"
+  },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.8.2",
-    "react-redux": "^9.2.0",
-    "react-router-dom": "^7.6.3"
-  }
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "nodemon": "^3.1.10"
+  },
+  "keywords": []
 }
