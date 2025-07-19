@@ -8,6 +8,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import Avatar from '@mui/material/Avatar';
 import {Menu, MenuItem, Typography, Divider} from '@mui/material';
+import {jwtDecode} from 'jwt-decode';
 
 export default function NavBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,10 +21,20 @@ export default function NavBar() {
         setActive(!isactive);
     }
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('profile')));
-    console.log(user);
     useEffect(() => {
+        const checkTokenExpiration = () => {
+          const token = user?.token;
+          if (token) {
+            const decodedToken = jwtDecode(token);
+            if (decodedToken.exp * 1000 < Date.now()) {
+              handleLogout();
+            }
+          }
+        };
         const profile = JSON.parse(localStorage.getItem('profile'));
         setUser(profile);
+
+        checkTokenExpiration();
     }, [location]);
     const handleLogout = () => {
         setUser(null);

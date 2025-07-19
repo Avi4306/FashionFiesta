@@ -1,5 +1,5 @@
 import express from 'express'
-import { createUser,getUser,updateUser,deleteUser } from '../controller/user.controller.js';    
+// import { createUser,getUser,updateUser,deleteUser } from '../controller/users.controller.js';    
 import { createProduct,getProduct,updateProduct,deleteProduct } from '../controller/product.controller.js';  
 import axios from 'axios';  
 
@@ -14,11 +14,10 @@ router.get("/user",(req,res)=>
     res.send("!USER PAGE");
 })
 
-router.post('/user',createUser );
 
-router.delete('/user/:id',deleteUser);
-router.put('/user/:id',updateUser);
-router.get('/user/:name',getUser);
+// router.delete('/user/:id',deleteUser);
+// router.put('/user/:id',updateUser);
+// router.get('/user/:name',getUser);
 
 
 router.post('/product',createProduct);

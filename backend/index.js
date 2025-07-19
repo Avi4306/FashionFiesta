@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import styleDiariesRouter from './routes/styleDiariesRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ app.use(cors()); // Enable CORS for all routes (should be above routes)
 app.use(express.json());
 app.use('/',router)
 app.use('/style-diaries', styleDiariesRouter)
+app.use('/user', userRouter)
 
 
 

@@ -8,6 +8,10 @@ import {GoogleLogin} from '@react-oauth/google'
 import { useDispatch } from 'react-redux';
 import {jwtDecode} from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
+import { login, signup } from '../../actions/auth';
+
+const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
+
 const Auth = () => {
 
     const [showPassword, setShowPassword] = useState(false);
@@ -15,12 +19,17 @@ const Auth = () => {
     const [isSignup, setIsSignup] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const handleChange = () => {
-
+    const [formData, setFormData] = useState(initialState);
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle form submission logic here
+        if (isSignup) {
+            dispatch(signup(formData, navigate));
+        } else {
+            dispatch(login(formData, navigate));
+        }
     };
     const switchMode = () => {
         setIsSignup((prevIsSignUp) => !prevIsSignUp);
@@ -64,9 +73,9 @@ const Auth = () => {
             { isSignup && (
             <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword}/>
             )}
-            <button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
+            <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
                 {isSignup ? 'Sign Up' : 'Login'}
-            </button>
+            </Button>
             <GoogleLogin
                 onSuccess={googleSuccess}
                 onError={googleFailure}
