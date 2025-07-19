@@ -65,3 +65,4 @@ This project is part of a student initiative aimed at blending fashion and creat
 All sections and content are designed to be fully dynamic and responsive, ensuring an engaging experience across all devices.
 
 © 2025 The Web Crawlers | FASHION FIESTA
+# Temp
