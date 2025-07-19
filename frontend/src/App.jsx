@@ -6,19 +6,16 @@ import OOTW from './components/OOTWsection/OOTW'
 import Hero from './components/Hero/Hero'
 import Quotes from './components/quotes/quotescard.jsx'
 import TrendingSection from './components/Categories/TrendingSection'
-// import AnimatedBackground from '../components/TSWave'
 import BlogSection from './components/Blog/Blog.jsx'
 import Designers from './components/Designer/Designers.jsx'
 import Footer from './components/Footer/Footer.jsx'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
 import {useEffect} from "react";
 import { useDispatch } from "react-redux";
 import {getPosts} from "./actions/posts";
 import Community from "./components/Community/Community.jsx";
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
-import Auth from './components/Auth/Auth.jsx'
-
+import AboutUs from "./components/AboutUs/AboutUs.jsx";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -32,6 +29,7 @@ function App() {
     <Routes>
       <Route path="/" element={
             <>
+            
               <Hero />
               <Quotes />
               <OOTW />
@@ -44,7 +42,7 @@ function App() {
        }
        />
       <Route path="/style-diaries" element={<StyleDiaries/>} />
-      <Route path="/auth" element={<Auth/>} />
+      <Route path="/aboutus" element={<AboutUs />} />
     </Routes>
     <Footer/>
     </Router>
