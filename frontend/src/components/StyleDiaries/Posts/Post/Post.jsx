@@ -4,6 +4,7 @@ import {
   CardMedia,
   Button,
   Typography,
+  Avatar,
 } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
@@ -17,7 +18,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(relativeTime);
 
-const Post = ({ post }) => {
+const Post = ({ post, setCurrentId }) => {
   const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -51,50 +52,68 @@ const Post = ({ post }) => {
   }
   return (
     <Card className="rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300">
-      <CardMedia
-        image={post.selectedFile}
-        title="Post Image"
-        style={{ height: 0, paddingTop: "56.25%" }} // 16:9 aspect ratio
-        className="object-cover"
-      />
-      <div className="px-4 pt-4">
-
-        <Typography variant="h7" component="h2" className="font-bold mt-1">
-          {post.name}
-        </Typography>
-        <Typography variant="h6" component="h2" className="font-bold mt-1">
-          {post.title}
-        </Typography>
-        <Typography variant="body2" color="textSecondary" className="mt-1">
-          {post.content}
-        </Typography>
-        <Typography variant="subtitle2" color="textSecondary">
-          {post.tags?.map((tag) => `#${tag} `)}
-        </Typography>
+      <div
+        onClick={() => navigate(`/style-diaries/${post._id}`)}
+        className="cursor-pointer"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') navigate(`/posts/${post._id}`);
+        }}
+      >
+        <CardMedia
+          image={post.selectedFile}
+          title="Post Image"
+          style={{ height: 0, paddingTop: "56.25%" }}
+          className="object-cover"
+        />
+        <div className="px-4 pt-4">
+          <Typography variant="h6" component="h2" className="font-bold mt-1">
+            {post.title}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" className="mt-1">
+            {post.content}
+          </Typography>
+          <Avatar src={post.profilePicture}>
+            {post.name?.charAt(0)}
+          </Avatar>
+          <Typography variant="body2" className="font-bold mt-1">
+            {post.name}
+          </Typography>
+          <Typography variant="subtitle2" color="textSecondary">
+            {post.tags?.map((tag) => `#${tag} `)}
+          </Typography>
+        </div>
       </div>
 
       <CardActions className="flex justify-between px-2 pt-2">
-        <Button
-          size="small"
-          color="primary"
-          onClick={handleLike}
-        >
+        <Button size="small" color="primary" onClick={(e) => {
+          e.stopPropagation(); // Prevent parent click
+          handleLike();
+        }}>
           <Likes />
         </Button>
         {userId === post.creator && (
-        <Button
-          size="small"
-          color="primary"
-          startIcon={<DeleteIcon />}
-          onClick={() => dispatch(deletePost(post._id))}
-        >
-          Delete
-        </Button>
-          )}
+          <Button
+            size="small"
+            color="primary"
+            startIcon={<DeleteIcon />}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent parent click
+              handleDelete();
+            }}
+          >
+            Delete
+          </Button>
+        )}
         <Button
           size="small"
           className="text-gray-600"
           startIcon={<MoreHorizIcon />}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent parent click
+            setCurrentId(post._id);
+          }}
         >
           More
         </Button>
@@ -108,6 +127,7 @@ const Post = ({ post }) => {
         {dayjs(post.createdAt).fromNow()}
       </Typography>
     </Card>
+
   );
 };
 
