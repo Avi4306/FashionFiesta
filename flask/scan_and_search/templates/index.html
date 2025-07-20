@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scan and Search</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .result {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    img {
+      max-width: 150px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Upload an Image to Search</h2>
+  <form id="uploadForm">
+    <input type="file" name="image" id="imageInput" required>
+    <button type="submit">Search</button>
+  </form>
+
+  <h3>Top Matches:</h3>
+  <div id="results" class="result"></div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      const imageFile = document.getElementById('imageInput').files[0];
+      formData.append('image', imageFile);
+
+      const response = await fetch('/search', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (data.matches) {
+        data.matches.forEach(match => {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `
+            <img src="http://localhost:5000${match.url}" alt="${match.filename}">
+            <p><strong>${match.filename}</strong></p>
+            <p>Similarity: ${match.score}</p>
+          `;
+          resultsDiv.appendChild(div);
+        });
+      } else {
+        resultsDiv.innerHTML = '<p>No matches found or error occurred.</p>';
+      }
+    });
+  </script>
+</body>
+</html>
