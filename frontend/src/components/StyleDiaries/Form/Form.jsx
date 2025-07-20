@@ -32,15 +32,16 @@ const Form = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const dispatch = useDispatch();
+  const user = JSON.parse(localStorage.getItem("profile"));
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!postData.title || !postData.content || !postData.selectedFile) {
+    if (!postData.title || !postData.content || !postData.tags) {
       setErrorMsg("Title, content, and image are required.");
       setOpenSnackbar(true);
       return;
     }
     try {
-      await dispatch(createPost(postData));
+      dispatch(createPost({ ...postData, name: user?.result?.name }));
     } catch (error) {
       console.error(error);
     }
@@ -54,6 +55,16 @@ const Form = () => {
       selectedFile: "",
     });
   };
+
+  if (!user?.result?.name) {
+    return (
+      <div className="community-container">
+        <h2 className="text-4xl tracking-[0.4rem] text-shadow-lg/30">
+          Please Sign In to share your ideas
+        </h2>
+      </div>
+    );
+  }
   return (
     <div className="community-container  grid grid-cols-1 grid-rows-[10rem,30rem] gap-5 text-center ">
       <h2 className="text-4xl tracking-[0.4rem] text-shadow-lg/30 ">
@@ -169,7 +180,7 @@ const Form = () => {
         {/* Tags Field */}
         <TextField
           name="tags"
-          label="Tags"
+          label="Tags (Comma separated)"
           variant="outlined"
           fullWidth
           value={postData.tags.join(",")}  // Join the array to display as comma-separated string

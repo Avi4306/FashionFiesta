@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+const designerDetailsSchema = new mongoose.Schema({
+  brandName: { type: String },
+  portfolioUrl: { type: String },
+  bio: { type: String },
+  verified: { type: Boolean, default: false },
+  appliedAt: { type: Date },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
     name : {
         type :String,
@@ -21,11 +29,13 @@ const userSchema = new mongoose.Schema({
         type:[String],
         required:false,
     },
-    designer:
+    role:
     {
-        type: Boolean,
-        default : false
-    }
+        type: String,
+        enum: ['customer', 'pending_designer', 'designer', 'admin'],
+        default : "customer"
+    },
+    designerDetails: designerDetailsSchema
 },
 {
     timestamps: true,

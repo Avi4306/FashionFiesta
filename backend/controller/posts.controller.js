@@ -12,7 +12,7 @@ export const getPosts = () => async (req, res) => {
 
 export const createPost = () =>  (req, res) => {
     const body = req.body;
-    const newPost = new Post(body);
+    const newPost = new Post({ ...body, creator: req.userId , createdAt: new Date().toISOString() });
     try {
         newPost.save();
         res.status(201).json(newPost);
@@ -46,15 +46,23 @@ export const likePost = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Invalid Post ID' });
     }
     try {
+        if (!req.userId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
         const post = await Post.findById(id);
         if (!post) {
             return res.status(404).json({ success: false, message: 'Post not found' });
         }
-        const updatedPost = await Post.findByIdAndUpdate(
-        id,
-        { $inc: { likes: 1 } },
-        { new: true }
-        );
+
+        const index = post.likes.findIndex((id) => id === String(req.userId));
+        if (index === -1) {
+            // Like the post
+            post.likes.push(req.userId);
+        } else {
+            // Unlike the post
+            post.likes = post.likes.filter((id) => id !== String(req.userId));
+        }
+        const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
 
         if (!updatedPost) {
         return res.status(404).json({ success: false, message: 'Post not found' });
