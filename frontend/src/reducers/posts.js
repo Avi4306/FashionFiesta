@@ -1,5 +1,5 @@
 import { FETCH_ALL, CREATE_POST, DELETE_POST, LIKE_POST } from '../constants/actionTypes';
-const reducer = (posts = [], action) => { // Here State is initialized as an empty array
+const posts = (posts = [], action) => { // Here State is initialized as an empty array
   // posts is the current state, action is the action being dispatched
   switch (action.type) {
     case FETCH_ALL:
@@ -14,4 +14,4 @@ const reducer = (posts = [], action) => { // Here State is initialized as an emp
       return posts;
   }
 }
-export default reducer;
+export default posts;
