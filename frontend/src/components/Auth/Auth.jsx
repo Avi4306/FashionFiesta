@@ -7,6 +7,7 @@ import { login, signup } from '../../actions/auth';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import CropperDialog from './CropperDialog';
+import { Typography, Button } from '@mui/material';
 
 const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '', profilePhoto: '' };
 const UserIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>);
@@ -36,13 +37,15 @@ const Auth = () => {
     };
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (isSignUp) {
-            dispatch(signup(formData, navigate));
+        if (isSignup) {
+                dispatch(signup(formData, navigate));
         } else {
             dispatch(login(formData, navigate));
         }
     };
     const switchMode = () => {
+        
+        setFormData(initialState)
         dispatch({ type: 'CLEAR_ERROR' });
         setIsSignup((prevIsSignUp) => !prevIsSignUp);
         setShowPassword(false); // Reset password visibility when switching modes
@@ -57,7 +60,6 @@ const Auth = () => {
             console.log(error);
         }
     };
-
     const googleFailure = (error) => {
         console.log(error);
         console.log("Google Sign In was unsuccessful. Try again later.");
@@ -80,124 +82,6 @@ const handleImageChange = (e) => {
   reader.readAsDataURL(file);
 };
 
-  return (
-    <Container component="main" maxWidth="xs">
-        <Paper elevation={3}>
-        <IconButton>
-            <Lock />
-        </IconButton>
-        <Typography variant="h5">{isSignup ? 'Sign Up' : 'Login'}</Typography>
-        <Typography variant="body2">{isSignup ? 'Sign Up to continue' : 'Login to continue'}</Typography>
-      <form >
-        <Grid container spacing={2}>
-            {openCropper && (
-            <CropperDialog
-                imageSrc={cropSrc}
-                onClose={() => setOpenCropper(false)}
-                onCropDone={(croppedImage) => {
-                setFormData({ ...formData, profilePhoto: croppedImage });
-                setImagePreview(croppedImage);
-                setOpenCropper(false);
-                }}
-            />
-            )}
-            {isSignup && (
-            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                <input
-                accept="image/*"
-                type="file"
-                onChange={handleImageChange}
-                style={{ display: 'none' }}
-                id="profile-upload"
-                />
-                <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
-                {imagePreview ? (
-                    <img
-                    src={imagePreview}
-                    alt="Preview"
-                    style={{ width: 80, height: 80, borderRadius: '50%' }}
-                    />
-                ) : (
-                    <div
-                    style={{
-                        width: 80,
-                        height: 80,
-                        borderRadius: '50%',
-                        backgroundColor: '#ccc',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '24px',
-                        margin: '0 auto',
-                        color: '#fff',
-                        textTransform: 'uppercase',
-                    }}
-                    >
-                    {formData.firstName ? formData.firstName.charAt(0) : 'U'}
-                    </div>
-                )}
-                <Typography variant="body2" color="primary">
-                    {imagePreview ? 'Change Photo' : 'Upload Profile Photo'}
-                </Typography>
-                </label>
-
-                {/* ✅ Remove Button (Only if preview is set) */}
-                {imagePreview && (
-                <Button
-                    size="small"
-                    color="secondary"
-                    onClick={() => {
-                    setImagePreview('');
-                    setFormData({ ...formData, profilePhoto: '' });
-                    }}
-                    style={{ marginTop: '0.5rem' }}
-                >
-                    Remove Photo
-                </Button>
-                )}
-            </div>
-            )}
-
-            {isSignup && (
-            <>
-            <Input name="firstName" label="First Name"  handleChange={handleChange} autoFocus half/>
-            <Input name="lastName" label="Last Name" handleChange={handleChange} half/>
-            </>
-            )}
-        </Grid>
-            <Input name="email" label="Email Address" handleChange={handleChange} type="email" />
-            <Input name="password" label="Password" handleChange={handleChange} type= {showPassword ? "text" : "password"} handleShowPassword={handleShowPassword}/>
-            { isSignup && (
-            <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword}/>
-            )}
-            {error && <Typography color="error">{error}</Typography>}
-            <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
-                {isSignup ? 'Sign Up' : 'Login'}
-            </Button>
-            <GoogleLogin
-                onSuccess={googleSuccess}
-                onError={googleFailure}
-                logo_alignment="left"
-                style={{ marginTop: '10px', marginBottom: '10px' }}
-            />
-            <Grid container justifyContent="flex-end">
-                <Grid item>
-                    <Button onClick={switchMode}>{isSignup ? 'Already have an account? Login' : "Don't have an account? Sign Up"}</Button>
-                </Grid>
-            </Grid>
-      </form>
-      </Paper>
-    </Container>
-  )
-}
-
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
-    const switchMode = () => {
-        setIsSignUp((prev) => !prev);
-        setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
-    };
-
     const spring = { type: "spring", stiffness: 260, damping: 30 };
 
     return (
@@ -207,7 +91,74 @@ const handleImageChange = (e) => {
                 {/* Sign Up Form Panel (Left Side) */}
                 <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
                     <AnimatePresence>
-                        {isSignUp && (
+                        {openCropper && (
+                                    <CropperDialog
+                                        imageSrc={cropSrc}
+                                        onClose={() => setOpenCropper(false)}
+                                        onCropDone={(croppedImage) => {
+                                        setFormData({ ...formData, profilePhoto: croppedImage });
+                                        setImagePreview(croppedImage);
+                                        setOpenCropper(false);
+                                        }}
+                                    />
+                                    )}
+                                    {isSignup && (
+                                    <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                                        <input
+                                        accept="image/*"
+                                        type="file"
+                                        onChange={handleImageChange}
+                                        style={{ display: 'none' }}
+                                        id="profile-upload"
+                                        />
+                                        <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
+                                        {imagePreview ? (
+                                            <img
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            style={{ width: 80, height: 80, borderRadius: '50%' }}
+                                            />
+                                        ) : (
+                                            <div
+                                            style={{
+                                                width: 80,
+                                                height: 80,
+                                                borderRadius: '50%',
+                                                backgroundColor: '#ccc',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '24px',
+                                                margin: '0 auto',
+                                                color: '#fff',
+                                                textTransform: 'uppercase',
+                                            }}
+                                            >
+                                            {formData.firstName ? formData.firstName.charAt(0) : 'U'}
+                                            </div>
+                                        )}
+                                        <Typography variant="body2" color="primary">
+                                            {imagePreview ? 'Change Photo' : 'Upload Profile Photo'}
+                                        </Typography>
+                                        </label>
+
+                                        {/* ✅ Remove Button (Only if preview is set) */}
+                                        {imagePreview && (
+                                        <Button
+                                            size="small"
+                                            color="secondary"
+                                            onClick={() => {
+                                            setImagePreview('');
+                                            setFormData({ ...formData, profilePhoto: '' });
+                                            }}
+                                            style={{ marginTop: '0.5rem' }}
+                                        >
+                                            Remove Photo
+                                        </Button>
+                                        )}
+                                    </div>
+                                    )}
+                        {(
                             <motion.div key="signup-form" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ ...spring, duration: 0.5 }} className="w-full">
                                 <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
                                 <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
@@ -234,7 +185,7 @@ const handleImageChange = (e) => {
                 {/* Sign In Form Panel (Right Side) */}
                 <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
                      <AnimatePresence>
-                        {!isSignUp && (
+                        {!isSignup && (
                             <motion.div key="signin-form" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} transition={{ ...spring, duration: 0.5 }} className="w-full">
                                 <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
                                 <p className="text-black mb-6 text-sm text-center">or use your account</p>
@@ -255,9 +206,9 @@ const handleImageChange = (e) => {
                 </div>
 
                 {/* Sliding Overlay */}
-                <motion.div className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30" style={{ backgroundColor: '#DCC5B2', color: '#000000' }} initial={false} animate={{ x: isSignUp ? '100%' : '0%' }} transition={spring}>
+                <motion.div className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30" style={{ backgroundColor: '#DCC5B2', color: '#000000' }} initial={false} animate={{ x: isSignup ? '100%' : '0%' }} transition={spring}>
                     <AnimatePresence mode="wait">
-                        {isSignUp ? (
+                        {isSignup ? (
                             <motion.div key="overlay-signup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
                                 <h2 className="text-3xl font-bold mb-2">Hello, Friend!</h2>
                                 <div className="w-xs h-0.5 my-3 ml-8" style={{ backgroundColor: '#000000', opacity: 0.7 }}></div>
@@ -278,3 +229,5 @@ const handleImageChange = (e) => {
             </div>
         </div>
     );
+}
+export default Auth;
