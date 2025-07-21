@@ -5,15 +5,16 @@ import { useDispatch } from 'react-redux'
 import { commentPost } from '../../../../actions/posts'
 
 const CommentSection = ({post}) => {
+    const commentsRef = useRef();
     const dispatch = useDispatch();
     const user = JSON.parse(localStorage.getItem('profile'));
     const [comments, setComments] = useState(post?.comments || [])
     const [comment, setComment] = useState('')
     const handleCommentSubmit = async () => {
         const finalComment = `${user?.result?.name}: ${comment}`;
-        const newComments = await dispatch(commentPost(finalComment, post._id));
-        setComments(newComments);
+        setComments([...comments, finalComment]);
         setComment('');
+        dispatch(commentPost(finalComment, post._id));
     }
     const Clear = () => {
         setComment('');
@@ -33,6 +34,7 @@ const CommentSection = ({post}) => {
                         </Typography>
                     </div>
                     ))}
+                    <div ref={commentsRef} />
             </div>
                 {user?.result?.name ?
                     <>

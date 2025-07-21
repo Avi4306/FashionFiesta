@@ -84,11 +84,11 @@ export default function NavBar() {
                 {user?.result ? ( // user !== null && user !== undefined ? user.result : undefined
                         <Avatar
                             alt={user.result.name}
-                            src={user.result.imageUrl}
+                            src={user.result.profilePhoto}
                             onClick={handleLogout}
                             sx={{ cursor: 'pointer', width: 40, height: 40 }}
                         >
-                            {!user.result.imageUrl && user.result.name.charAt(0)}
+                            {!user.result.profilePhoto && user.result.name.charAt(0)}
                         </Avatar>
                     ) : (
                     <Link to="/auth">Login</Link>

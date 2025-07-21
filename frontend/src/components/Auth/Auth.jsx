@@ -11,8 +11,9 @@ import { useNavigate } from 'react-router-dom';
 import { login, signup } from '../../actions/auth';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import CropperDialog from './CropperDialog';
 
-const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
+const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '', profilePhoto: '' };
 
 const Auth = () => {
 
@@ -22,12 +23,16 @@ const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [formData, setFormData] = useState(initialState);
+    const [imagePreview, setImagePreview] = useState('');
+    const [cropSrc, setCropSrc] = useState(null);
+    const [openCropper, setOpenCropper] = useState(false);
     const handleChange = (e) => {
         dispatch({ type: 'CLEAR_ERROR' });
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log("Submitting form data:", formData)
         if (isSignup) {
             dispatch(signup(formData, navigate));
         } else {
@@ -61,6 +66,18 @@ const Auth = () => {
     dispatch({ type: 'CLEAR_ERROR' }); // clear on unmount
   };
 }, [dispatch]);
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setCropSrc(reader.result);
+    setOpenCropper(true);
+  };
+  reader.readAsDataURL(file);
+};
+
   return (
     <Container component="main" maxWidth="xs">
         <Paper elevation={3}>
@@ -71,6 +88,74 @@ const Auth = () => {
         <Typography variant="body2">{isSignup ? 'Sign Up to continue' : 'Login to continue'}</Typography>
       <form >
         <Grid container spacing={2}>
+            {openCropper && (
+            <CropperDialog
+                imageSrc={cropSrc}
+                onClose={() => setOpenCropper(false)}
+                onCropDone={(croppedImage) => {
+                setFormData({ ...formData, profilePhoto: croppedImage });
+                setImagePreview(croppedImage);
+                setOpenCropper(false);
+                }}
+            />
+            )}
+            {isSignup && (
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                <input
+                accept="image/*"
+                type="file"
+                onChange={handleImageChange}
+                style={{ display: 'none' }}
+                id="profile-upload"
+                />
+                <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
+                {imagePreview ? (
+                    <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{ width: 80, height: 80, borderRadius: '50%' }}
+                    />
+                ) : (
+                    <div
+                    style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        backgroundColor: '#ccc',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px',
+                        margin: '0 auto',
+                        color: '#fff',
+                        textTransform: 'uppercase',
+                    }}
+                    >
+                    {formData.firstName ? formData.firstName.charAt(0) : 'U'}
+                    </div>
+                )}
+                <Typography variant="body2" color="primary">
+                    {imagePreview ? 'Change Photo' : 'Upload Profile Photo'}
+                </Typography>
+                </label>
+
+                {/* ✅ Remove Button (Only if preview is set) */}
+                {imagePreview && (
+                <Button
+                    size="small"
+                    color="secondary"
+                    onClick={() => {
+                    setImagePreview('');
+                    setFormData({ ...formData, profilePhoto: '' });
+                    }}
+                    style={{ marginTop: '0.5rem' }}
+                >
+                    Remove Photo
+                </Button>
+                )}
+            </div>
+            )}
+
             {isSignup && (
             <>
             <Input name="firstName" label="First Name"  handleChange={handleChange} autoFocus half/>

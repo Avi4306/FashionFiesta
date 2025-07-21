@@ -77,7 +77,7 @@ const Post = ({ post, setCurrentId }) => {
           <Typography variant="body2" color="textSecondary" className="mt-1">
             {post.content}
           </Typography>
-          <Avatar src={post.profilePicture}>
+          <Avatar src={post.creatorPfp}>
             {post.name?.charAt(0)}
           </Avatar>
           <Typography variant="body2" className="font-bold mt-1">
