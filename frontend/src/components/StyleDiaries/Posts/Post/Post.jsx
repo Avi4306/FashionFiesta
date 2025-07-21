@@ -16,7 +16,8 @@ const Post = ({ post, setCurrentId }) => {
   const [likes, setLikes] = useState(post?.likes);
   const hasLikedPost = likes?.includes(userId);
 
-  const handleLike = () => {
+  const handleLike = (e) => {
+    e.stopPropagation()
     if (!userId) {
       alert("You must be logged in to like a post.");
       return navigate('/auth');
@@ -29,7 +30,8 @@ const Post = ({ post, setCurrentId }) => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    e.stopPropagation()
     if (window.confirm("Are you sure you want to delete this post?")) {
       dispatch(deletePost(post._id));
     }
@@ -42,9 +44,9 @@ const Post = ({ post, setCurrentId }) => {
 
 
   return (
-    <div className="bg-card-bg rounded-xl shadow-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <div onClick={openPost} className="bg-card-bg rounded-xl shadow-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
       {/* Clickable Area */}
-      <div onClick={openPost} className="cursor-pointer">
+      <div className="cursor-pointer">
         <img
           className="h-52 w-full object-cover"
           // MODIFIED LINE 1: Using a descriptive placeholder for the main image.
@@ -87,11 +89,12 @@ const Post = ({ post, setCurrentId }) => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.562 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
           </svg>
-          {likes?.length || 0} Likes
+          {likes?.length > 0
+          ? `${likes.length} Like${likes.length > 1 ? 's' : ''}`
+          : 'Like'}
         </button>
         {userId === post?.creator && (
           <div className="flex gap-2">
-            <button onClick={() => setCurrentId(post._id)} className="text-text-secondary hover:text-blue-500 text-xs font-medium">EDIT</button>
             <button onClick={handleDelete} className="text-text-secondary hover:text-red-500 text-xs font-medium">DELETE</button>
           </div>
         )}

@@ -56,7 +56,7 @@ const Form = () => {
     });
   };
 
-  if (!user?.result?.name) {
+  if (!user?.result?.name && !user?.result.sub) {
     return (
       <div className="community-container">
         <h2 className="text-4xl tracking-[0.4rem] text-shadow-lg/30">

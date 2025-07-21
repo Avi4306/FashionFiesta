@@ -17,16 +17,13 @@ const CommentSection = ({ post }) => {
     const handleCommentSubmit = async () => {
         if (!comment.trim()) return;
         const commentData = {
-            name : user?.result?.name,
+            name : user?.result?.name || user.result.sub,
             comment,
             profilePhoto: user?.result?.profilePhoto
     };
         setComments([...comments, commentData]);
         setComment('');
         dispatch(commentPost(commentData, post._id));
-    }
-    const Clear = () => {
-        setComment('');
     }
   return (
         <div>
@@ -35,14 +32,13 @@ const CommentSection = ({ post }) => {
 
             {/* List of Comments */}
             <div className="space-y-6 max-h-[500px] overflow-y-auto pr-4 mb-8">
-                {comments.map((c, index) => {
+                {comments.map((comment, index) => {
                     // Splitting "Name: The comment text" to style them differently
-                    const parts = c.split(': ');
-                    const name = parts[0];
-                    const commentText = parts.slice(1).join(': ');
-
+                    const name = comment.name;
+                    const commentText = comment.comment;
+                    const time = dayjs(post?.createdAt).fromNow()
                     // Themed placeholder avatar using your hex codes
-                    const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${name?.charAt(0) || '?'}`;
+                    const avatarPlaceholder = comment.profilePhoto ||`https://placehold.co/40x40/F0E4D3/44403c?text=${name?.charAt(0)}`;
                     
                     return (
                         <div key={index} className="flex items-start gap-4">
@@ -54,6 +50,7 @@ const CommentSection = ({ post }) => {
                             {/* Themed comment bubble using your light accent color */}
                             <div className="flex-1 bg-[#F0E4D3] dark:bg-[#292524] p-4 rounded-lg">
                                 <p className="font-semibold text-sm text-[#44403c] dark:text-[#e7e5e4]">{name}</p>
+                                <span className="text-xs text-[#78716c] dark:text-[#a8a29e]">{time}</span>
                                 <p className="text-[#78716c] dark:text-[#a8a29e] mt-1">{commentText}</p>
                             </div>
                         </div>
@@ -63,7 +60,7 @@ const CommentSection = ({ post }) => {
 
             {/* Themed "Add a Comment" Form */}
             <div className="mt-6">
-                {user?.result?.name ? (
+                {(user?.result?.name || user?.result?.sub) ? (
                     <div>
                         <textarea
                             value={comment}

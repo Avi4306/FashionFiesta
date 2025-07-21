@@ -4,8 +4,6 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login, signup } from '../../actions/auth';
-import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
 import CropperDialog from './CropperDialog';
 import { Typography, Button } from '@mui/material';
 import {jwtDecode} from 'jwt-decode'
