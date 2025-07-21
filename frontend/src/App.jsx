@@ -49,6 +49,7 @@ function App() {
       <Route path="/style-diaries/search" element={<StyleDiaries/>} />
       <Route path="/style-diaries/:id" element={<PostDetails/>} />
       <Route path="/aboutus" element={<AboutUs />} />
+      <Route path="/auth" element={<Auth />} />
     </Routes>
     <Footer/>
     </Router>
