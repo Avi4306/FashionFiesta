@@ -21,6 +21,7 @@ export const deletePost = (id) => API.delete(`/style-diaries/${id}`);
 
 export const likePost = (id) => API.patch(`/style-diaries/${id}/likePost`);
 
+export const comment = (value, id) => API.post(`/style-diaries/${id}/comment`, { value });
 
 export const login = (formData) => API.post('/user/login', formData);
 export const signUp = (formData) => API.post('/user/signup', formData);

@@ -9,6 +9,8 @@ import { useDispatch } from 'react-redux';
 import {jwtDecode} from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { login, signup } from '../../actions/auth';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
 
@@ -21,6 +23,7 @@ const Auth = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState(initialState);
     const handleChange = (e) => {
+        dispatch({ type: 'CLEAR_ERROR' });
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
     const handleSubmit = (e) => {
@@ -32,6 +35,7 @@ const Auth = () => {
         }
     };
     const switchMode = () => {
+        dispatch({ type: 'CLEAR_ERROR' });
         setIsSignup((prevIsSignUp) => !prevIsSignUp);
         setShowPassword(false); // Reset password visibility when switching modes
     }
@@ -51,6 +55,12 @@ const Auth = () => {
         console.log(error);
         console.log("Google Sign In was unsuccessful. Try again later.");
     }
+    const { error } = useSelector((state) => state.auth);
+    useEffect(() => {
+  return () => {
+    dispatch({ type: 'CLEAR_ERROR' }); // clear on unmount
+  };
+}, [dispatch]);
   return (
     <Container component="main" maxWidth="xs">
         <Paper elevation={3}>
@@ -73,6 +83,7 @@ const Auth = () => {
             { isSignup && (
             <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword}/>
             )}
+            {error && <Typography color="error">{error}</Typography>}
             <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
                 {isSignup ? 'Sign Up' : 'Login'}
             </Button>

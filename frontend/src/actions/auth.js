@@ -1,4 +1,4 @@
-import { AUTH } from '../constants/actionTypes';
+import { AUTH, AUTH_ERROR } from '../constants/actionTypes';
 import * as api from '../api/index.js';
 
 export const login = (formData, navigate) => async (dispatch) => {
@@ -8,6 +8,7 @@ export const login = (formData, navigate) => async (dispatch) => {
         navigate('/');
     } catch (error) {
         console.log(error);
+        dispatch({ type: AUTH_ERROR, payload: error.response?.data?.message || 'Something went wrong' });
     }
 }
 

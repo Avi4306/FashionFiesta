@@ -2,10 +2,22 @@ import React from 'react'
 import { useState, useRef } from 'react'
 import { Button, TextField, Typography } from '@mui/material'
 import { useDispatch } from 'react-redux'
+import { commentPost } from '../../../../actions/posts'
 
 const CommentSection = ({post}) => {
-    const [comments, setComments] = useState([])
+    const dispatch = useDispatch();
+    const user = JSON.parse(localStorage.getItem('profile'));
+    const [comments, setComments] = useState(post?.comments || [])
     const [comment, setComment] = useState('')
+    const handleCommentSubmit = async () => {
+        const finalComment = `${user?.result?.name}: ${comment}`;
+        const newComments = await dispatch(commentPost(finalComment, post._id));
+        setComments(newComments);
+        setComment('');
+    }
+    const Clear = () => {
+        setComment('');
+    }
   return (
     <div>
       <div>
@@ -17,25 +29,54 @@ const CommentSection = ({post}) => {
                 {comments.map((comment, index) => (
                     <div key={index} style={{ marginBottom: '10px' }}>
                         <Typography variant="body1" gutterBottom>
-                        <strong>{comment.name}</strong>: {comment.comment}
+                        <strong>{comment}</strong>
                         </Typography>
                     </div>
                     ))}
             </div>
-            <div>
-                <Typography variant="h6" gutterBottom>
-                Add a Comment...
-                </Typography>
-                <TextField
+                {user?.result?.name ?
+                    <>
+                    <TextField
                     fullWidth
                     variant="outlined"
-                    label="Name"
+                    label="Add a Comment..."
                     margin="normal"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                />
-
-            </div>
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && comment.trim()) {
+                        handleCommentSubmit();
+                        }
+                    }}
+                    />
+                    </> 
+                    :
+                    <Typography variant="body1" gutterBottom>
+                        Please <a href="/auth">sign in</a> to comment.
+                        </Typography>
+                }
+                {comment.trim() && (
+                    <>
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    style={{ marginTop: '10px' }}
+                    disabled={!comment}
+                    onClick={Clear}
+                >
+                    Clear
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    style={{ marginTop: '10px' }}
+                    disabled={!comment}
+                    onClick={handleCommentSubmit}
+                >
+                    Comment
+                </Button>
+                </>
+                )}
         </div>
       </div>
     </div>

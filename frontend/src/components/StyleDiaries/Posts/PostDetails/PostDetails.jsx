@@ -49,21 +49,18 @@ const PostDetails = () => {
           <Typography variant="h6">Created by: {post.name}</Typography>
           <Typography variant="body1">{dayjs(post.createdAt).fromNow()}</Typography>
           <Divider style={{ margin: '20px 0' }} />
-          <Typography variant="body1"><strong>Realtime Chat - coming soon!</strong></Typography>
-          <Divider style={{ margin: '20px 0' }} />
-          <CommentSection post={post}/>
-          <Divider style={{ margin: '20px 0' }} />
         </div>
         {(post.selectedFile) && (
-        <div >
+          <div >
           <img src={post.selectedFile} alt={post.title} />
         </div>
         )}
+        <CommentSection post={post}/>
     </div>
     {recommendedPosts.length > 0 && (
       <div>
-        <Typography variant="h5" gutterBottom>You Might Also Like:</Typography>
         <Divider />
+        <Typography variant="h5" gutterBottom>You Might Also Like:</Typography>
         <div className="mt-4">
           {recommendedPosts.map(({ title, content, name, creatorPfp, tags, likes, _id}) => (
             <Paper key={_id} className="p-4 mb-4" onClick={() => navigate(`/style-diaries/${_id}`)}>

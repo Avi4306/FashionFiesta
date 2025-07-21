@@ -21,9 +21,6 @@ export const getPost = async (req, res) => {
 
 export const getPostsBySearch = async (req, res) => {
     const {searchQuery, tags} = req.query;
-console.log('Search Query:', searchQuery);
-console.log('Regex:', new RegExp(searchQuery, 'i'));
-
     try {
         const title = new RegExp(searchQuery, 'i'); // Case-insensitive search
         const posts = await Post.find({$or: [{ title }, { tags: { $in: tags.split(',') } }] });
@@ -94,5 +91,28 @@ export const likePost = async (req, res) => {
         res.status(200).json({ success: true, message: 'Post liked successfully', post: updatedPost });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error liking post', error: error.message });
+    }
+}
+
+export const commentPost = async (req, res) => {
+    const { id } = req.params;
+    const { value } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
+
+    try {
+        const post = await Post.findById(id);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        post.comments.push(value);
+        const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+
+        res.status(200).json(updatedPost);
+    } catch (error) {
+        console.error('Error adding comment:', error.message)
+        res.status(500).json({ message: 'Error adding comment', error });
     }
 }

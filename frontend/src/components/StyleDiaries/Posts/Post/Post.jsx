@@ -15,6 +15,7 @@ import { deletePost, likePost } from "../../../../actions/posts";
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
@@ -22,6 +23,7 @@ const Post = ({ post, setCurrentId }) => {
   const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [likes, setLikes] = useState(post?.likes);
   
   const Likes = () => {
     if (post.likes.length > 0) {
@@ -42,6 +44,7 @@ const Post = ({ post, setCurrentId }) => {
       alert("You cannot like your own post.");
     } 
     else {
+      setLikes(post.likes.includes(userId) ? post.likes.filter(id => id !== userId) : [...post.likes, userId]);
       dispatch(likePost(post._id));
     }
   }

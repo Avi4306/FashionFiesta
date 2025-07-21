@@ -35,7 +35,7 @@ export default function NavBar() {
         setUser(profile);
 
         checkTokenExpiration();
-    }, [location], [user?.token]);
+    }, [location]);
     const handleLogout = () => {
         setUser(null);
         localStorage.removeItem('profile');
