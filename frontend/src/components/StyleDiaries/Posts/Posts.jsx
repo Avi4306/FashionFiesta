@@ -1,44 +1,34 @@
-import Post from "./Post/Post.jsx"
-import { Grid, CircularProgress } from "@mui/material";
-import {useSelector} from "react-redux"
-import Paginate from "../../Pagination/Pagination.jsx";
+import Post from "./Post/Post.jsx";
+import { useSelector } from "react-redux";
 import { useState } from "react";
 
 const Posts = () => {
-  const {isLoading, posts} = useSelector((state) => state.posts); // Using useSelector to access the posts from the Redux store provided by the reducer
-  //posts is the name inside reducer folder, which is the name of the reducer function
-
+  const { isLoading, posts } = useSelector((state) => state.posts);
   const [currentId, setCurrentId] = useState(0);
 
-  if (!posts.length && !isLoading) {
-    return <div>No posts available</div>; // Display a fallback if no posts
+  if (isLoading) {
+    return <div className="text-center p-10 text-text-secondary">Loading...</div>;
   }
-  if(isLoading) {
-    return <CircularProgress style={{margin: 'auto'}} size="7em" />
+
+  if (!posts.length) {
+    return (
+      <div className="text-center p-10">
+        <h2 className="text-xl font-semibold text-text-primary">No Posts Found</h2>
+        <p className="text-text-secondary">It's quiet in here... why not create one?</p>
+      </div>
+    );
   }
+
   return (
-      <Grid
-  container
-  alignItems="stretch"
-  spacing={3}
-  className="mt-5 px-3"
->
-  {posts.map((post) => (
-    <Grid
-      key={post._id}
-      item
-      xs={12}
-      sm={6}
-      md={6}
-      className="transition-transform duration-300 hover:scale-[1.02]"
-    >
-      <Post post={post} setCurrentId={setCurrentId}/>
-    </Grid>
-  ))}
-</Grid>
+    // Using custom background color and Tailwind's grid system
+    <main className="bg-page-bg p-4 md:p-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {posts.map((post) => (
+          <Post key={post?._id} post={post} setCurrentId={setCurrentId} />
+        ))}
+      </div>
+    </main>
+  );
+};
 
-
-  )
-}
-
-export default Posts
+export default Posts;
