@@ -102,7 +102,7 @@ export default function NavBar() {
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
           <Link to="/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
           <Link to="/designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
-          <Link to="/community" className="hover:text-[#aa5a44]">Community</Link>
+          <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>
       )}
         </nav>

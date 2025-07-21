@@ -13,16 +13,19 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {useEffect} from "react";
 import { useDispatch } from "react-redux";
 import {getPosts} from "./actions/posts";
-import Community from "./components/Community/Community.jsx";
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import AboutUs from "./components/AboutUs/AboutUs.jsx";
-import Auth from "./components/Auth/Auth.jsx";
+import Auth from './components/Auth/Auth.jsx';
+import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails.jsx';
+import { Navigate } from 'react-router-dom';
+
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     // Dispatch an action to fetch posts or any other initial data
     dispatch(getPosts());
   }, [dispatch]);
+  const user = JSON.parse(localStorage.getItem('profile'));
   return (<>
     <Router>
     <Header />
@@ -30,7 +33,6 @@ function App() {
     <Routes>
       <Route path="/" element={
             <>
-            
               <Hero />
               <Quotes />
               <OOTW />
@@ -42,7 +44,10 @@ function App() {
             </>
        }
        />
+      <Route path="/auth" element={!user ? <Auth/> : <Navigate to='/' replace />} />
       <Route path="/style-diaries" element={<StyleDiaries/>} />
+      <Route path="/style-diaries/search" element={<StyleDiaries/>} />
+      <Route path="/style-diaries/:id" element={<PostDetails/>} />
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/auth" element={<Auth />} />
     </Routes>

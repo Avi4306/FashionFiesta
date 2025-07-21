@@ -10,15 +10,19 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    name: {
+    creatorPfp: {
         type: String,
-        required: true,
-        trim: true
     },
     creator: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
+    name: {
+        type: String,
         ref: 'User',
-        required: true
+        required: true,
+        trim: true
     },
     tags: [{
         type: String,
@@ -29,6 +33,11 @@ const postSchema = new mongoose.Schema({
     },
     likes: { 
         type: [String],
+        default: []
+    },
+    comments: {
+        type: [String],
+        default: []
     },
     createdAt: {
         type: Date,

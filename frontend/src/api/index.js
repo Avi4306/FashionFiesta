@@ -11,12 +11,17 @@ API.interceptors.request.use((req) => {
 
 export const fetchPosts = () => API.get('/style-diaries');
 
+export const fetchPost = (id) => API.get(`/style-diaries/${id}`);
+
+export const fetchPostsBySearch = (searchQuery) => API.get(`/style-diaries/search?searchQuery=${searchQuery.search || 'none'}&tags=${searchQuery.tags}`);
+
 export const createPost = (newPost) => API.post('/style-diaries', newPost);
 
 export const deletePost = (id) => API.delete(`/style-diaries/${id}`);
 
 export const likePost = (id) => API.patch(`/style-diaries/${id}/likePost`);
 
+export const comment = (value, id) => API.post(`/style-diaries/${id}/comment`, { value });
 
 export const login = (formData) => API.post('/user/login', formData);
 export const signUp = (formData) => API.post('/user/signup', formData);

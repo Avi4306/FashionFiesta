@@ -41,7 +41,7 @@ const Form = () => {
       return;
     }
     try {
-      dispatch(createPost({ ...postData, name: user?.result?.name }));
+      dispatch(createPost({ ...postData, name: user?.result?.name, creatorPfp: user?.result?.profilePhoto }));
     } catch (error) {
       console.error(error);
     }
