@@ -16,6 +16,7 @@ import {getPosts} from "./actions/posts";
 import Community from "./components/Community/Community.jsx";
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import AboutUs from "./components/AboutUs/AboutUs.jsx";
+import Auth from "./components/Auth/Auth.jsx";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -43,6 +44,7 @@ function App() {
        />
       <Route path="/style-diaries" element={<StyleDiaries/>} />
       <Route path="/aboutus" element={<AboutUs />} />
+      <Route path="/auth" element={<Auth />} />
     </Routes>
     <Footer/>
     </Router>
