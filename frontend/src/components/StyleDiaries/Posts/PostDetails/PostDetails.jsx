@@ -1,5 +1,5 @@
-import React, {use, useEffect} from 'react'
-import {Paper, Typography, CircularProgress, Divider} from '@mui/material'
+import React, { useEffect} from 'react'
+import {Paper, Typography, CircularProgress, Divider, Button} from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPost } from '../../../../actions/posts'
@@ -8,6 +8,8 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { getPostsBySearch } from '../../../../actions/posts'
 import Avatar from '@mui/material/Avatar';
 import CommentSection from './CommentSection'
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
 
 dayjs.extend(relativeTime);
 
@@ -16,6 +18,35 @@ const PostDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
+  const profile = JSON.parse(localStorage.getItem("profile"));
+  const userId = profile?.result?._id || profile?.result.sub
+  const handleLike = () => {
+      if (!userId) {
+        navigate('/auth');
+      }
+      else if (userId === post.creator) {
+        alert("You cannot like your own post.");
+      } 
+      else {
+        setLikes(post.likes.includes(userId) ? post.likes.filter(id => id !== userId) : [...post.likes, userId]);
+        dispatch(likePost(post._id));
+      }
+  }
+  const handleDelete = () => {
+      if (window.confirm("Are you sure you want to delete this post?")) {
+        dispatch(deletePost(post._id));
+      }
+  }
+  const Likes = () => {
+    if (post.likes.length > 0) {
+      return post.likes.includes(userId) ? (
+        <><ThumbUpIcon fontSize="small" />&nbsp;{post.likes.length > 2 ? `You and ${post.likes.length - 1} others` : `${post.likes.length} like${post.likes.length > 1 ? 's' : ''}`}</>
+      ) : (
+        <><ThumbUpOffAltIcon fontSize="small" />&nbsp;{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>
+      );
+    }
+    return <><ThumbUpOffAltIcon fontSize="small" />&nbsp;Like</>;
+  }
   useEffect(() => {
     if (id) {
       dispatch(getPost(id));
@@ -54,6 +85,25 @@ const PostDetails = () => {
           <div >
           <img src={post.selectedFile} alt={post.title} />
         </div>
+        )}
+        <Button size="small" color="primary" onClick={(e) => {
+          e.stopPropagation(); // Prevent parent click
+          handleLike();
+        }}>
+        <Likes />
+        </Button>
+        {userId === post.creator && (
+          <Button
+            size="small"
+            color="primary"
+            startIcon={<DeleteIcon />}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent parent click
+              handleDelete();
+            }}
+          >
+            Delete
+          </Button>
         )}
         <CommentSection post={post}/>
     </div>

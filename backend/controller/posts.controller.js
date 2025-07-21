@@ -97,7 +97,7 @@ export const likePost = async (req, res) => {
 export const commentPost = async (req, res) => {
     const { id } = req.params;
     const { value } = req.body;
-
+    const {name, comment, profilePhoto} = value
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json({ message: 'Post not found' });
     }
@@ -107,9 +107,8 @@ export const commentPost = async (req, res) => {
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
-        post.comments.push(value);
+        post.comments.push({name, comment, profilePhoto, createdAt: new Date().toISOString() });
         const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
-
         res.status(200).json(updatedPost);
     } catch (error) {
         console.error('Error adding comment:', error.message)

@@ -20,7 +20,8 @@ import { useState } from "react";
 dayjs.extend(relativeTime);
 
 const Post = ({ post, setCurrentId }) => {
-  const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
+  const profile = JSON.parse(localStorage.getItem("profile"));
+  const userId = profile?.result?._id || profile?.result?.sub;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [likes, setLikes] = useState(post?.likes);

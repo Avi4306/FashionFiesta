@@ -14,7 +14,7 @@ const postSchema = new mongoose.Schema({
         type: String,
     },
     creator: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         ref: 'User'
     },
@@ -35,10 +35,15 @@ const postSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-    comments: {
-        type: [String],
-        default: []
-    },
+    comments: [{
+        name: String,
+        comment: String,
+        profilePhoto: String,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+    }],
     createdAt: {
         type: Date,
         default: Date.now

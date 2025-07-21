@@ -60,9 +60,10 @@ export const likePost = (id) => async (dispatch) => {
     }
 }
 
-export const commentPost = (comment, id) => async (dispatch) => {
+export const commentPost = (commentData, id) => async (dispatch) => {
     try {
-        const { data } = await api.comment(comment, id);
+        const { data } = await api.comment(commentData, id);
+        console.log(data)
         dispatch({ type: COMMENT_POST, payload: data });
         return data.comments; // Return the updated comments array
     } catch (error) {

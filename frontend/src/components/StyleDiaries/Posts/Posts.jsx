@@ -14,7 +14,7 @@ const Posts = () => {
     return <div>No posts available</div>; // Display a fallback if no posts
   }
   if(isLoading) {
-    <CircularProgress style={{margin: 'auto'}} size="7em" />
+    return <CircularProgress style={{margin: 'auto'}} size="7em" />
   }
   return (
       <Grid
