@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { getPostsBySearch } from '../../../../actions/posts'
 import Avatar from '@mui/material/Avatar';
+import CommentSection from './CommentSection'
 
 dayjs.extend(relativeTime);
 
@@ -25,8 +26,10 @@ const PostDetails = () => {
       dispatch(getPostsBySearch({ searchQuery: 'none', tags: post.tags.join(',') }));
     }
   }, [post]);
-  const recommendedPosts = posts.filter(({ _id }) => _id !== post._id);
-  if (isLoading) {
+  const recommendedPosts = post && posts?.length
+  ? posts.filter(({ _id }) => _id !== post._id)
+  : [];
+  if (isLoading || !post) {
     return (
       <Paper elevation={6} className="p-4">
         <CircularProgress size="7em" />
@@ -48,7 +51,7 @@ const PostDetails = () => {
           <Divider style={{ margin: '20px 0' }} />
           <Typography variant="body1"><strong>Realtime Chat - coming soon!</strong></Typography>
           <Divider style={{ margin: '20px 0' }} />
-          <Typography variant="body1"><strong>Comments - coming soon!</strong></Typography>
+          <CommentSection post={post}/>
           <Divider style={{ margin: '20px 0' }} />
         </div>
         {(post.selectedFile) && (
