@@ -1,4 +1,4 @@
-import {AUTH, AUTH_ERROR, UPDATE_PROFILE,LOGOUT} from '../constants/actionTypes';
+import {AUTH, AUTH_ERROR, UPDATE_PROFILE,LOGOUT, CLEAR_ERROR} from '../constants/actionTypes';
 
 const auth = (state = { authData: null, error: null }, action) => {
     switch (action.type) {
@@ -10,9 +10,9 @@ const auth = (state = { authData: null, error: null }, action) => {
         case UPDATE_PROFILE:
             return { ...state, authData: action?.data };
         case LOGOUT:
-            localStorage.clear();
+            localStorage.removeItem("profile");
             return {...state, authData: null};
-        case 'CLEAR_ERROR':
+        case CLEAR_ERROR:
             return { ...state, error: null };
         default:
             return state;

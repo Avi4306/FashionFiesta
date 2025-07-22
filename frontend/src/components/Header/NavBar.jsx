@@ -16,13 +16,35 @@ export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
-useEffect(() => {
+
+  // Sync localStorage with Redux on load
+  useEffect(() => {
     const profile = JSON.parse(localStorage.getItem("profile"));
-    if (profile) {
-      dispatch({ type: "AUTH", data: profile });
+    if (profile?.token) {
+      const decodedToken = jwtDecode(profile.token);
+      if (decodedToken.exp * 1000 < new Date().getTime()) {
+        dispatch({ type: "LOGOUT" });
+        navigate("/auth");
+      } else {
+        dispatch({ type: "AUTH", data: profile });
+      }
     }
   }, [dispatch]);
-  // Close profile dropdown if clicking outside
+
+  // Check token expiration on route change
+  useEffect(() => {
+    const token = user?.token;
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      if (decodedToken.exp * 1000 < new Date().getTime()) {
+        dispatch({ type: "LOGOUT" });
+        setIsProfileOpen(false);
+        navigate("/auth");
+      }
+    }
+  }, [location, user]);
+
+  // Close profile dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -33,24 +55,12 @@ useEffect(() => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Check token expiration on route change
-  useEffect(() => {
-    const token = user?.token;
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      if (decodedToken.exp * 1000 < new Date().getTime()) {
-        handleLogout();
-      }
-    }
-  }, [location, user]);
-
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
     navigate("/");
     setIsProfileOpen(false);
   };
 
-  // Placeholder for avatar
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${
     user?.result?.name?.charAt(0) || "A"
   }`;

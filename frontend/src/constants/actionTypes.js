@@ -13,3 +13,4 @@ export const COMMENT_POST = 'COMMENT_POST';
 
 export const FETCH_USER = 'FETCH_USER'
 export const UPDATE_PROFILE = 'UPDATE_PROFILE'
+export const CLEAR_ERROR = 'CLEAR_ERROR'
