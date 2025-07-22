@@ -1,0 +1,39 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+venv/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# dotenv environment files
+.env
+.env.* 
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.swp
+
+# Build files (React)
+client/build/
+client/.next/          # if using Next.js instead
+client/.parcel-cache/  # if using Parcel
+
+# Dependency lock files (if using only one)
+client/package-lock.json
+server/package-lock.json
+
+# Optional: ignore coverage
+coverage/
+
+# Optional: ignore local database dumps
+dump/

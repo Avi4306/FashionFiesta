@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Homemade+Apple&family=Montserrat:ital,wght@0,100..900;1,100..900&family=My+Soul&display=swap');
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.designer-container {
+  background-color: #dcc5b2;
+  padding: 2rem 1rem;
+  overflow-x: hidden;
+  text-align: center;
+}
+
+.designer-container > h2 {
+  font-family: 'Homemade Apple', cursive;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.designer-description {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  color: #4a4a4a;
+  max-width: 700px;
+  margin: 1.5rem auto 0;
+  padding: 0 1rem;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.designer.swiper {
+  background: transparent;
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  overflow: visible;
+}
+
+.designer-slide.swiper-slide {
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  max-width: 300px;
+  aspect-ratio: 1 / 1.4;
+  overflow: hidden;
+  position: relative;
+  padding: 0.5rem;
+}
+
+.designer-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 1rem;
+  transform: scale(0.85); /* smaller by default */
+  opacity: 0.8;            /* slightly faded */
+  filter: brightness(0.8); /* dimmed */
+  transition: all 0.6s ease;
+  background-color: transparent;
+}
+
+.designer-slide:hover .designer-image {
+  transform: scale(1.05);
+  box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1024px) {
+  .designer-slide.swiper-slide {
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .designer-slide.swiper-slide {
+    max-width: 200px;
+  }
+
+  .designer-container > h2 {
+    font-size: 2rem;
+  }
+
+  .designer-description {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .designer-slide.swiper-slide {
+    max-width: 160px;
+  }
+
+  .designer-container > h2 {
+    font-size: 1.6rem;
+  }
+
+  .designer-description {
+    font-size: 0.95rem;
+  }
+}
+.swiper-slide-active .designer-image {
+  transform: scale(1);        /* full size */
+  opacity: 1;                 /* fully visible */
+  filter: brightness(1);      /* no dim */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); /* spotlight */
+  z-index: 2;
+}
+
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation:
+    typing 2.5s steps(20, end) forwards,
+    blink 0.75s step-end infinite;
+  font-family: 'Homemade Apple', cursive;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+  width: 0;                  /* Start with zero */
+}
+
+/* Use steps(n), where n = number of characters */
+@keyframes typing {
+  from {
+    width: 0ch;
+  }
+  to {
+    width: 20ch; /* Match or slightly exceed number of characters */
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}

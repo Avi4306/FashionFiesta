@@ -1,0 +1,54 @@
+import mongoose from 'mongoose';
+
+const postSchema = new mongoose.Schema({
+    title: {    
+        type: String,
+        required: true,
+        trim: true
+    },
+    content: {
+        type: String,
+        required: true,
+    },
+    creatorPfp: {
+        type: String,
+    },
+    creator: {
+        type: String,
+        required: true,
+        ref: 'User'
+    },
+    name: {
+        type: String,
+        ref: 'User',
+        required: true,
+        trim: true
+    },
+    tags: [{
+        type: String,
+        required: true
+    }],
+    selectedFile: {
+        type: String,
+    },
+    likes: { 
+        type: [String],
+        default: []
+    },
+    comments: [{
+        name: String,
+        comment: String,
+        profilePhoto: String,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+    }],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const Post = mongoose.model('Post', postSchema);
+export default Post;

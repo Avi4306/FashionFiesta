@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+.font-cinzel {
+  font-family: 'Cinzel Decorative', serif;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
