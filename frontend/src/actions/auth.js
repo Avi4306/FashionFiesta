@@ -12,6 +12,16 @@ export const login = (formData, navigate) => async (dispatch) => {
     }
 }
 
+export const googleLogin = (googleUser, navigate) => async (dispatch) => {
+  try {
+    const { data } = await api.googleLogin(googleUser); // send to backend
+    dispatch({ type: AUTH, data }); // save to Redux
+    navigate('/');
+  } catch (error) {
+    console.error('Google Login Error:', error);
+  }
+};
+
 export const signup = (formData, navigate) => async (dispatch) => {
     try {
         const { data } = await api.signUp(formData);

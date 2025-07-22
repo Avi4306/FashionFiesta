@@ -21,7 +21,6 @@ export const getPost = (id) => async (dispatch) => {
     } catch (error) {
         console.error(error);        
     }
-
 }
 export const getPostsBySearch = (searchQuery) => async (dispatch) => {
     try {

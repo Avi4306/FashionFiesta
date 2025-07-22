@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const designerDetailsSchema = new mongoose.Schema({
   brandName: { type: String },
   portfolioUrl: { type: String },
-  bio: { type: String },
   verified: { type: Boolean, default: false },
   appliedAt: { type: Date },
 }, { _id: false });
@@ -17,6 +16,7 @@ const userSchema = new mongoose.Schema({
     email :
     {
         type :String,
+        unique: true,
         required : true,
     },
     password :
@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     {
         type:String,
         required:false,
+        default : ''
     },
     role:
     {
@@ -35,7 +36,8 @@ const userSchema = new mongoose.Schema({
         enum: ['customer', 'pending_designer', 'designer', 'admin'],
         default : "customer"
     },
-    designerDetails: designerDetailsSchema
+    designerDetails: designerDetailsSchema,
+    bio: { type: String, default: '' },
 },
 {
     timestamps: true,

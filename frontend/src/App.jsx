@@ -18,6 +18,9 @@ import AboutUs from "./components/AboutUs/AboutUs.jsx";
 import Auth from './components/Auth/Auth.jsx';
 import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails.jsx';
 import { Navigate } from 'react-router-dom';
+import UserDetails from './components/User/UserDetails.jsx'
+import PrivateRoute from './components/PrivateRoute.jsx'
+import Profile from './components/User/Profile.jsx'
 
 function App() {
   const dispatch = useDispatch();
@@ -50,6 +53,8 @@ function App() {
       <Route path="/style-diaries/:id" element={<PostDetails/>} />
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/user" element={<UserDetails />} />
+      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
     </Routes>
     <Footer/>
     </Router>

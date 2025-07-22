@@ -16,7 +16,12 @@ export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
-
+useEffect(() => {
+    const profile = JSON.parse(localStorage.getItem("profile"));
+    if (profile) {
+      dispatch({ type: "AUTH", data: profile });
+    }
+  }, [dispatch]);
   // Close profile dropdown if clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {

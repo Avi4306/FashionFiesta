@@ -7,6 +7,7 @@ import { login, signup } from '../../actions/auth';
 import CropperDialog from './CropperDialog';
 import { Typography, Button } from '@mui/material';
 import {jwtDecode} from 'jwt-decode'
+import { googleLogin } from '../../actions/auth';
 
 // Icons
 const UserIcon = () => <svg className="h-5 w-5 text-gray-500"  />;
@@ -79,15 +80,19 @@ const handleImageChange = (e) => {
   };
 
   const googleSuccess = async (res) => {
-    const token = res?.credential;
-    const result = jwtDecode(token);
-    try {
-      dispatch({ type: 'AUTH', data: { result, token } });
-      navigate('/');
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const token = res?.credential;
+  if (!token) return;
+
+  const decoded = jwtDecode(token);
+  const { name, email} = decoded;
+
+  try {
+    // send this to backend via redux action
+    dispatch(googleLogin({ name, email}, navigate));
+  } catch (error) {
+    console.error("Google Login Failed:", error);
+  }
+};
 
   const googleFailure = (err) => {
     console.error("Google Sign In failed:", err);

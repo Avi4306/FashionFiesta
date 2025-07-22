@@ -10,3 +10,5 @@ export const LOGOUT = 'LOGOUT';
 export const START_LOADING = 'START_LOADING';
 export const END_LOADING = 'END_LOADING';
 export const COMMENT_POST = 'COMMENT_POST';
+
+export const FETCH_USER = 'FETCH_USER'
