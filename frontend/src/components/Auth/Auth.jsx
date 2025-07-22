@@ -193,6 +193,9 @@ const handleImageChange = (e) => {
                   <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
                   <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} />
                   <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockIcon />} value={formData.confirmPassword} handleChange={handleChange} />
+                  {error && (
+                    <p className="text-red-600 text-sm mt-2 text-center">{error}</p>
+                  )}
                   <div className="text-center">
                     <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
                       SIGN UP
@@ -224,6 +227,9 @@ const handleImageChange = (e) => {
                 <form onSubmit={handleSubmit}>
                   <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
                   <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} />
+                  {error && (
+                    <p className="text-red-600 text-sm mt-2 text-center">{error}</p>
+                  )}
                   <div className="text-center">
                     <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
                       SIGN IN
