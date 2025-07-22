@@ -27,5 +27,5 @@ export const login = (formData) => API.post('/user/login', formData);
 export const googleLogin = (formData) => API.post("/user/google", formData);
 export const signUp = (formData) => API.post('/user/signup', formData);
 
-
+export const fetchUserById = (id) => API.get(`/user/${id}`)
 export const updateUser = (id, formData) => API.put(`/user/profile/${id}`, formData);

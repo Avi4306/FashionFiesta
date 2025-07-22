@@ -20,6 +20,7 @@ import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails
 import { Navigate } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute.jsx'
 import Profile from './components/User/Profile.jsx'
+import UserDetails from './components/User/UserDetails.jsx'
 
 function App() {
   const dispatch = useDispatch();
@@ -52,7 +53,7 @@ function App() {
       <Route path="/style-diaries/:id" element={<PostDetails/>} />
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/auth" element={<Auth />} />
-      {/* <Route path="/user" element={<UserDetails />} /> */}
+      <Route path="/user/:id" element={<UserDetails />} />
       <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
     </Routes>
     <Footer/>

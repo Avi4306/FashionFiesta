@@ -38,6 +38,17 @@ const userSchema = new mongoose.Schema({
     },
     designerDetails: designerDetailsSchema,
     bio: { type: String, default: '' },
+    socialLinks: {
+    instagram: { type: String, default: '' },
+    facebook: { type: String, default: ''  },
+    twitter: { type: String, default: ''  },
+    website: { type: String, default: ''  },
+    },
+    location: {
+    city: { type: String, default: ''  },
+    state: { type: String, default: ''  },
+    country: { type: String, default: ''  }
+    },
 },
 {
     timestamps: true,

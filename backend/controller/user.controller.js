@@ -20,7 +20,6 @@ const loginUser = async (req, res) => {
       email: existingUser.email,
       role: existingUser.role,
     }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    console.log(token)
     res.status(200).json({ result: existingUser, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
@@ -35,13 +34,22 @@ export const googleAuth = async (req, res) => {
 
     if (!user) {
       user = await User.create({
-        name,
-        email,
-        profilePhoto : '',
+        profilePhoto: '',
         password: null,
         role: 'customer',
         bio: '',
         designerDetails: null,
+        socialLinks: {
+          instagram: '',
+          facebook: '',
+          twitter: '',
+          website: '',
+        },
+        location: {
+          city: '',
+          state: '',
+          country: '',
+        },
       });
     }
 
@@ -102,7 +110,7 @@ const getUser = ( async(req,res)=>
 
    try{
       
-      const user = await User.findById({id}).select(-password);
+      const user = await User.findById(id).select('-password');
       console.log(user)
       if (!user) return res.status(404).json({ message: 'User not found' });
       res.json(user);

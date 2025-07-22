@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import CropperDialog from '../Auth/CropperDialog';
+import CropperDialog from "../Auth/CropperDialog";
 import { Typography, Button } from "@mui/material";
 import { updateProfile } from "../../actions/user";
 
@@ -10,23 +10,39 @@ export default function Profile() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.authData);
 
+  if (!user || !user.result) {
+    return <div className="text-center py-10 text-gray-500">Loading profile...</div>;
+  }
+
+  const role = user.result.role || "customer";
+
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
-    name: user?.result?.name || "",
-    email: user?.result?.email || "",
-    profilePhoto: user?.result?.profilePhoto || "",
-    bio: user?.result?.bio || "",
+    name: user.result.name || "",
+    email: user.result.email || "",
+    profilePhoto: user.result.profilePhoto || "",
+    bio: user.result.bio || "",
     designerDetails: {
-      brandName: user?.result?.designerDetails?.brandName || "",
-      portfolioUrl: user?.result?.designerDetails?.portfolioUrl || "",
+      brandName: user.result.designerDetails?.brandName || "",
+      portfolioUrl: user.result.designerDetails?.portfolioUrl || "",
+    },
+    socialLinks: {
+      instagram: user.result.socialLinks?.instagram || "",
+      facebook: user.result.socialLinks?.facebook || "",
+      twitter: user.result.socialLinks?.twitter || "",
+      website: user.result.socialLinks?.website || "",
+    },
+    location: {
+      city: user.result.location?.city || "",
+      state: user.result.location?.state || "",
+      country: user.result.location?.country || "",
     },
   });
 
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagePreview, setImagePreview] = useState("");
   const [cropSrc, setCropSrc] = useState(null);
   const [openCropper, setOpenCropper] = useState(false);
 
-  const role = user?.result?.role || "customer";
   const avatarPlaceholder = `https://placehold.co/80x80/F0E4D3/44403c?text=${form.name.charAt(0) || "U"}`;
 
   const handleLogout = () => {
@@ -56,6 +72,18 @@ export default function Profile() {
         ...prev,
         designerDetails: { ...prev.designerDetails, [field]: value },
       }));
+    } else if (name.startsWith("socialLinks.")) {
+      const field = name.split(".")[1];
+      setForm((prev) => ({
+        ...prev,
+        socialLinks: { ...prev.socialLinks, [field]: value },
+      }));
+    } else if (name.startsWith("location.")) {
+      const field = name.split(".")[1];
+      setForm((prev) => ({
+        ...prev,
+        location: { ...prev.location, [field]: value },
+      }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -72,7 +100,13 @@ export default function Profile() {
     designer: "🧵 Designer",
     pending_designer: "⏳ Pending",
   };
+  const locationParts = [
+    user.socialLinks?.location?.city,
+    user.socialLinks?.location?.state,
+    user.socialLinks?.location?.country,
+  ].filter(Boolean); // removes falsy values (e.g., "", null)
 
+  const fullLocation = locationParts.join(", ");
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
       <div className="bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]">
@@ -109,31 +143,28 @@ export default function Profile() {
                   <strong>Brand:</strong> {form.designerDetails.brandName || "—"}
                 </p>
                 <p className="text-sm text-[#78716c]">
-                  <strong>Portfolio:</strong>{" "}
-                  {form.designerDetails.portfolioUrl ? (
-                    <a
-                      href={form.designerDetails.portfolioUrl}
-                      className="text-[#aa5a44] underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View
-                    </a>
-                  ) : (
-                    "—"
-                  )}
+                  <strong>Portfolio:</strong> {form.designerDetails.portfolioUrl || "—"}
                 </p>
-                {user?.result?.designerDetails?.appliedAt && (
-                  <p className="text-sm text-[#78716c]">
-                    <strong>Applied:</strong>{" "}
-                    {new Date(user.result.designerDetails.appliedAt).toLocaleDateString()}
-                  </p>
-                )}
-                {user?.result?.designerDetails?.verified && (
-                  <p className="text-sm text-green-600 font-medium">✔️ Verified</p>
-                )}
               </div>
             )}
+
+            <div className="mb-4">
+              <h3 className="text-md font-semibold text-[#44403c] mb-1">Social Links:</h3>
+              {Object.entries(form.socialLinks).map(([key, value]) => (
+                <p key={key} className="text-sm text-[#78716c]">
+                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value || "—"}
+                </p>
+              ))}
+            </div>
+
+            <div className="mb-4">
+              <h3 className="text-md font-semibold text-[#44403c] mb-1">Location:</h3>
+                {fullLocation && (
+                  <p className="text-sm text-[#78716c]">
+                    <strong>Location:</strong> {fullLocation}
+                  </p>
+                )}
+            </div>
 
             <button
               onClick={() => setEditMode(true)}
@@ -163,132 +194,68 @@ export default function Profile() {
                   }}
                 />
               )}
-              <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              <div className="text-center mb-4">
                 <input
                   accept="image/*"
                   type="file"
                   onChange={handleImageChange}
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                   id="profile-upload"
                 />
-                <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
+                <label htmlFor="profile-upload" className="cursor-pointer block">
                   {imagePreview ? (
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      style={{ width: 80, height: 80, borderRadius: '50%' }}
+                      className="w-20 h-20 rounded-full mx-auto"
                     />
                   ) : (
-                    <div
-                      style={{
-                        width: 80,
-                        height: 80,
-                        borderRadius: '50%',
-                        backgroundColor: '#ccc',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '24px',
-                        margin: '0 auto',
-                        color: '#fff',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {form.name ? form.name.charAt(0) : 'U'}
+                    <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-xl text-white mx-auto">
+                      {form.name ? form.name.charAt(0) : "U"}
                     </div>
                   )}
                   <Typography variant="body2" color="primary">
-                    {imagePreview ? 'Change Photo' : 'Upload Profile Photo'}
+                    {imagePreview ? "Change Photo" : "Upload Profile Photo"}
                   </Typography>
                 </label>
-                {imagePreview && (
-                  <Button
-                    size="small"
-                    color="secondary"
-                    onClick={() => {
-                      setImagePreview('');
-                      setForm({ ...form, profilePhoto: '' });
-                    }}
-                    style={{ marginTop: '0.5rem' }}
-                  >
-                    Remove Photo
-                  </Button>
-                )}
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm mb-1 text-[#44403c]">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded-md"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1 text-[#44403c]">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded-md"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1 text-[#44403c]">Bio</label>
-              <textarea
-                name="bio"
-                value={form.bio}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded-md"
-                rows={3}
-              />
-            </div>
+            <input name="name" value={form.name} onChange={handleChange} className="w-full border px-3 py-2 rounded-md" placeholder="Name" />
+            <textarea name="bio" value={form.bio} onChange={handleChange} rows={3} className="w-full border px-3 py-2 rounded-md" placeholder="Bio" />
 
             {(role === "designer" || role === "pending_designer") && (
               <>
-                <div>
-                  <label className="block text-sm mb-1 text-[#44403c]">Brand Name</label>
-                  <input
-                    type="text"
-                    name="designerDetails.brandName"
-                    value={form.designerDetails.brandName}
-                    onChange={handleChange}
-                    className="w-full border px-3 py-2 rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm mb-1 text-[#44403c]">Portfolio URL</label>
-                  <input
-                    type="text"
-                    name="designerDetails.portfolioUrl"
-                    value={form.designerDetails.portfolioUrl}
-                    onChange={handleChange}
-                    className="w-full border px-3 py-2 rounded-md"
-                  />
-                </div>
+                <input name="designerDetails.brandName" value={form.designerDetails.brandName} onChange={handleChange} className="w-full border px-3 py-2 rounded-md" placeholder="Brand Name" />
+                <input name="designerDetails.portfolioUrl" value={form.designerDetails.portfolioUrl} onChange={handleChange} className="w-full border px-3 py-2 rounded-md" placeholder="Portfolio URL" />
               </>
             )}
 
+            {Object.keys(form.socialLinks).map((key) => (
+              <input
+                key={key}
+                name={`socialLinks.${key}`}
+                value={form.socialLinks[key]}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded-md"
+                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+              />
+            ))}
+
+            {Object.keys(form.location).map((key) => (
+              <input
+                key={key}
+                name={`location.${key}`}
+                value={form.location[key]}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded-md"
+                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+              />
+            ))}
+
             <div className="flex gap-4">
-              <button
-                type="submit"
-                className="flex-1 bg-[#aa5a44] text-white py-2 rounded-lg hover:bg-[#8e4738]"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditMode(false)}
-                className="flex-1 border border-[#aa5a44] text-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-              >
-                Cancel
-              </button>
+              <button type="submit" className="flex-1 bg-[#aa5a44] text-white py-2 rounded-lg hover:bg-[#8e4738]">Save</button>
+              <button type="button" onClick={() => setEditMode(false)} className="flex-1 border border-[#aa5a44] text-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]">Cancel</button>
             </div>
           </form>
         )}
