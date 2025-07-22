@@ -7,15 +7,15 @@ import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
-const Post = ({ post, setCurrentId }) => {
+const Post = ({ post }) => {
   const profile = JSON.parse(localStorage.getItem("profile"));
   const userId = profile?.result?._id || profile?.result?.sub;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [likes, setLikes] = useState(post?.likes);
+  const [copied, setCopied] = useState(false);
   const hasLikedPost = likes?.includes(userId);
-
   const handleLike = (e) => {
     e.stopPropagation()
     if (!userId) {
@@ -44,7 +44,7 @@ const Post = ({ post, setCurrentId }) => {
 
 
   return (
-    <div onClick={openPost} className="bg-card-bg rounded-xl shadow-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+    <div onClick={openPost} className="bg-card-bg rounded-xl shadow-md overflow-visible flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
       {/* Clickable Area */}
       <div className="cursor-pointer">
         <img
@@ -81,21 +81,72 @@ const Post = ({ post, setCurrentId }) => {
 
       {/* Actions */}
       <div className="border-t border-gray-100 px-5 py-3 flex justify-between items-center mt-auto">
+        {/* Like Button */}
         <button
           onClick={handleLike}
-          className={`flex items-center gap-2 text-sm font-semibold transition-colors ${hasLikedPost ? 'text-like-accent' : 'text-text-secondary hover:text-text-primary'}`}
+          className={`flex items-center gap-2 text-sm font-semibold cursor-pointer transition-colors ${
+            hasLikedPost
+              ? 'text-like-accent'
+              : 'text-text-secondary hover:text-blue-500'
+          }`}
         >
-          {/* Using an SVG for a cleaner icon */}
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.562 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
           </svg>
           {likes?.length > 0
-          ? `${likes.length} Like${likes.length > 1 ? 's' : ''}`
-          : 'Like'}
+            ? `${likes.length} Like${likes.length > 1 ? 's' : ''}`
+            : 'Like'}
         </button>
+
+        {/* Share Button */}
+        <div className="relative">
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              const link = `${window.location.origin}/style-diaries/${post._id}`;
+              try {
+                await navigator.clipboard.writeText(link);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              } catch (err) {
+                console.error("Failed to copy:", err);
+              }
+            }}
+            className="flex items-center gap-2 text-sm font-semibold text-text-secondary hover:text-yellow-500 transition-colors cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 12v.01M12 4v.01M20 12v.01M12 20v.01M8 16.93a10 10 0 008 0M8 7.07a10 10 0 018 0"
+              />
+            </svg>
+            Share
+          </button>
+
+          {copied && (
+            <div className="absolute top-full mt-1 text-xs text-green-600 bg-white px-2 py-1 rounded shadow border border-green-200">
+              Link copied!
+            </div>
+          )}
+        </div>
+
+        {/* Delete Button */}
         {userId === post?.creator && (
           <div className="flex gap-2">
-            <button onClick={handleDelete} className="text-text-secondary hover:text-red-500 text-xs font-medium">DELETE</button>
+            <button
+              onClick={handleDelete}
+              className="text-text-secondary hover:text-red-500 text-xs font-medium cursor-pointer"
+            >
+              DELETE
+            </button>
           </div>
         )}
       </div>

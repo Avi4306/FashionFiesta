@@ -4,7 +4,6 @@ import { useState } from "react";
 
 const Posts = () => {
   const { isLoading, posts } = useSelector((state) => state.posts);
-  const [currentId, setCurrentId] = useState(0);
 
   if (isLoading) {
     return <div className="text-center p-10 text-text-secondary">Loading...</div>;
@@ -22,9 +21,9 @@ const Posts = () => {
   return (
     // Using custom background color and Tailwind's grid system
     <main className="bg-page-bg p-4 md:p-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {posts.map((post) => (
-          <Post key={post?._id} post={post} setCurrentId={setCurrentId} />
+          <Post key={post?._id} post={post} />
         ))}
       </div>
     </main>
