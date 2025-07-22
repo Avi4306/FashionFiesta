@@ -39,6 +39,7 @@ const postSchema = new mongoose.Schema({
         name: String,
         comment: String,
         profilePhoto: String,
+        userId : String,
         createdAt: {
             type: Date,
             default: Date.now

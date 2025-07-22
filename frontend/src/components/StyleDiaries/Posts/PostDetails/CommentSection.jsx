@@ -5,21 +5,22 @@ import { useDispatch } from 'react-redux'
 import { commentPost } from '../../../../actions/posts'
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Link} from 'react-router-dom'
 dayjs.extend(relativeTime);
 
 const CommentSection = ({ post }) => {
     const dispatch = useDispatch();
     const user = JSON.parse(localStorage.getItem('profile'));
-    
     const [comments, setComments] = useState(post?.comments || []);
     const [comment, setComment] = useState('');
-
+    console.log(comments)
     const handleCommentSubmit = async () => {
         if (!comment.trim()) return;
         const commentData = {
-            name : user?.result?.name || user.result.sub,
+            name : user?.result?.name,
             comment,
-            profilePhoto: user?.result?.profilePhoto
+            profilePhoto: user?.result?.profilePhoto,
+            userId : user?.result?._id || user.result.sub
     };
         setComments([...comments, commentData]);
         setComment('');
@@ -39,19 +40,24 @@ const CommentSection = ({ post }) => {
                     const time = dayjs(post?.createdAt).fromNow()
                     // Themed placeholder avatar using your hex codes
                     const avatarPlaceholder = comment.profilePhoto ||`https://placehold.co/40x40/F0E4D3/44403c?text=${name?.charAt(0)}`;
+                    const profileLink = ((user?.result?.id || user?.result?.sub) === comment.userId) ? "/user/profile" : `/user/${comment.userId}`;
                     
                     return (
                         <div key={index} className="flex items-start gap-4">
+                            <Link to = {profileLink}>
                             <img 
                                 src={avatarPlaceholder}
                                 alt={name} 
                                 className="h-10 w-10 rounded-full"
                             />
+                            </Link>
                             {/* Themed comment bubble using your light accent color */}
                             <div className="flex-1 bg-[#F0E4D3] dark:bg-[#292524] p-4 rounded-lg">
+                                <Link to = {profileLink}>
                                 <p className="font-semibold text-sm text-[#44403c] dark:text-[#e7e5e4]">{name}</p>
                                 <span className="text-xs text-[#78716c] dark:text-[#a8a29e]">{time}</span>
                                 <p className="text-[#78716c] dark:text-[#a8a29e] mt-1">{commentText}</p>
+                                </Link>
                             </div>
                         </div>
                     );
@@ -66,6 +72,11 @@ const CommentSection = ({ post }) => {
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             placeholder={`Commenting as ${user.result.name}...`}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey && comment.trim()) {
+                                e.preventDefault(); // Prevents new line when shift is not pressed
+                                handleCommentSubmit();
+                                }}}
                             className="w-full p-3 border rounded-lg bg-transparent border-[#DCC5B2] dark:border-[#44403c] text-[#dcc5b2] dark:text-[#c19580] focus:ring-2 focus:ring-[#d97706] focus:border-transparent transition-shadow"
                             rows="3"
                         />
