@@ -12,3 +12,4 @@ export const END_LOADING = 'END_LOADING';
 export const COMMENT_POST = 'COMMENT_POST';
 
 export const FETCH_USER = 'FETCH_USER'
+export const UPDATE_PROFILE = 'UPDATE_PROFILE'

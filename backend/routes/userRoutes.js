@@ -6,7 +6,8 @@ userRouter.get('/:id', getUser);
 userRouter.post('/signup', signupUser);
 userRouter.post('/login', loginUser);
 userRouter.post('/google', googleAuth);
-userRouter.patch('/:id', updateUser);
 userRouter.delete('/:id', deleteUser);
+userRouter.put('/profile/:id', updateUser);
+
 
 export default userRouter;

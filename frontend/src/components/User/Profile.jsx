@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import CropperDialog from '../Auth/CropperDialog';
 import { Typography, Button } from "@mui/material";
+import { updateProfile } from "../../actions/user";
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -63,22 +63,8 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const { data } = await axios.put(`/api/users/${user.result._id}`, form, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-
-      const updatedUser = {
-        ...user,
-        result: data,
-      };
-
-      dispatch({ type: "AUTH", data: updatedUser });
-      localStorage.setItem("profile", JSON.stringify(updatedUser));
-      setEditMode(false);
-    } catch (err) {
-      console.error("Update failed:", err.response?.data || err.message);
-    }
+    dispatch(updateProfile(user.result._id, form));
+    setEditMode(false);
   };
 
   const roleBadge = {

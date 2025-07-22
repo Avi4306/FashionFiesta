@@ -128,7 +128,7 @@ useEffect(() => {
                           Feedback
                         </p>
                         <Link
-                          to="/profile"
+                          to="/user/profile"
                           onClick={() => setIsProfileOpen(false)}
                           className="block w-full text-left px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md"
                         >
