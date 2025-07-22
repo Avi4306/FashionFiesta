@@ -13,7 +13,6 @@ const CommentSection = ({ post }) => {
     const user = JSON.parse(localStorage.getItem('profile'));
     const [comments, setComments] = useState(post?.comments || []);
     const [comment, setComment] = useState('');
-    console.log(comments)
     const handleCommentSubmit = async () => {
         if (!comment.trim()) return;
         const commentData = {
