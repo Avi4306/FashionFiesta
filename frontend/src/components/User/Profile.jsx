@@ -53,6 +53,7 @@ export default function Profile() {
   const [imagePreview, setImagePreview] = useState("");
   const [cropSrc, setCropSrc] = useState(null);
   const [openCropper, setOpenCropper] = useState(false);
+  const { error } = useSelector((state) => state.auth);
   
   const avatarPlaceholder = `https://placehold.co/80x80/F0E4D3/44403c?text=${form.name.charAt(0) || "U"}`;
   
@@ -252,6 +253,9 @@ export default function Profile() {
             >
               Delete Account
             </button>
+            {error && (
+              <div className="text-red-600 text-sm mb-2 text-center">{error}</div>
+            )}
             <ConfirmDelete
               open={showDeletePopup}
               password={passwordInput}
@@ -261,7 +265,7 @@ export default function Profile() {
                 setShowDeletePopup(false);
                 setPasswordInput("");
               }}
-              onConfirm={() => {
+              onConfirm={() => {    dispatch({ type: 'CLEAR_ERROR' });
                 dispatch(deleteAccount(userId, passwordInput, navigate));
                 setShowDeletePopup(false);
                 setPasswordInput("");

@@ -49,6 +49,10 @@ export const deleteAccount = (userId, password, navigate) => async (dispatch) =>
     navigate("/");
   } catch (error) {
     console.error("Failed to delete account:", error?.response?.data || error.message);
+    dispatch({
+      type: AUTH_ERROR,
+      payload: error.response?.data?.message || "Something went wrong",
+    });
     dispatch({ type: END_LOADING });
   }
 };
