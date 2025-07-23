@@ -1,5 +1,5 @@
 import * as api from '../api';
-import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING } from '../constants/actionTypes';
+import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING, AUTH_ERROR } from '../constants/actionTypes';
 
 export const getUserProfileData = (id) => async (dispatch) => {
     try {

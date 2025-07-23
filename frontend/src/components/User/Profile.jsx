@@ -9,6 +9,8 @@ import { getUserProfileData } from "../../actions/user";
 import { Link } from "react-router-dom";
 import ConfirmDelete from "../ConfirmDelete"; // adjust path
 import { deleteAccount } from "../../actions/user";
+import { CLEAR_ERROR } from '../../constants/actionTypes';
+
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -265,7 +267,7 @@ export default function Profile() {
                 setShowDeletePopup(false);
                 setPasswordInput("");
               }}
-              onConfirm={() => {    dispatch({ type: 'CLEAR_ERROR' });
+              onConfirm={() => {    dispatch({ type: CLEAR_ERROR });
                 dispatch(deleteAccount(userId, passwordInput, navigate));
                 setShowDeletePopup(false);
                 setPasswordInput("");

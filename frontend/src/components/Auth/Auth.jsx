@@ -8,6 +8,7 @@ import CropperDialog from './CropperDialog';
 import { Typography, Button } from '@mui/material';
 import {jwtDecode} from 'jwt-decode'
 import { googleLogin } from '../../actions/auth';
+import { CLEAR_ERROR } from '../../constants/actionTypes';
 
 // Icons
 const UserIcon = () => <svg className="h-5 w-5 text-gray-500"  />;
@@ -58,10 +59,10 @@ const handleImageChange = (e) => {
   const navigate = useNavigate();
   const { error } = useSelector((state) => state.auth);
 
-  useEffect(() => () => dispatch({ type: 'CLEAR_ERROR' }), [dispatch]);
+  useEffect(() => () => dispatch({ type: CLEAR_ERROR }), [dispatch]);
 
   const handleChange = (e) => {
-    dispatch({ type: 'CLEAR_ERROR' });
+    dispatch({ type: CLEAR_ERROR });
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -73,7 +74,7 @@ const handleImageChange = (e) => {
   };
 
   const switchMode = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
+    dispatch({ type: CLEAR_ERROR });
     setIsSignUp((prev) => !prev);
     setShowPassword(false);
     setFormData(initialState);
