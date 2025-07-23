@@ -84,11 +84,11 @@ const handleImageChange = (e) => {
   if (!token) return;
 
   const decoded = jwtDecode(token);
-  const { name, email} = decoded;
+  const { name, email, picture} = decoded;
 
   try {
     // send this to backend via redux action
-    dispatch(googleLogin({ name, email}, navigate));
+    dispatch(googleLogin({ name, email, picture}, navigate));
   } catch (error) {
     console.error("Google Login Failed:", error);
   }

@@ -29,3 +29,8 @@ export const signUp = (formData) => API.post('/user/signup', formData);
 
 export const fetchUserById = (id) => API.get(`/user/${id}`)
 export const updateUser = (id, formData) => API.put(`/user/profile/${id}`, formData);
+
+export const fetchUserPosts = (id) => API.get(`/user/${id}/posts`);
+export const fetchUserProducts = (id) => API.get(`/user/${id}/products`);
+
+export const deleteUserAccount = (userId, password) => API.delete(`/user/${userId}`, { data: { password } });

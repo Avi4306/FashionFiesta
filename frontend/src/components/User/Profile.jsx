@@ -4,18 +4,29 @@ import { useNavigate } from "react-router-dom";
 import CropperDialog from "../Auth/CropperDialog";
 import { Typography, Button } from "@mui/material";
 import { updateProfile } from "../../actions/user";
+import { useEffect } from "react";
+import { getUserProfileData } from "../../actions/user";
+import { Link } from "react-router-dom";
+import ConfirmDelete from "../ConfirmDelete"; // adjust path
+import { deleteAccount } from "../../actions/user";
 
 export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.authData);
+  const { posts, products } = useSelector((state) => state.user);
+  const userId = user?.result?._id;
+  useEffect(() => {
+    if (userId) {
+      dispatch(getUserProfileData(userId)); // should fetch posts + products for the logged-in user
+    }
+  }, [dispatch, userId]);
 
-  if (!user || !user.result) {
-    return <div className="text-center py-10 text-gray-500">Loading profile...</div>;
-  }
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
 
   const role = user.result.role || "customer";
-
+  
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
     name: user.result.name || "",
@@ -38,23 +49,23 @@ export default function Profile() {
       country: user.result.location?.country || "",
     },
   });
-
+  
   const [imagePreview, setImagePreview] = useState("");
   const [cropSrc, setCropSrc] = useState(null);
   const [openCropper, setOpenCropper] = useState(false);
-
+  
   const avatarPlaceholder = `https://placehold.co/80x80/F0E4D3/44403c?text=${form.name.charAt(0) || "U"}`;
-
+  
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
     localStorage.removeItem("profile");
     navigate("/");
   };
-
+  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+    
     const reader = new FileReader();
     reader.onloadend = () => {
       setCropSrc(reader.result);
@@ -62,10 +73,10 @@ export default function Profile() {
     };
     reader.readAsDataURL(file);
   };
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+    
     if (name.startsWith("designerDetails.")) {
       const field = name.split(".")[1];
       setForm((prev) => ({
@@ -88,13 +99,13 @@ export default function Profile() {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(updateProfile(user.result._id, form));
     setEditMode(false);
   };
-
+  
   const roleBadge = {
     admin: "✔️ Admin",
     designer: "🧵 Designer",
@@ -105,7 +116,10 @@ export default function Profile() {
     user.socialLinks?.location?.state,
     user.socialLinks?.location?.country,
   ].filter(Boolean); // removes falsy values (e.g., "", null)
-
+  
+  if (!user || !user.result) {
+    return <div className="text-center py-10 text-gray-500">Loading profile...</div>;
+  }
   const fullLocation = locationParts.join(", ");
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
@@ -165,7 +179,60 @@ export default function Profile() {
                   </p>
                 )}
             </div>
-
+            {posts?.length > 0 && (
+              <div className="mt-10">
+                <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Posts</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {posts.map((post) => (
+                    <Link to = {`/style-diaries/${post._id}`}
+                      key={post._id}
+                      className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
+                    >
+                      {post.image && (
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-40 object-cover"
+                        />
+                      )}
+                      <div className="p-4">
+                        <h4 className="font-semibold text-[#44403c]">{post.title}</h4>
+                        <p className="text-sm text-[#78716c] line-clamp-2">
+                          {post.content || "No content"}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {products?.length > 0 && (
+              <div className="mt-10">
+                <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Products</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {products.map((product) => (
+                    <Link to = {`/products/${product._id}`}
+                      key={product._id}
+                      className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
+                    >
+                      {product.image && (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-40 object-cover"
+                        />
+                      )}
+                      <div className="p-4">
+                        <h4 className="font-semibold text-[#44403c]">{product.name}</h4>
+                        <p className="text-sm text-[#78716c] line-clamp-2">
+                          {product.description || "No description"}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             <button
               onClick={() => setEditMode(true)}
               className="w-full bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738]"
@@ -179,6 +246,27 @@ export default function Profile() {
             >
               Logout
             </button>
+            <button
+              onClick={() => setShowDeletePopup(true)}
+              className="mt-4 w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+            >
+              Delete Account
+            </button>
+            <ConfirmDelete
+              open={showDeletePopup}
+              password={passwordInput}
+              setPassword={setPasswordInput}
+              requiresPassword={user.result.authProvider !== "google"}
+              onClose={() => {
+                setShowDeletePopup(false);
+                setPasswordInput("");
+              }}
+              onConfirm={() => {
+                dispatch(deleteAccount(userId, passwordInput, navigate));
+                setShowDeletePopup(false);
+                setPasswordInput("");
+              }}
+            />
           </>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

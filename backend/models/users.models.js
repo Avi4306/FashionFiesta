@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         required : true,
     },
+    authProvider: { type: String, default: "local" },
     password :
     {
         type:String,
