@@ -34,3 +34,8 @@ export const fetchUserPosts = (id) => API.get(`/user/${id}/posts`);
 export const fetchUserProducts = (id) => API.get(`/user/${id}/products`);
 
 export const deleteUserAccount = (userId, password) => API.delete(`/user/${userId}`, { data: { password } });
+
+
+export const fetchProduct = (id) => API.get(`/products/${id}`);
+export const fetchAllProducts = (page, limit) => API.get(`/products?page=${page}`);
+export const createProduct = (productData) => API.post('/products', productData);

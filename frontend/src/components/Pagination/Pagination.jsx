@@ -7,7 +7,7 @@ const Paginate = ({ page, count, onChange }) => {
     <Pagination
       count={count}
       page={page}
-      onChange={onChange}
+      onChange={(e, value) => onChange(value)}
       sx={{
         display: "flex",
         justifyContent: "center",
@@ -18,7 +18,7 @@ const Paginate = ({ page, count, onChange }) => {
         <PaginationItem
           {...item}
           component={Link}
-          to={`/style-diaries?page=${item.page}`}
+          to={`/products?page=${item.page}`}
           sx={{
             borderRadius: "8px",
             minWidth: "36px",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { TextField } from "@mui/material";
+import { TextField, Snackbar } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { createPost } from "../../../actions/posts";
 import "./styles.css";
@@ -246,6 +246,13 @@ const Form = () => {
           </button>
         </div>
       </form>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setOpenSnackbar(false)}
+        message={errorMsg}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </div>
   );
 };
