@@ -25,7 +25,6 @@ export const getAllProducts = (page = 1) => async (dispatch) => {
     dispatch({ type: START_LOADING });
 
     const { data } = await api.fetchAllProducts(page);
-    console.log(data)
     dispatch({ type: FETCH_ALL_PRODUCTS, payload: data });
 
     dispatch({ type: END_LOADING });
