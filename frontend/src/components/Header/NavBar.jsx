@@ -85,10 +85,10 @@ export default function NavBar() {
         </div>
 
         {/* Right Icons */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-8">
           {/* Search */}
           <div
-            className={`flex items-center border-b border-[#dcc5b2] px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
+            className={`flex items-center border-b border-[#dcc5b2] h-9  px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
               isSearchActive ? "w-56" : "w-32"
             }`}
             onClick={() => setSearchActive(!isSearchActive)}
@@ -103,11 +103,11 @@ export default function NavBar() {
 
           {/* Icons */}
           <div className="flex items-center gap-4 text-xl text-gray-800">
-            <CiHome />
-            <PiShoppingCartThin />
+            <CiHome className="text-3xl mx-1" />
+            <PiShoppingCartThin className="text-3xl mx-1" />
 
             {/* Profile Dropdown */}
-            <div className="relative" ref={profileRef}>
+            <div className="relative pt-2" ref={profileRef}>
               {user?.result ? (
                 <div>
                   <button onClick={() => setIsProfileOpen(!isProfileOpen)}>

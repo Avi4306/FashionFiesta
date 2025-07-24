@@ -7,14 +7,16 @@ import { login, googleLogin, sendSignupOtp, verifySignupOtp } from '../../action
 import { CLEAR_ERROR } from '../../constants/actionTypes';
 import { jwtDecode } from 'jwt-decode';
 import CropperDialog from './CropperDialog';
-import { Typography, Button } from '@mui/material';
+import { Typography, Button, IconButton } from '@mui/material'; // Added IconButton
+import { Visibility, VisibilityOff } from '@mui/icons-material'; // Added Icons
 
 // Icons (custom SVGs or replace with a proper icon library)
 const UserIcon = () => <svg className="h-5 w-5 text-gray-500" />;
 const MailIcon = () => <svg className="h-5 w-5 text-gray-500" />;
 const LockIcon = () => <svg className="h-5 w-5 text-gray-500" />;
 
-const Input = ({ name, type = 'text', placeholder, icon, value, handleChange }) => (
+// Modified Input component to include password toggle
+const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword }) => (
   <div className="relative w-full mb-4">
     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">{icon}</div>
     <input
@@ -23,7 +25,8 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange }) 
       placeholder={placeholder}
       value={value}
       onChange={handleChange}
-      className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+      // Added right padding to make space for the icon
+      className="w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2"
       style={{
         backgroundColor: '#F0E4D3',
         borderColor: '#D5D0B8',
@@ -32,8 +35,17 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange }) 
       }}
       required
     />
+    {/* Conditionally render the toggle icon for password fields */}
+    {(name === 'password' || name === 'confirmPassword') && (
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+        <IconButton onClick={handleShowPassword} edge="end">
+          {type === 'password' ? <Visibility /> : <VisibilityOff />}
+        </IconButton>
+      </div>
+    )}
   </div>
 );
+
 
 export default function Auth() {
   const initialState = {
@@ -162,9 +174,9 @@ const handleSubmit = async () => {
                     <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: 'none' }} id="profile-upload" />
                     <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
                       {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" style={{ width: 80, height: 80, borderRadius: '50%' }} />
+                        <img src={imagePreview} alt="Preview" style={{ width: 80, height: 80, borderRadius: '50%',marginLeft:'8.5rem',marginBottom: '1rem' }} />
                       ) : (
-                        <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff' }}>
+                        <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff',marginLeft:'8.5rem',marginBottom: '1rem' }}>
                           {formData.firstName ? formData.firstName.charAt(0) : 'U'}
                         </div>
                       )}
@@ -185,8 +197,9 @@ const handleSubmit = async () => {
                     <Input name="lastName" placeholder="Last Name" icon={<UserIcon />} value={formData.lastName} handleChange={handleChange} />
                   </div>
                   <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} />
-                  <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockIcon />} value={formData.confirmPassword} handleChange={handleChange} />
+                  {/* Pass the handleShowPassword function to the Input components */}
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} />
+                  <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockIcon />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} />
                   {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
 
                   <div className="text-center">
@@ -245,7 +258,8 @@ const handleSubmit = async () => {
                 <p className="text-black mb-6 text-sm text-center">or use your account</p>
                 <form onSubmit={handleSubmit}>
                   <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} />
+                   {/* Pass the handleShowPassword function to the Input component */}
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} />
                   {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
                   <div className="text-center">
                     <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
