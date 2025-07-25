@@ -4,7 +4,7 @@ const auth = (state = { authData: null, error: null }, action) => {
     switch (action.type) {
         case AUTH:
             localStorage.setItem('profile', JSON.stringify({ ...action?.data }));
-            return {...state, authData : action?.data};
+            return {...state, authData : action?.data, error : null};
         case AUTH_ERROR:
             return { ...state, error: action.payload };
         case UPDATE_PROFILE:

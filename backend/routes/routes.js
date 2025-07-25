@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
 import FormData from 'form-data';
-
+// import {genotp , sendotp} from '../controller/auth.controller'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,7 +27,7 @@ router.get("/user",(req,res)=>
 
 router.post('/recommend/:id',async (req,res)=>{
 
-    const {id} = req.body
+    const {id} = req.body.id
 
      try {
     const response = await axios.post('http://localhost:5000/recommend', { id });
@@ -74,6 +74,28 @@ router.post('/search', upload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'Search failed' });
   }
 });
+
+// const otpcache = {};
+
+// router.post('/signup', async (req, res) => {
+//   const { email, otp, skipVerify, ...rest } = req.body;
+
+//   if (skipVerify) {
+//     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+//     await sendEmail(email, otpCode); // Use nodemailer or similar
+//     await OTP.create({ email, code: otpCode }); // store OTP temporarily
+//     return res.json({ otpSent: true, otp: otpCode }); // return otp in dev
+//   }
+
+//   const existingOtp = await OTP.findOne({ email });
+//   if (!existingOtp || existingOtp.code !== otp) {
+//     return res.status(400).json({ message: 'Invalid OTP' });
+//   }
+
+//   // proceed with actual signup
+//   const user = await User.create({ email, ...rest });
+//   res.status(201).json({ result: user });
+// });
 
 
 

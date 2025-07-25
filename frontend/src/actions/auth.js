@@ -29,16 +29,20 @@ export const googleLogin = (googleUser, navigate) => async (dispatch) => {
   }
 };
 
-export const signup = (formData, navigate) => async (dispatch) => {
+export const sendSignupOtp = (email) => async (dispatch) => {
   try {
-    const { data } = await api.signUp(formData);
-    dispatch({ type: AUTH, data });
-    navigate("/");
+    await api.sendOtp(email);
   } catch (error) {
-    console.log(error);
-    dispatch({
-      type: AUTH_ERROR,
-      payload: error.response?.data?.message || "Something went wrong",
-    });
+    dispatch({ type: AUTH_ERROR, payload: error.response?.data?.message || 'OTP Error' });
+  }
+};
+
+export const verifySignupOtp = (formData, navigate) => async (dispatch) => {
+  try {
+    const { data } = await api.verifyOtpSignup(formData);
+    dispatch({ type: AUTH, data });
+    navigate('/');
+  } catch (error) {
+    dispatch({ type: AUTH_ERROR, payload: error.response?.data?.message || 'OTP verification failed' });
   }
 };

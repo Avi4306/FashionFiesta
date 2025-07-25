@@ -9,6 +9,7 @@ import cors from 'cors';
 import styleDiariesRouter from './routes/styleDiariesRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import productRouter from './routes/productRoutes.js';
+import authRouter from './routes/authRoutes.js'
 
 dotenv.config();
 const app = express();
@@ -21,10 +22,10 @@ app.use('/',router)
 app.use('/style-diaries', styleDiariesRouter)
 app.use('/user', userRouter)
 app.use('/products', productRouter)
-
+app.use('/auth', authRouter)
 
 
 app.listen(process.env.PORT, () => {
     connectDB();
-  console.log(`Server is running on port http://localhost:${process.env.PORT || PORT}`);
+  console.log(`Server is running on port http://localhost:${process.env.PORT || 3000}`);
 });
