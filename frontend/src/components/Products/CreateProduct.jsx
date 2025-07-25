@@ -51,7 +51,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.title || !form.price || !form.tags || images.length<0) {
+    if (!form.title || !form.price || !form.tags || images.length <= 0) {
       setErrorMsg("Title, price, tags and images are required.");
       setOpenSnackbar(true);
       return;
@@ -86,13 +86,19 @@ const CreateProduct = ({ isOpen, onClose }) => {
         tags: "",
       });
       setImages([]);
-      dispatch(resetProductCreate());
+      // dispatch(resetProductCreate());
       onClose();
     }
   }, [success, dispatch, onClose]);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      // Remove the PaperProps and sx to revert to default centering
+    >
       <DialogTitle>Create New Product</DialogTitle>
       <DialogContent>
         {error && (

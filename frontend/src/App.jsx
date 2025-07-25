@@ -60,9 +60,8 @@ function App() {
       <Route path="/user/:id" element={<UserDetails />} />
       <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/products/trending" element={<TrendingStyles/>} />
-      <Route path="/products" element={<Products/>} />
       <Route path="/products/:id" element={<ProductDetails/>} />
-      {/* <Route path="/products/categories" element={<Categories/>} /> */}
+      <Route path="/products/category/:category" element={<Products/>} />
     </Routes>
     <Footer/>
     </Router>

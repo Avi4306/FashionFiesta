@@ -39,8 +39,12 @@ export const deleteUserAccount = (userId, password) => API.delete(`/user/${userI
 
 
 export const fetchProduct = (id) => API.get(`/products/${id}`);
-export const fetchProducts = (query) => API.get(`/products?${query}`);
+// export const fetchProducts = (query) => API.get(`/products?${query}`);
 export const createProduct = (productData) => API.post('/products', productData);
 
 export const fetchCategories = () => API.get("/products/categories/list");
-export const fetchProductsByCategory = (category, limit = 15) => API.get(`/products/categories?category=${category}&limit=${limit}`);
+
+export const fetchProducts = ({ category, page = 1, limit = 12, sort = "newest" }) =>
+  API.get("/products/categories", {
+    params: { category, page, limit, sort },
+  });

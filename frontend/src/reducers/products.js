@@ -34,7 +34,8 @@ export default function productsData(state = initialState, action) {
         products: action.payload.data,
         currentPage: action.payload.currentPage,
         totalPages: action.payload.totalPages,
-        totalProducts: action.payload.totalProducts || state.totalProducts,
+        totalProducts: action.payload.totalProducts,
+        categoryFilter: action.payload.category,
       };
     case CREATE_PRODUCT:
       return {

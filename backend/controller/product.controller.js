@@ -74,32 +74,42 @@ const getProductById = async (req, res) => {
 };
 
 const getProducts = async (req, res) => {
-  const { page = 1, limit = 15, category } = req.query;
-
-  const skip = (Number(page) - 1) * Number(limit);
-  const filter = category ? { category } : {};
-
   try {
-    const total = await Product.countDocuments(filter);
-    const products = await Product.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+    const { category, page = 1, limit = 12, sort = "newest" } = req.query;
 
-    res.status(200).json({
-      data: products,
-      currentPage: Number(page),
-      totalPages: Math.ceil(total / limit),
-      totalProducts: total,
+    const numericPage = parseInt(page, 10);
+    const numericLimit = parseInt(limit, 10);
+
+    const filter = category ? { category } : {};
+    const skip = (numericPage - 1) * numericLimit;
+
+    const sortOptions = {
+      price_asc: { price: 1 },
+      price_desc: { price: -1 },
+      rating: { rating: -1 },
+      newest: { createdAt: -1 },
+    };
+
+    const totalProducts = await Product.countDocuments(filter);
+
+    const products = await Product.find(filter)
+      .sort(sortOptions[sort] || { createdAt: -1 })
+      .skip(skip)
+      .limit(numericLimit);
+
+    res.json({
+      products,
+      currentPage: numericPage,
+      totalPages: Math.ceil(totalProducts / numericLimit),
+      totalProducts,
     });
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
 // Get products by category (for carousel)
-export const getProductsByCategory = async (req, res) => {
+const getProductsByCategory = async (req, res) => {
   const { category, limit } = req.query;
   try {
     const query = category ? { category } : {};
@@ -113,7 +123,7 @@ export const getProductsByCategory = async (req, res) => {
 };
 
 // Get distinct categories
-export const getCategories = async (req, res) => {
+const getCategories = async (req, res) => {
   try {
     const categories = await Product.distinct("category");
     res.json(categories);
@@ -141,4 +151,4 @@ const updateProduct = ( async(req,res) =>
     }
 })
 
-export {createProduct,getProductById, getProducts,updateProduct,deleteProduct} 
+export {createProduct,getProductById, getProducts,updateProduct,deleteProduct, getProductsByCategory, getCategories} 

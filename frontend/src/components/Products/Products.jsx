@@ -1,54 +1,69 @@
-import React, { useState, useEffect } from "react";
-import CreateProduct from "./CreateProduct";
-import Product from "./Product/Product";
-import Pagination from "../Pagination/Pagination";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../actions/products";
+import ProductCard from "./Product/Product";
+import Pagination from "../Pagination/Pagination";
 
 const Products = () => {
+  const { category } = useParams();
   const dispatch = useDispatch();
-  const [showModal, setShowModal] = useState(false);
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const { products, isLoading, totalPages } = useSelector((state) => state.productsData);
+  const page = parseInt(searchParams.get("page")) || 1;
+  const sort = searchParams.get("sort") || "newest";
+
+  const { products, isLoading, totalPages, currentPage, totalProducts } = useSelector(
+    (state) => state.productsData
+  );
 
   useEffect(() => {
-    dispatch(getProducts(page));
-  }, [dispatch, page]);
+    dispatch(getProducts(category, page, sort));
+  }, [dispatch, category, page, sort]);
 
   const handlePageChange = (newPage) => {
-    setPage(newPage);
+    setSearchParams({ sort, page: newPage });
+  };
+
+  const handleSortChange = (e) => {
+    setSearchParams({ sort: e.target.value, page: 1 });
   };
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">All Products</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Products in "{category}" ({totalProducts})
+        </h2>
+        <select
+          value={sort}
+          onChange={handleSortChange}
+          className="border px-3 py-2 rounded-md"
+        >
+          <option value="newest">Newest</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="rating">Rating</option>
+        </select>
+      </div>
 
       {isLoading ? (
-        <p className="text-center text-gray-500">Loading...</p>
+        <p className="text-gray-500">Loading...</p>
+      ) : products.length === 0 ? (
+        <p className="text-gray-500">No products found.</p>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-            {products?.map((product) => (
-              <Product key={product._id} product={product} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
 
-          {/* Bottom Left Button and Pagination */}
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-            >
-              ➕ New Product
-            </button>
-
-            <Pagination page={page} count={totalPages} onChange={handlePageChange} />
-          </div>
+          {totalPages > 1 && (
+            <Pagination page={currentPage} count={totalPages} onChange={handlePageChange} />
+          )}
         </>
       )}
-
-      <CreateProduct isOpen={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 };
