@@ -104,8 +104,9 @@ export default function NavBar() {
           {/* Icons */}
           <div className="flex items-center gap-4 text-xl text-gray-800">
             <CiHome className="text-3xl mx-1" />
+            <Link to = '/cart'>
             <PiShoppingCartThin className="text-3xl mx-1" />
-
+            </Link>
             {/* Profile Dropdown */}
             <div className="relative pt-2" ref={profileRef}>
               {user?.result ? (
