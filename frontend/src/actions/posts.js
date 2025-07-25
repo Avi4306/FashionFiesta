@@ -1,17 +1,23 @@
 import * as api from '../api';
-import { FETCH_ALL, FETCH_POST, FETCH_BY_SEARCH, CREATE_POST, DELETE_POST, LIKE_POST, START_LOADING, END_LOADING, COMMENT_POST } from '../constants/actionTypes';
+import { FETCH_POSTS, FETCH_POST, FETCH_BY_SEARCH, CREATE_POST, DELETE_POST, LIKE_POST, START_LOADING, END_LOADING, COMMENT_POST } from '../constants/actionTypes';
 
-export const getPosts = () => async (dispatch) => {
-    try {
-        dispatch({ type: START_LOADING });
-        const { data } = await api.fetchPosts(); //There is data object in response
-        dispatch({type: FETCH_ALL, payload: data });
-        dispatch({ type: END_LOADING });
-    } catch (error) {
-        console.error(error);        
-    }
+export const getPosts = (currentPage) => async (dispatch) => {
+  try {
+    dispatch({ type: START_LOADING });
+    const response = await api.fetchPosts(currentPage); // returns { data: { data, page, total, hasMore } }
+    const { data, page, total, hasMore } = response.data;
 
-}
+    dispatch({
+      type: FETCH_POSTS,
+      payload: { data, page, total, hasMore },
+    });
+
+    dispatch({ type: END_LOADING });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const getPost = (id) => async (dispatch) => {
     try {
         dispatch({ type: START_LOADING });

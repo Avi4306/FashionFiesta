@@ -14,7 +14,6 @@ export default function ProductDetails() {
   useEffect(() => {
     if (id) dispatch(getProductById(id));
   }, [dispatch, id]);
-
   if (isLoading || !product) return <div className="text-center p-10 text-text-secondary">Loading...</div>;
 
   const {
@@ -51,6 +50,7 @@ export default function ProductDetails() {
           src={images?.[0] || "https://placehold.co/500x500"}
           alt={title}
           className="w-full object-cover rounded-xl border border-gray-200"
+          loading="lazy"
         />
         {/* Thumbnail Gallery (optional) */}
         {images?.length > 1 && (

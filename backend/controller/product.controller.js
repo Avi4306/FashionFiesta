@@ -73,23 +73,24 @@ const getProductById = async (req, res) => {
   }
 };
 
-const getAllProducts = async (req, res) => {
-  const { page = 1 } = req.query;
-  const limit = 9; // fixed limit per page
+const getProducts = async (req, res) => {
+  const { page = 1, limit = 15, category } = req.query;
+
+  const skip = (Number(page) - 1) * Number(limit);
+  const filter = category ? { category } : {};
 
   try {
-    const startIndex = (Number(page) - 1) * limit;
-
-    const total = await Product.countDocuments({});
-    const products = await Product.find({})
+    const total = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
       .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip(startIndex);
+      .skip(skip)
+      .limit(Number(limit));
 
     res.status(200).json({
       data: products,
       currentPage: Number(page),
       totalPages: Math.ceil(total / limit),
+      totalProducts: total,
     });
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -97,6 +98,29 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+// Get products by category (for carousel)
+export const getProductsByCategory = async (req, res) => {
+  const { category, limit } = req.query;
+  try {
+    const query = category ? { category } : {};
+    const products = await Product.find(query)
+      .limit(Number(limit) || 10)
+      .sort({ createdAt: -1 });
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get distinct categories
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Product.distinct("category");
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 const updateProduct = ( async(req,res) =>
 {
@@ -117,4 +141,4 @@ const updateProduct = ( async(req,res) =>
     }
 })
 
-export {createProduct,getProductById, getAllProducts,updateProduct,deleteProduct} 
+export {createProduct,getProductById, getProducts,updateProduct,deleteProduct} 

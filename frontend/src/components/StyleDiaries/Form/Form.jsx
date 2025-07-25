@@ -67,7 +67,8 @@ const Form = () => {
   }
 
   return (
-    <div className="community-container grid grid-cols-1 grid-rows-[10rem,auto] gap-5 text-center">
+    <div className="fixed bottom-6 right-6 z-50 w-full max-w-md bg-white border border-gray-200 shadow-2xl rounded-xl p-6
+               grid grid-cols-1 grid-rows-[auto,1fr] gap-5 text-center overflow-auto max-h-[90vh]">
       <h2 className="text-4xl tracking-[0.4rem] text-shadow-lg/30">
         Got an idea? Share it with the world
       </h2>

@@ -24,6 +24,7 @@ import UserDetails from './components/User/UserDetails.jsx'
 import TrendingStyles from './components/TrendingStyles/TrendingStyles.jsx'
 import ProductDetails from './components/Products/Product/ProductDetails.jsx'
 import Products from './components/Products/Products.jsx'
+// import Categories from './components/Shopping/ProductCategories/Categories.jsx'
 
 function App() {
   const dispatch = useDispatch();
@@ -58,9 +59,10 @@ function App() {
       <Route path="/auth" element={<Auth />} />
       <Route path="/user/:id" element={<UserDetails />} />
       <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-      <Route path="/trending" element={<TrendingStyles/>} />
+      <Route path="/products/trending" element={<TrendingStyles/>} />
       <Route path="/products" element={<Products/>} />
       <Route path="/products/:id" element={<ProductDetails/>} />
+      {/* <Route path="/products/categories" element={<Categories/>} /> */}
     </Routes>
     <Footer/>
     </Router>

@@ -1,9 +1,11 @@
 import {
   FETCH_PRODUCT,
+  FETCH_PRODUCTS,
   FETCH_ALL_PRODUCTS,
   START_LOADING,
   END_LOADING,
   CREATE_PRODUCT,
+  FETCH_CAROUSELS, // 🆕 New action
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -12,7 +14,8 @@ const initialState = {
   products: [],
   currentPage: 1,
   totalPages: 1,
-  totalProducts: 0
+  totalProducts: 0,
+  categoryCarousels: {}, // 🆕 carousel-specific product groups
 };
 
 export default function productsData(state = initialState, action) {
@@ -24,14 +27,26 @@ export default function productsData(state = initialState, action) {
     case FETCH_PRODUCT:
       return { ...state, product: action.payload };
     case FETCH_ALL_PRODUCTS:
+      return { ...state, products: action.payload };
+    case FETCH_PRODUCTS:
       return {
         ...state,
         products: action.payload.data,
         currentPage: action.payload.currentPage,
         totalPages: action.payload.totalPages,
+        totalProducts: action.payload.totalProducts || state.totalProducts,
       };
     case CREATE_PRODUCT:
-      return { ...state, products: [...state.products, action.payload], totalProducts: state.totalProducts + 1, };
+      return {
+        ...state,
+        products: [...state.products, action.payload],
+        totalProducts: state.totalProducts + 1,
+      };
+    case FETCH_CAROUSELS: // 🆕 New case
+      return {
+        ...state,
+        categoryCarousels: action.payload, // { category: [products] }
+      };
     default:
       return state;
   }

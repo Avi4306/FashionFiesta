@@ -2,13 +2,27 @@ import Post from '../models/posts.models.js';
 import mongoose from 'mongoose';
 
 export const getPosts = async (req, res) => {
-    try {
-        const posts = await Post.find();
-        res.status(200).json(posts);
-    } catch (error) {
-        res.status(404).json({ message: error.message });
-    }
-}
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 30;
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await Promise.all([
+      Post.find()
+        .sort({ createdAt: -1 }) // newest first
+        .skip(skip)
+        .limit(limit),
+      Post.countDocuments()
+    ]);
+
+    const hasMore = skip + posts.length < total;
+
+    res.status(200).json({ data: posts, page, total, hasMore });
+  } catch (err) {
+    console.error("Error fetching posts:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 export const getPost = async (req, res) => {
     try {
         const { id } = req.params;

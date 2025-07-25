@@ -9,7 +9,7 @@ API.interceptors.request.use((req) => {
     return req;
 });
 
-export const fetchPosts = () => API.get('/style-diaries');
+export const fetchPosts = (currentPage) => API.get(`/style-diaries?page=${currentPage}`);
 
 export const fetchPost = (id) => API.get(`/style-diaries/${id}`);
 
@@ -37,5 +37,8 @@ export const deleteUserAccount = (userId, password) => API.delete(`/user/${userI
 
 
 export const fetchProduct = (id) => API.get(`/products/${id}`);
-export const fetchAllProducts = (page, limit) => API.get(`/products?page=${page}`);
+export const fetchProducts = (query) => API.get(`/products?${query}`);
 export const createProduct = (productData) => API.post('/products', productData);
+
+export const fetchCategories = () => API.get("/products/categories/list");
+export const fetchProductsByCategory = (category, limit = 15) => API.get(`/products/categories?category=${category}&limit=${limit}`);

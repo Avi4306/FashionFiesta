@@ -79,7 +79,7 @@ export default function NavBar() {
         {/* Desktop Nav Links */}
         <div className="hidden md:flex gap-6 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
-          <Link to="/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
+          <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
           <Link to="/designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>

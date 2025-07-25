@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useState } from "react";
+import { useEffect } from "react";
 
 dayjs.extend(relativeTime);
 
@@ -19,7 +20,6 @@ const Post = ({ post }) => {
   const handleLike = (e) => {
     e.stopPropagation()
     if (!userId) {
-      alert("You must be logged in to like a post.");
       return navigate('/auth');
     }
     dispatch(likePost(post._id));
