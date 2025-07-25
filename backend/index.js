@@ -10,6 +10,7 @@ import styleDiariesRouter from './routes/styleDiariesRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import productRouter from './routes/productRoutes.js';
 import authRouter from './routes/authRoutes.js'
+import cartRouter from './routes/cartRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,7 @@ app.use('/style-diaries', styleDiariesRouter)
 app.use('/user', userRouter)
 app.use('/products', productRouter)
 app.use('/auth', authRouter)
+app.use('/cart', cartRouter)
 
 
 app.listen(process.env.PORT, () => {

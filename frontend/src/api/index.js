@@ -48,3 +48,7 @@ export const fetchProducts = ({ category, page = 1, limit = 12, sort = "newest" 
   API.get("/products/categories", {
     params: { category, page, limit, sort },
   });
+
+export const addToCart = (productId, quantity) => API.post('/cart/add', { productId, quantity });
+export const fetchCart = () => API.get('/cart');
+export const mergeCarts = (localCartItems) => API.post('/cart/merge', { items: localCartItems });

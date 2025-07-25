@@ -58,15 +58,23 @@ export const fetchCarousels = () => async (dispatch) => {
     dispatch({ type: START_LOADING });
 
     const { data: categories } = await api.fetchCategories();
-    const categoryData = {};
+    
+    const productPromises = categories.map(async (category) => {
+      const { data: products } = await api.fetchProducts({ category, limit: 10 }); 
+      return { category, products };
+    });
 
-    for (const category of categories) {
-      const { data: products } = await api.fetchProducts(category);
-      categoryData[category] = products;
-    }
+    const results = await Promise.all(productPromises);
+
+    const categoryData = results.reduce((acc, current) => {
+      acc[current.category] = current.products;
+      return acc;
+    }, {});
+    
     dispatch({ type: FETCH_CAROUSELS, payload: categoryData });
-    dispatch({ type: END_LOADING });
   } catch (error) {
-    console.log(error)
+    console.error("Error fetching carousels:", error);
+  } finally {
+    dispatch({ type: END_LOADING });
   }
 };

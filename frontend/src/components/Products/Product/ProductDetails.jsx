@@ -1,20 +1,27 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProductById } from "../../../actions/products";
+import { addToCart } from "../../../actions/cart";
 import AddReviewSection from "./AddReviewSection";
-// import { addToCart } from "../../actions/cart";
 
 export default function ProductDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // New state to manage the selected quantity
+  const [quantity, setQuantity] = useState(1);
+
   const { product, isLoading } = useSelector((state) => state.productsData);
   const user = useSelector((state) => state.auth?.authData?.result);
-
   useEffect(() => {
     if (id) dispatch(getProductById(id));
   }, [dispatch, id]);
-  if (isLoading || !product) return <div className="text-center p-10 text-text-secondary">Loading...</div>;
+
+  if (isLoading || !product) {
+    return <div className="text-center p-10 text-text-secondary">Loading...</div>;
+  }
 
   const {
     title,
@@ -34,12 +41,27 @@ export default function ProductDetails() {
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
 
   const handleAddToCart = () => {
-    dispatch(addToCart(product._id));
+    // Pass the full product object and the selected quantity to the action
+    dispatch(addToCart(product, quantity));
   };
 
   const handleBuyNow = () => {
-    dispatch(addToCart(product._id));
-    // Navigate to checkout or payment
+    // Pass the product and quantity to the cart, then navigate to checkout
+    dispatch(addToCart(product, quantity));
+    navigate('/checkout'); // Example: navigate to a checkout page
+  };
+  
+  // Handlers for quantity buttons
+  const increaseQuantity = () => {
+    if (quantity < stock) {
+      setQuantity(prev => prev + 1);
+    }
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+    }
   };
 
   return (
@@ -52,7 +74,6 @@ export default function ProductDetails() {
           className="w-full object-cover rounded-xl border border-gray-200"
           loading="lazy"
         />
-        {/* Thumbnail Gallery (optional) */}
         {images?.length > 1 && (
           <div className="flex gap-2 mt-4 overflow-auto">
             {images.map((img, idx) => (
@@ -61,6 +82,7 @@ export default function ProductDetails() {
                 src={img}
                 alt={`img-${idx}`}
                 className="w-20 h-20 object-cover rounded-md border"
+                loading="lazy"
               />
             ))}
           </div>
@@ -94,7 +116,6 @@ export default function ProductDetails() {
           )}
         </div>
 
-        {/* Description */}
         <p className="text-sm text-gray-700 mb-4">{description}</p>
 
         {/* Sizes */}
@@ -131,36 +152,64 @@ export default function ProductDetails() {
           </div>
         )}
 
-        {/* Stock */}
         <p className="text-sm mb-4 text-gray-500">
           {stock > 0 ? `${stock} in stock` : "Out of stock"}
         </p>
+
+        {/* Quantity Selector */}
+        {stock > 0 && (
+            <div className="flex items-center gap-4 mb-4">
+                <strong className="text-gray-700">Quantity:</strong>
+                <div className="flex items-center border rounded-md">
+                    <button
+                        onClick={decreaseQuantity}
+                        disabled={quantity <= 1}
+                        className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-md disabled:opacity-50"
+                    >
+                        -
+                    </button>
+                    <input
+                        type="number"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                        className="w-12 text-center border-x outline-none text-gray-800"
+                        min="1"
+                        max={stock}
+                    />
+                    <button
+                        onClick={increaseQuantity}
+                        disabled={quantity >= stock}
+                        className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-50"
+                    >
+                        +
+                    </button>
+                </div>
+            </div>
+        )}
 
         {/* Buttons */}
         <div className="flex gap-4">
           <button
             onClick={handleAddToCart}
             disabled={stock === 0}
-            className="bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738]"
+            className="bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738] disabled:opacity-50"
           >
             Add to Cart
           </button>
           <button
             onClick={handleBuyNow}
             disabled={stock === 0}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
+            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
           >
             Buy Now
           </button>
         </div>
 
-        {/* Rating */}
+        {/* Rating and Reviews */}
         <div className="mt-6">
           <strong className="text-gray-800">Rating:</strong>{" "}
           <span className="text-yellow-500 font-semibold">{rating.toFixed(1)} / 5</span>
         </div>
-
-        {/* Reviews */}
         {reviews?.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Reviews</h3>

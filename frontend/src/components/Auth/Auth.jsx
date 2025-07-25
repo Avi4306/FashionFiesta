@@ -65,7 +65,6 @@ export default function Auth() {
   const [cropSrc, setCropSrc] = useState(null);
   const [openCropper, setOpenCropper] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
-  const [serverOtp, setServerOtp] = useState(null); // optional for dev/testing
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { error } = useSelector((state) => state.auth);
@@ -98,20 +97,25 @@ export default function Auth() {
   if (!formData.email) return;
 
   try {
-    await dispatch(sendSignupOtp(formData.email));
+    dispatch(sendSignupOtp(formData.email));
     setOtpStep(true);
   } catch (err) {
     console.error("Error sending OTP:", err);
   }
 };
 
-const handleSubmit = async () => {
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if(isSignUp){
   try {
-    await dispatch(verifySignupOtp(formData, navigate));
+    dispatch(verifySignupOtp(formData, navigate));
     setOtpStep(false);
     setFormData(initialState);
   } catch (err) {
     console.error("OTP verification failed:", err);
+  }}
+  else{
+    dispatch(login(formData, navigate));
   }
 };
 
@@ -221,9 +225,6 @@ const handleSubmit = async () => {
                         >
                           Verify OTP
                         </button>
-                        {serverOtp && (
-                          <p className="mt-2 text-xs text-gray-500">Dev OTP: {serverOtp}</p>
-                        )}
                       </div>
                     )}
                     {!otpStep && (

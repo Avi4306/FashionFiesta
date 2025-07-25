@@ -3,5 +3,6 @@ import posts from './posts.js';
 import auth from './auth.js';
 import user from './user.js';
 import productsData from './products.js';
+import cart from './cart.js'
 
-export default combineReducers({posts, auth, user, productsData}); //posts : posts
+export default combineReducers({posts, auth, user, productsData, cart}); //posts : posts

@@ -96,7 +96,7 @@ const getProducts = async (req, res) => {
       .sort(sortOptions[sort] || { createdAt: -1 })
       .skip(skip)
       .limit(numericLimit);
-
+    console.log(category)
     res.json({
       products,
       currentPage: numericPage,
