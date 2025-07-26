@@ -16,6 +16,7 @@ const initialState = {
   totalPages: 1,
   totalProducts: 0,
   categoryCarousels: {}, // 🆕 carousel-specific product groups
+  reFetchTrigger: Date.now(),
 };
 
 export default function productsData(state = initialState, action) {
@@ -42,6 +43,7 @@ export default function productsData(state = initialState, action) {
         ...state,
         products: [...state.products, action.payload],
         totalProducts: state.totalProducts + 1,
+        reFetchTrigger: Date.now(),
       };
     case FETCH_CAROUSELS: // 🆕 New case
       return {

@@ -1,15 +1,10 @@
-import React, { useEffect} from 'react'
-import {Paper, Typography, CircularProgress, Divider, Button} from '@mui/material'
-import { useDispatch, useSelector } from 'react-redux'
-import { useParams, useNavigate } from 'react-router-dom'
-import { getPost } from '../../../../actions/posts'
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getPost, getPostsBySearch } from '../../../../actions/posts';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { getPostsBySearch } from '../../../../actions/posts'
-import Avatar from '@mui/material/Avatar';
-import CommentSection from './CommentSection'
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
+import CommentSection from './CommentSection';
 
 dayjs.extend(relativeTime);
 
@@ -18,40 +13,22 @@ const PostDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
-  const profile = JSON.parse(localStorage.getItem("profile"));
-  const userId = profile?.result?._id || profile?.result.sub
-  const handleLike = () => {
-      if (!userId) {
-        navigate('/auth');
-      }
-      else if (userId === post.creator) {
-        alert("You cannot like your own post.");
-      } 
-      else {
-        setLikes(post.likes.includes(userId) ? post.likes.filter(id => id !== userId) : [...post.likes, userId]);
-        dispatch(likePost(post._id));
-      }
-  }
-  const handleDelete = () => {
-      if (window.confirm("Are you sure you want to delete this post?")) {
-        dispatch(deletePost(post._id));
-      }
-  }
-  const Likes = () => {
-    if (post.likes.length > 0) {
-      return post.likes.includes(userId) ? (
-        <><ThumbUpIcon fontSize="small" />&nbsp;{post.likes.length > 2 ? `You and ${post.likes.length - 1} others` : `${post.likes.length} like${post.likes.length > 1 ? 's' : ''}`}</>
-      ) : (
-        <><ThumbUpOffAltIcon fontSize="small" />&nbsp;{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>
-      );
-    }
-    return <><ThumbUpOffAltIcon fontSize="small" />&nbsp;Like</>;
-  }
+
+  // State to manage the main image being displayed
+  const [currentImage, setCurrentImage] = useState(null);
+
   useEffect(() => {
     if (id) {
       dispatch(getPost(id));
     }
   }, [id, dispatch]);
+
+  // Set the initial image once the post data is loaded
+  useEffect(() => {
+    if (post?.selectedFiles?.length > 0) {
+      setCurrentImage(post.selectedFiles[0]);
+    }
+  }, [post]);
 
   // Fetch related posts once the main post is loaded
   useEffect(() => {
@@ -59,17 +36,16 @@ const PostDetails = () => {
       dispatch(getPostsBySearch({ searchQuery: 'none', tags: post.tags.join(',') }));
     }
   }, [post, dispatch]);
-
+  
   // Filter out the current post from the recommended list
   const recommendedPosts = posts?.length
     ? posts.filter(({ _id }) => _id !== post?._id)
     : [];
-  
+
   // --- Loading State ---
   if (isLoading || !post) {
     return (
       <div className="flex justify-center items-center h-screen bg-page-bg">
-        {/* You can replace this with a more styled spinner if you like */}
         <div className="text-xl text-text-secondary">Loading Post...</div>
       </div>
     );
@@ -99,7 +75,7 @@ const PostDetails = () => {
               <div className="flex items-center my-6">
                 <img
                   className="h-12 w-12 rounded-full object-cover mr-4"
-                  src={post.profilePicture || avatarPlaceholder}
+                  src={post.creatorPfp || avatarPlaceholder} // Using the correct field name
                   alt={post.name}
                 />
                 <div>
@@ -110,26 +86,38 @@ const PostDetails = () => {
 
               <hr className="my-6 border-gray-200" />
               
-              {/* Using a 'prose' like styling for the post content for readability */}
               <div className="text-text-secondary text-base md:text-lg leading-relaxed space-y-4">
-                <p>{post.message || post.content}</p> 
+                <p>{post.content}</p> 
               </div>
-
             </div>
 
-            {/* --- Right Column: Post Image --- */}
-            {(post.selectedFile) && (
+            {/* --- Right Column: Post Images --- */}
+            {(post.selectedFiles?.length > 0) && (
               <div className="md:col-span-2 md:sticky md:top-24 h-fit">
                 <img
                   className="w-full h-auto object-cover rounded-lg shadow-md"
-                  src={post.selectedFile}
+                  src={currentImage || "https://placehold.co/600x400/F0E4D3/44403c?text=Image+Not\\nAvailable"}
                   alt={post.title}
                 />
+                 {post.selectedFiles.length > 1 && (
+                  <div className="flex gap-2 mt-4 overflow-auto">
+                    {post.selectedFiles.map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt={`thumbnail-${idx}`}
+                        className={`w-20 h-20 object-cover rounded-md border cursor-pointer ${
+                          img === currentImage ? "border-2 border-accent-medium" : "border-gray-200"
+                        }`}
+                        onClick={() => setCurrentImage(img)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
           
-          {/* --- Comment Section --- */}
           <hr className="my-8 md:my-12 border-gray-200" />
           <CommentSection post={post} />
         </div>
@@ -139,11 +127,11 @@ const PostDetails = () => {
           <div className="mt-16">
             <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-6">You Might Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recommendedPosts.slice(0, 4).map(({ title, name, likes, _id, selectedFile }) => (
+              {recommendedPosts.slice(0, 4).map(({ title, name, likes, _id, selectedFiles }) => (
                 <div key={_id} onClick={() => navigate(`/style-diaries/${_id}`)} className="bg-card-bg rounded-lg shadow-md overflow-hidden cursor-pointer group">
                   <img 
                     className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                    src={selectedFile || 'https://placehold.co/400x300/F0E4D3/44403c?text=Image'} 
+                    src={selectedFiles?.[0] || 'https://placehold.co/400x300/F0E4D3/44403c?text=Image'} 
                     alt={title}
                   />
                   <div className="p-4">

@@ -5,11 +5,15 @@ import ProductCarousel from "./ProductCarousel";
 
 const Categories = () => {
   const dispatch = useDispatch();
-  const { isLoading, categoryCarousels, error } = useSelector((state) => state.productsData);
+  // Select the reFetchTrigger from the Redux store
+  const { isLoading, categoryCarousels, error, reFetchTrigger } = useSelector(
+    (state) => state.productsData
+  );
 
   useEffect(() => {
+    // The effect now runs whenever a new product is added
     dispatch(fetchCarousels());
-  }, [dispatch]);
+  }, [dispatch, reFetchTrigger]); // <-- Added reFetchTrigger here
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;

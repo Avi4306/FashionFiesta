@@ -46,8 +46,26 @@ export const getProducts = (category, page = 1, sort = "newest") => async (dispa
 
 export const createProduct = (productData) => async (dispatch) => {
   try {
-    const { data } = await api.createProduct(productData);
-    dispatch({ type: CREATE_PRODUCT, payload: data });
+    let finalProductData = { ...productData };
+
+    if (finalProductData.images && finalProductData.images.length > 0) {
+      // Create an array of promises for each image upload
+      const uploadPromises = finalProductData.images.map((imageData) =>
+        api.uploadImage(imageData, "products")
+      );
+
+      // Wait for all image uploads to complete
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      // Replace the base64 images with the array of secure URLs
+      finalProductData = {
+        ...finalProductData,
+        images: uploadedImages.map((res) => res.data.imageUrl),
+      };
+    }
+
+    const { data } = await api.createProduct(finalProductData);
+    dispatch({ type: "CREATE_PRODUCT", payload: data });
   } catch (error) {
     console.error('Create Product Error:', error.message);
   }

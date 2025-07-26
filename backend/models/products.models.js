@@ -1,4 +1,4 @@
-import mongoose, { Mongoose, Schema }  from "mongoose";
+import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
     title: {
@@ -8,7 +8,6 @@ const productSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: false,
     },
     price: {
         type: Number,
@@ -16,7 +15,7 @@ const productSchema = new mongoose.Schema({
         min: 0
     },
     creator: {
-        type : mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
     },
@@ -37,7 +36,6 @@ const productSchema = new mongoose.Schema({
     },
     stock: {
         type: Number,
-        required: false,
         default : 0,
         min: 0
     },
@@ -63,6 +61,10 @@ const productSchema = new mongoose.Schema({
         min : 0,
         max: 5
     },
+    numReviews: {
+        type: Number,
+        default: 0,
+    },
     reviews: [
         {
             user: {
@@ -70,7 +72,10 @@ const productSchema = new mongoose.Schema({
                 ref: 'User'
             },
             comment: String,
-            rating: Number
+            rating: {
+                type: Number,
+                required: true
+            }
         }
     ],
     createdAt: {

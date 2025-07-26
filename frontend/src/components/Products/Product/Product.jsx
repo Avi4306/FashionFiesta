@@ -24,6 +24,10 @@ const ProductCard = ({ product }) => {
     return stars;
   };
 
+  const mainImage = product.images?.[0] || "/placeholder.png";
+  const hoverImage = product.images?.[1] || mainImage;
+  const currentImage = hovered ? hoverImage : mainImage;
+
   return (
     <Link
       to={`/products/${product._id}`}
@@ -34,11 +38,7 @@ const ProductCard = ({ product }) => {
       {/* Product Image */}
       <div className="relative w-full h-40">
         <img
-          src={
-            hovered && product.images?.[1]
-              ? product.images[1]
-              : product.images?.[0] || "/placeholder.png"
-          }
+          src={currentImage}
           alt={product.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
@@ -61,7 +61,7 @@ const ProductCard = ({ product }) => {
         )}
         <div className="mt-1 text-xs text-gray-700 flex items-center">
           {renderStars(product.rating || 0)}
-          <span className="ml-1">({product.rating || "0"})</span>
+          <span className="ml-1">({product.numReviews || "0"})</span>
         </div>
       </div>
     </Link>

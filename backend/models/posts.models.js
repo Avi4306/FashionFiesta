@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-    title: {    
+    title: {    
         type: String,
         required: true,
         trim: true
@@ -14,9 +14,9 @@ const postSchema = new mongoose.Schema({
         type: String,
     },
     creator: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
-        ref: 'User'
     },
     name: {
         type: String,
@@ -28,8 +28,9 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true
     }],
-    selectedFile: {
-        type: String,
+    selectedFiles: {
+        type: [String],
+        default: []
     },
     likes: { 
         type: [String],
@@ -39,7 +40,7 @@ const postSchema = new mongoose.Schema({
         name: String,
         comment: String,
         profilePhoto: String,
-        userId : String,
+        userId: String,
         createdAt: {
             type: Date,
             default: Date.now

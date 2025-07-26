@@ -10,14 +10,25 @@ export default function ProductDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // New state to manage the selected quantity
   const [quantity, setQuantity] = useState(1);
-
   const { product, isLoading } = useSelector((state) => state.productsData);
   const user = useSelector((state) => state.auth?.authData?.result);
+
+  // State to manage the main image being displayed
+  const [mainImage, setMainImage] = useState(null);
+
   useEffect(() => {
-    if (id) dispatch(getProductById(id));
+    if (id) {
+      dispatch(getProductById(id));
+    }
   }, [dispatch, id]);
+
+  // Set the main image once the product data is loaded
+  useEffect(() => {
+    if (product?.images?.length > 0) {
+      setMainImage(product.images[0]);
+    }
+  }, [product]);
 
   if (isLoading || !product) {
     return <div className="text-center p-10 text-text-secondary">Loading...</div>;
@@ -35,23 +46,21 @@ export default function ProductDetails() {
     category,
     stock,
     rating,
+    numReviews, // Added numReviews here
     reviews,
   } = product;
 
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
 
   const handleAddToCart = () => {
-    // Pass the full product object and the selected quantity to the action
     dispatch(addToCart(product, quantity));
   };
 
   const handleBuyNow = () => {
-    // Pass the product and quantity to the cart, then navigate to checkout
     dispatch(addToCart(product, quantity));
-    navigate('/checkout'); // Example: navigate to a checkout page
+    navigate('/checkout');
   };
-  
-  // Handlers for quantity buttons
+
   const increaseQuantity = () => {
     if (quantity < stock) {
       setQuantity(prev => prev + 1);
@@ -69,7 +78,7 @@ export default function ProductDetails() {
       {/* Images */}
       <div>
         <img
-          src={images?.[0] || "https://placehold.co/500x500"}
+          src={mainImage || "https://placehold.co/500x500"} // Use mainImage state
           alt={title}
           className="w-full object-cover rounded-xl border border-gray-200"
           loading="lazy"
@@ -81,8 +90,11 @@ export default function ProductDetails() {
                 key={idx}
                 src={img}
                 alt={`img-${idx}`}
-                className="w-20 h-20 object-cover rounded-md border"
+                className={`w-20 h-20 object-cover rounded-md border cursor-pointer ${
+                  img === mainImage ? "border-2 border-[#aa5a44]" : "border-gray-200"
+                }`}
                 loading="lazy"
+                onClick={() => setMainImage(img)} // Click to change main image
               />
             ))}
           </div>
@@ -158,33 +170,33 @@ export default function ProductDetails() {
 
         {/* Quantity Selector */}
         {stock > 0 && (
-            <div className="flex items-center gap-4 mb-4">
-                <strong className="text-gray-700">Quantity:</strong>
-                <div className="flex items-center border rounded-md">
-                    <button
-                        onClick={decreaseQuantity}
-                        disabled={quantity <= 1}
-                        className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-md disabled:opacity-50"
-                    >
-                        -
-                    </button>
-                    <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        className="w-12 text-center border-x outline-none text-gray-800"
-                        min="1"
-                        max={stock}
-                    />
-                    <button
-                        onClick={increaseQuantity}
-                        disabled={quantity >= stock}
-                        className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-50"
-                    >
-                        +
-                    </button>
-                </div>
+          <div className="flex items-center gap-4 mb-4">
+            <strong className="text-gray-700">Quantity:</strong>
+            <div className="flex items-center border rounded-md">
+              <button
+                onClick={decreaseQuantity}
+                disabled={quantity <= 1}
+                className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-md disabled:opacity-50"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="w-12 text-center border-x outline-none text-gray-800"
+                min="1"
+                max={stock}
+              />
+              <button
+                onClick={increaseQuantity}
+                disabled={quantity >= stock}
+                className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-50"
+              >
+                +
+              </button>
             </div>
+          </div>
         )}
 
         {/* Buttons */}
@@ -209,6 +221,7 @@ export default function ProductDetails() {
         <div className="mt-6">
           <strong className="text-gray-800">Rating:</strong>{" "}
           <span className="text-yellow-500 font-semibold">{rating.toFixed(1)} / 5</span>
+          <span className="text-gray-600 ml-2">({numReviews || "0"} reviews)</span>
         </div>
         {reviews?.length > 0 && (
           <div className="mt-6">
@@ -223,7 +236,7 @@ export default function ProductDetails() {
             </div>
           </div>
         )}
-        <AddReviewSection productId={id}/>
+        {user && <AddReviewSection productId={id}/>}
       </div>
     </div>
   );

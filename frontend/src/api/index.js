@@ -56,3 +56,7 @@ export const mergeCarts = (localCartItems) => API.post('/cart/merge', { items: l
 export const updateCartItem = (productId, quantity) => API.patch(`/cart/${productId}`, { quantity });
 
 export const removeCartItem = (productId) => API.delete(`/cart/${productId}`);
+
+
+export const uploadImage = (fileData, folderName) =>
+  API.post("/upload", { fileData, folderName });

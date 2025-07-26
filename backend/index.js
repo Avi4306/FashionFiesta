@@ -11,6 +11,7 @@ import userRouter from './routes/userRoutes.js';
 import productRouter from './routes/productRoutes.js';
 import authRouter from './routes/authRoutes.js'
 import cartRouter from './routes/cartRoutes.js';
+import './config/cloudinary.js'
 
 dotenv.config();
 const app = express();

@@ -40,14 +40,32 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
     }
 
 }
-export const createPost = (post) => async (dispatch) => {
-    try {
-        const { data } = await api.createPost(post);
-        dispatch({ type: CREATE_POST, payload: data });
-    } catch (error) {
-        console.error(error);
+export const createPost = (postData) => async (dispatch) => {
+  try {
+    let finalPostData = { ...postData };
+
+    if (finalPostData.selectedFiles && finalPostData.selectedFiles.length > 0) {
+      // Create an array of promises for each image upload
+      const uploadPromises = finalPostData.selectedFiles.map((imageData) =>
+        api.uploadImage(imageData, "posts")
+      );
+
+      // Wait for all image uploads to complete
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      // Replace the base64 images with the array of secure URLs
+      finalPostData = {
+        ...finalPostData,
+        selectedFiles: uploadedImages.map((res) => res.data.imageUrl),
+      };
     }
-}
+
+    const { data } = await api.createPost(finalPostData);
+    dispatch({ type: CREATE_POST, payload: data });
+  } catch (error) {
+    console.error(error);
+  }
+};
 export const deletePost = (id) => async (dispatch) => {
     try {
         await api.deletePost(id);
