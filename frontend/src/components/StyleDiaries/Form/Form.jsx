@@ -1,11 +1,21 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { TextField, Snackbar } from "@mui/material";
+import {
+  TextField,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  IconButton,
+} from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { createPost } from "../../../actions/posts";
 import "./styles.css";
 
-const Form = () => {
+const Form = ({ isOpen, onClose }) => {
   const [postData, setPostData] = useState({
     title: "",
     content: "",
@@ -34,17 +44,29 @@ const Form = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!postData.title || !postData.content || !postData.tags) {
-      setErrorMsg("Title, content, and image are required.");
+    if (
+      !postData.title ||
+      !postData.content ||
+      !postData.selectedFile
+    ) {
+      setErrorMsg("Title, content, tags, and image are required.");
       setOpenSnackbar(true);
       return;
     }
+
     try {
-      dispatch(createPost({ ...postData, name: user?.result?.name || user?.result?.sub, creatorPfp: user?.result?.profilePhoto }));
+      dispatch(
+        createPost({
+          ...postData,
+          name: user?.result?.name || user?.result?.sub,
+          creatorPfp: user?.result?.profilePhoto,
+        })
+      );
+      clear();
+      onClose(); // close dialog after submission
     } catch (error) {
       console.error(error);
     }
-    clear();
   };
 
   const clear = () => {
@@ -56,205 +78,122 @@ const Form = () => {
     });
   };
 
-  if (!user?.result?.name && !user?.result.sub) {
-    return (
-      <div className="community-container">
-        <h2 className="text-4xl tracking-[0.4rem] text-shadow-lg/30">
-          Please Sign In to share your ideas
-        </h2>
-      </div>
-    );
+  if (!user?.result?.name && !user?.result?.sub) {
+    return null;
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-full max-w-md bg-white border border-gray-200 shadow-2xl rounded-xl p-6
-               grid grid-cols-1 grid-rows-[auto,1fr] gap-5 text-center overflow-auto max-h-[90vh]">
-      <h2 className="text-4xl tracking-[0.4rem] text-shadow-lg/30">
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      BackdropProps={{
+        style: {
+          backgroundColor: "rgba(0, 0, 0, 0.3)", // semi-transparent black
+        },
+      }}
+      PaperProps={{
+        style: {
+          borderRadius: 16,
+          padding: "24px",
+        },
+      }}
+    >
+      <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
         Got an idea? Share it with the world
-      </h2>
-
-      <form
-        className="Form-container grid grid-cols-1 md:grid-cols-2 grid-rows-auto gap-5 w-full"
-        autoComplete="off"
-        noValidate
-        onSubmit={handleSubmit}
-      >
-        {/* Title Field */}
-        <TextField
-          name="title"
-          label="Title"
-          variant="outlined"
-          fullWidth
-          value={postData.title}
-          onChange={(e) => setPostData({ ...postData, title: e.target.value })}
-          className="md:col-span-2"
-          slotProps={{
-            inputLabel: {
-              sx: {
-                color: "#2e2e2e",
-                fontFamily: "Montserrat",
-                backgroundColor: "transparent",
-                px: "4px",
-                "&.Mui-focused": {
-                  color: "#000",
-                  backgroundColor: "transparent",
-                },
-              },
-            },
-          }}
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
           sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              backgroundColor: "#faf7f3",
-              fontFamily: "Montserrat",
-              "& input": {
-                padding: "12px",
-              },
-              "& fieldset": { borderColor: "#ccc" },
-              "&:hover fieldset": { borderColor: "#999" },
-              "&.Mui-focused fieldset": {
-                borderColor: "#000",
-                boxShadow: "0 0 0 2px rgba(0,0,0,0.15)",
-              },
-            },
+            position: "absolute",
+            right: 16,
+            top: 16,
+            color: (theme) => theme.palette.grey[500],
           }}
-        />
-
-        {/* Content Field */}
-        <TextField
-          name="content"
-          label="Content"
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={4}
-          value={postData.content}
-          onChange={(e) =>
-            setPostData({ ...postData, content: e.target.value })
-          }
-          className="md:col-span-2"
-          slotProps={{
-            inputLabel: {
-              sx: {
-                color: "#2e2e2e",
-                fontFamily: "Montserrat",
-                backgroundColor: "transparent",
-                px: "4px",
-                "&.Mui-focused": {
-                  color: "#000",
-                  backgroundColor: "transparent",
-                },
-              },
-            },
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              backgroundColor: "#faf7f3",
-              fontFamily: "Montserrat",
-              "& textarea": {
-                padding: "12px",
-              },
-              "& fieldset": { borderColor: "#ccc" },
-              "&:hover fieldset": { borderColor: "#999" },
-              "&.Mui-focused fieldset": {
-                borderColor: "#000",
-                boxShadow: "0 0 0 2px rgba(0,0,0,0.15)",
-              },
-            },
-          }}
-        />
-
-        {/* Tags Field */}
-        <TextField
-          name="tags"
-          label="Tags (Comma separated)"
-          variant="outlined"
-          fullWidth
-          value={postData.tags.join(",")}
-          onChange={(e) =>
-            setPostData({ ...postData, tags: e.target.value.split(",") })
-          }
-          className="md:col-span-2"
-          slotProps={{
-            inputLabel: {
-              sx: {
-                color: "#2e2e2e",
-                fontFamily: "Montserrat",
-                backgroundColor: "transparent",
-                px: "4px",
-                "&.Mui-focused": {
-                  color: "#000",
-                  backgroundColor: "transparent",
-                },
-              },
-            },
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              backgroundColor: "#faf7f3",
-              fontFamily: "Montserrat",
-              "& input": {
-                padding: "12px",
-              },
-              "& fieldset": { borderColor: "#ccc" },
-              "&:hover fieldset": { borderColor: "#999" },
-              "&.Mui-focused fieldset": {
-                borderColor: "#000",
-                boxShadow: "0 0 0 2px rgba(0,0,0,0.15)",
-              },
-            },
-          }}
-        />
-
-        {/* Dropzone */}
-        <div
-          {...getRootProps()}
-          className="col-span-1 md:col-span-2 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#737373] rounded-2xl p-6 cursor-pointer transition hover:border-[#999]"
         >
-          <input {...getInputProps()} />
-          <p className="text-sm text-gray-600 font-medium">
-            Drag & drop an image, or click to select one
-          </p>
-        </div>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-        {/* Image Preview */}
-        {postData.selectedFile && (
-          <div className="col-span-1 md:col-span-2 flex justify-center">
-            <img
-              src={postData.selectedFile}
-              alt="Preview"
-              className="w-32 h-auto rounded-xl shadow"
-            />
+      <DialogContent dividers>
+        <form
+          className="grid grid-cols-1 gap-4"
+          autoComplete="off"
+          noValidate
+          onSubmit={handleSubmit}
+        >
+          <TextField
+            name="title"
+            label="Title"
+            fullWidth
+            value={postData.title}
+            onChange={(e) =>
+              setPostData({ ...postData, title: e.target.value })
+            }
+          />
+
+          <TextField
+            name="content"
+            label="Content"
+            fullWidth
+            multiline
+            rows={4}
+            value={postData.content}
+            onChange={(e) =>
+              setPostData({ ...postData, content: e.target.value })
+            }
+          />
+
+          <TextField
+            name="tags"
+            label="Tags (comma separated)"
+            fullWidth
+            value={postData.tags.join(",")}
+            onChange={(e) =>
+              setPostData({ ...postData, tags: e.target.value.split(",") })
+            }
+          />
+
+          <div
+            {...getRootProps()}
+            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-4 rounded-md cursor-pointer text-center"
+          >
+            <input {...getInputProps()} />
+            <p className="text-sm text-gray-600 font-medium">
+              Drag & drop an image, or click to select one
+            </p>
           </div>
-        )}
 
-        {/* Buttons */}
-        <div className="col-span-1 md:col-span-2 flex flex-col sm:flex-row justify-center items-center gap-4 mt-2">
-          <button
-            type="submit"
-            className="px-5 py-2 bg-[#dcc5b2] text-white font-semibold rounded-md shadow hover:bg-[#dfd0b8] transition"
-          >
-            Submit
-          </button>
-          <button
-            onClick={clear}
-            type="button"
-            className="px-5 py-2 bg-[#ccc] text-black font-semibold rounded-md shadow hover:bg-[#bbb] transition"
-          >
-            Clear
-          </button>
-        </div>
-      </form>
+          {postData.selectedFile && (
+            <div className="flex justify-center">
+              <img
+                src={postData.selectedFile}
+                alt="Preview"
+                className="w-32 h-auto rounded-xl shadow mt-2"
+              />
+            </div>
+          )}
+        </form>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={clear} color="secondary">
+          Clear
+        </Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
+          Submit
+        </Button>
+      </DialogActions>
+
       <Snackbar
         open={openSnackbar}
         autoHideDuration={4000}
         onClose={() => setOpenSnackbar(false)}
         message={errorMsg}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
-    </div>
+    </Dialog>
   );
 };
 

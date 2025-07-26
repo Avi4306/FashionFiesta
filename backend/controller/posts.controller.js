@@ -8,11 +8,17 @@ export const getPosts = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [posts, total] = await Promise.all([
-      Post.find()
-        .sort({ createdAt: -1 }) // newest first
-        .skip(skip)
-        .limit(limit),
-      Post.countDocuments()
+      Post.aggregate([
+        {
+          $addFields: { // Adds a temporary likeCount field to each document
+            likeCount: { $size: { $ifNull: ["$likes", []] } },
+          },
+        },
+        { $sort: { likeCount: -1, createdAt: -1 } }, // Sort by most likes, then newest
+        { $skip: skip },
+        { $limit: limit },
+      ]),
+      Post.countDocuments(),
     ]);
 
     const hasMore = skip + posts.length < total;

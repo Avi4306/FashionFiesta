@@ -31,8 +31,7 @@ const Posts = () => {
 
 
   useEffect(() => {
-    console.log("📄 Fetching page:", page);
-    dispatch(getPosts(page)); // must accept page in backend + redux
+    dispatch(getPosts(page));
   }, [dispatch, page]);
 
   return (
