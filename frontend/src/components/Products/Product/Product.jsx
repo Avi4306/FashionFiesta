@@ -44,12 +44,12 @@ const ProductCard = ({ product }) => {
           loading="lazy"
         />
 
-        {/* Optional Quick View Overlay */}
+        {/* Optional Quick View Overlay
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition">
           <span className="text-white text-sm opacity-0 group-hover:opacity-100 transition">
             Quick View →
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Product Info */}

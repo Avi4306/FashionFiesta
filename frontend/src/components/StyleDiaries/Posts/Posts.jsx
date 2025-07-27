@@ -6,6 +6,7 @@ import Post from "./Post/Post.jsx";
 const Posts = () => {
   const dispatch = useDispatch();
   const { posts, isLoading, hasMore } = useSelector((state) => state.posts);
+  console.log(posts)
   const postList = posts?.data || [];
   
   const [page, setPage] = useState(1);

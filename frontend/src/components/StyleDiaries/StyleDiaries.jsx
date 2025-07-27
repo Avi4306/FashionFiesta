@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Form from './Form/Form.jsx'; // Assuming Form.jsx is your Create Post form
 import Posts from './Posts/Posts.jsx';
-import { TextField, Button, IconButton, Box, Typography, Snackbar } from '@mui/material'; // Added Snackbar
-import MuiAlert from '@mui/material/Alert'; // For a styled Snackbar
+import { TextField, Button, IconButton, Box, Typography, Snackbar } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 import { Cancel as CancelIcon } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MuiChipsInput } from 'mui-chips-input';
 import { getPostsBySearch, getPosts } from '../../actions/posts.js';
-import { useDispatch, useSelector } from 'react-redux'; // Import useSelector
+import { useDispatch } from 'react-redux';
 
 // Helper component for a more styled snackbar alert
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -45,7 +45,7 @@ const StyleDiaries = () => {
         if (!searchQuery && !query.get('tags')) {
             dispatch(getPosts());
         }
-    }, [dispatch, searchQuery, query]);
+    }, [dispatch, searchQuery, query.get('tags')]); // <-- FIX: Changed dependency from 'query' to 'query.get('tags')'
 
     const clearSearch = () => setSearch('');
 

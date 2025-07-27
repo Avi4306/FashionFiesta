@@ -38,10 +38,11 @@ const PostDetails = () => {
   }, [post, dispatch]);
   
   // Filter out the current post from the recommended list
-  const recommendedPosts = posts?.length
-    ? posts.filter(({ _id }) => _id !== post?._id)
+  console.log(posts)
+  const recommendedPosts = posts.data?.length
+    ? posts.data.filter(({ _id }) => _id !== post?._id)
     : [];
-
+  console.log(recommendedPosts)
   // --- Loading State ---
   if (isLoading || !post) {
     return (

@@ -40,6 +40,7 @@ export const deleteUserAccount = (userId, password) => API.delete(`/user/${userI
 
 export const fetchProduct = (id) => API.get(`/products/${id}`);
 // export const fetchProducts = (query) => API.get(`/products?${query}`);
+export const fetchProductsBySearch = (searchQuery) => API.get(`/products/search?searchQuery=${searchQuery.search || 'none'}`);
 export const createProduct = (productData) => API.post('/products', productData);
 
 export const fetchCategories = () => API.get("/products/categories/list");

@@ -5,7 +5,8 @@ import {
   START_LOADING,
   END_LOADING,
   CREATE_PRODUCT,
-  FETCH_CAROUSELS, // 🆕 New action
+  FETCH_CAROUSELS,
+  FETCH_PRODUCT_BY_SEARCH,
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -45,11 +46,13 @@ export default function productsData(state = initialState, action) {
         totalProducts: state.totalProducts + 1,
         reFetchTrigger: Date.now(),
       };
-    case FETCH_CAROUSELS: // 🆕 New case
+    case FETCH_CAROUSELS:
       return {
         ...state,
         categoryCarousels: action.payload, // { category: [products] }
       };
+    case FETCH_PRODUCT_BY_SEARCH:
+      return { ...state, products: action.payload };
     default:
       return state;
   }

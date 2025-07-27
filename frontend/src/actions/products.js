@@ -6,6 +6,7 @@ import {
   FETCH_PRODUCTS,
   CREATE_PRODUCT,
   FETCH_CAROUSELS,
+  FETCH_PRODUCT_BY_SEARCH
 } from '../constants/actionTypes';
 
 export const getProductById = (id) => async (dispatch) => {
@@ -41,6 +42,17 @@ export const getProducts = (category, page = 1, sort = "newest") => async (dispa
   } catch (error) {
     console.error("Error fetching products:", error);
     dispatch({ type: END_LOADING });
+  }
+};
+
+export const getProductsBySearch = (searchQuery) => async (dispatch) => {
+  try {
+    dispatch({ type: 'START_LOADING' });
+    const { data } = await api.fetchProductsBySearch(searchQuery);
+    dispatch({ type: FETCH_PRODUCT_BY_SEARCH, payload: data });
+    dispatch({ type: 'END_LOADING' });
+  } catch (error) {
+    console.log(error);
   }
 };
 

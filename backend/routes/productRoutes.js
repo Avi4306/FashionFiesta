@@ -1,5 +1,5 @@
 import express from 'express';
-import {getProductById, getCategories, getProductsByCategory, getProducts, createProduct} from '../controller/product.controller.js';
+import {getProductById, getCategories, getProductsBySearch, getProductsByCategory, getProducts, createProduct} from '../controller/product.controller.js';
 import auth from '../middleware/auth.js'
 
 const productRouter = express.Router();
@@ -8,6 +8,10 @@ const productRouter = express.Router();
 productRouter.get("/categories", getProducts);
 productRouter.get("/categories/list", getCategories);
 productRouter.post('/', auth, createProduct);
+// By placing the search route first, Express will check for that specific path and handle it correctly. 
+// If the path is anything else (like /products/615a1f...), 
+// it will fall through to the /:id route, and your getProductById controller will function as expected.
+productRouter.get('/search', getProductsBySearch);
 productRouter.get('/:id', getProductById);
 
 export default productRouter;

@@ -25,8 +25,7 @@ import TrendingStyles from './components/TrendingStyles/TrendingStyles.jsx'
 import ProductDetails from './components/Products/Product/ProductDetails.jsx'
 import Products from './components/Products/Products.jsx'
 import CartPage from './components/CartPage.jsx'
-// import Categories from './components/Shopping/ProductCategories/Categories.jsx'
-
+import SearchPage from './components/SearchPage.jsx'
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -62,7 +61,8 @@ function App() {
       <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/products/trending" element={<TrendingStyles/>} />
       <Route path="/products/:id" element={<ProductDetails/>} />
-      <Route path="/products/category/:category" element={<Products/>} />
+      <Route path="/products/:id" element={<ProductDetails/>} />
+      <Route path="/products/search" element={<SearchPage/>} />
       <Route path="/cart" element={<CartPage/>} />
     </Routes>
     <Footer/>

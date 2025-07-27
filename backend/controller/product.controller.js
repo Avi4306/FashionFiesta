@@ -108,6 +108,24 @@ const getProducts = async (req, res) => {
   }
 };
 
+const getProductsBySearch = async (req, res) => {
+    const { searchQuery } = req.query;
+
+    try {
+        // Create a case-insensitive regex for the search term
+        const title = new RegExp(searchQuery, 'i');
+        
+        // Find products that match the title OR tags.
+        const products = await Product.find({ 
+            $or: [{ title }, { tags: { $in: searchQuery.split(',') } }] 
+        });
+
+        res.status(200).json({ data: products });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
 // Get products by category (for carousel)
 const getProductsByCategory = async (req, res) => {
   const { category, limit } = req.query;
@@ -151,4 +169,4 @@ const updateProduct = ( async(req,res) =>
     }
 })
 
-export {createProduct,getProductById, getProducts,updateProduct,deleteProduct, getProductsByCategory, getCategories} 
+export {createProduct,getProductById, getProducts, getProductsBySearch,updateProduct,deleteProduct, getProductsByCategory, getCategories} 

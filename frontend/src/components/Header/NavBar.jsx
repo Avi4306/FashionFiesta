@@ -10,12 +10,14 @@ export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchActive, setSearchActive] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // <-- New: State for search query
 
   const user = useSelector((state) => state.auth.authData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
+  const searchInputRef = useRef(null); // <-- New: Ref for search input
 
   // Sync localStorage with Redux on load
   useEffect(() => {
@@ -55,10 +57,26 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // <-- New: Auto-focus the search bar when it becomes active
+  useEffect(() => {
+    if (isSearchActive && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchActive]);
+
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
     navigate("/");
     setIsProfileOpen(false);
+  };
+
+  // <-- New: Function to handle the search logic
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/products/search?searchQuery=${searchQuery}`);
+      setSearchActive(false); // Close search bar after searching
+      setSearchQuery(""); // Clear the search bar
+    }
   };
 
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${
@@ -88,16 +106,20 @@ export default function NavBar() {
         <div className="flex items-center gap-8">
           {/* Search */}
           <div
-            className={`flex items-center border-b border-[#dcc5b2] h-9  px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
+            className={`flex items-center border-b border-[#dcc5b2] h-9 px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
               isSearchActive ? "w-56" : "w-32"
             }`}
             onClick={() => setSearchActive(!isSearchActive)}
           >
             <CiSearch className="text-gray-700" />
             <input
+              ref={searchInputRef} // <-- New: Attach ref
               type="text"
               placeholder="Search...?"
               className="bg-transparent w-full outline-none text-sm placeholder-gray-500"
+              value={searchQuery} // <-- New: Connect to state
+              onChange={(e) => setSearchQuery(e.target.value)} // <-- New: Update state on change
+              onKeyDown={handleSearch} // <-- New: Handle search on Enter key
             />
           </div>
 
