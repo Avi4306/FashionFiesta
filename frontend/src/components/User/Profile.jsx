@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import CropperDialog from "../Auth/CropperDialog";
-import { Typography, Button } from "@mui/material";
+import { Typography } from "@mui/material";
 import { updateProfile, getUserProfileData, deleteAccount } from "../../actions/user";
 import { CLEAR_ERROR } from '../../constants/actionTypes';
 import ConfirmDelete from "../ConfirmDelete";
@@ -27,7 +29,7 @@ export default function Profile() {
   const [openCropper, setOpenCropper] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
-  
+
   useEffect(() => {
     if (authData?.result) {
       const { result } = authData;
@@ -54,23 +56,23 @@ export default function Profile() {
 
   useEffect(() => {
     if (userId) {
-      dispatch(getUserProfileData(userId)); 
+      dispatch(getUserProfileData(userId));
     }
   }, [dispatch, userId]);
 
   if (!authData || !authData.result) {
     return <div className="text-center py-10 text-gray-500">Loading profile...</div>;
   }
-  
+
   const role = authData.result.role || "customer";
   const avatarPlaceholder = `https://placehold.co/80x80/F0E4D3/44403c?text=${form.name.charAt(0) || "U"}`;
-  
+
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
     localStorage.removeItem("profile");
     navigate("/");
   };
-  
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -81,7 +83,7 @@ export default function Profile() {
     };
     reader.readAsDataURL(file);
   };
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name.startsWith("designerDetails.")) {
@@ -97,28 +99,30 @@ export default function Profile() {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(updateProfile(authData.result._id, form));
     setEditMode(false);
   };
-  
+
   const roleBadge = {
     admin: "✔️ Admin",
     designer: "🧵 Designer",
     pending_designer: "⏳ Pending",
   };
-  
+
   const locationParts = [form.location?.city, form.location?.state, form.location?.country].filter(Boolean);
   const fullLocation = locationParts.join(", ");
-  
+
   const postsToShow = posts?.slice(0, 6);
   const productsToShow = products?.slice(0, 6);
 
+  const cardStyle = "bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]";
+
   return (
-    <div className="max-w-xl mx-auto px-4 py-10">
-      <div className="bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]">
+    <div className="max-w-7xl mx-auto px-4 py-10 space-y-8">
+      <div className={cardStyle}>
         {!editMode ? (
           <>
             <div className="flex items-center gap-4 mb-6">
@@ -141,54 +145,55 @@ export default function Profile() {
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                <button 
-                    onClick={() => setEditMode(true)}
-                    className="flex-1 bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738] transition-colors"
-                >
-                    Edit Profile
-                </button>
-                <button 
-                    onClick={handleLogout}
-                    className="flex-1 border border-[#aa5a44] text-[#aa5a44] py-2 px-4 rounded-lg hover:bg-[#f3e5dc] transition-colors"
-                >
-                    Logout
-                </button>
-                <button 
-                    onClick={() => setShowDeletePopup(true)}
-                    className="flex-1 border border-red-500 text-red-500 py-2 px-4 rounded-lg hover:bg-red-100 transition-colors"
-                >
-                    Delete Account
-                </button>
+              <button
+                onClick={() => setEditMode(true)}
+                className="flex-1 bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738] transition-colors"
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 border border-[#aa5a44] text-[#aa5a44] py-2 px-4 rounded-lg hover:bg-[#f3e5dc] transition-colors"
+              >
+                Logout
+              </button>
+              <button
+                onClick={() => setShowDeletePopup(true)}
+                className="flex-1 border border-red-500 text-red-500 py-2 px-4 rounded-lg hover:bg-red-100 transition-colors"
+              >
+                Delete Account
+              </button>
             </div>
-            
-            <div className="mb-4">
-              <h3 className="text-md font-semibold text-[#44403c] mb-1">Bio:</h3>
-              <p className="text-sm text-[#78716c]">{form.bio || "No bio yet."}</p>
-            </div>
-            
-            {(role === "designer" || role === "pending_designer") && (
-              <div className="mb-4">
-                <h3 className="text-md font-semibold text-[#44403c] mb-1">Designer Details:</h3>
-                <p className="text-sm text-[#78716c]">
-                  <strong>Brand:</strong> {form.designerDetails.brandName || "—"}
-                </p>
-                <p className="text-sm text-[#78716c]">
-                  <strong>Portfolio:</strong> {form.designerDetails.portfolioUrl || "—"}
-                </p>
+
+            <div className="space-y-4"> {/* Added space-y-4 here */}
+              <div>
+                <h3 className="text-md font-semibold text-[#44403c]">Bio:</h3>
+                <p className="text-sm text-[#78716c]">{form.bio || "No bio yet."}</p>
               </div>
-            )}
 
-            <div className="mb-4">
-              <h3 className="text-md font-semibold text-[#44403c] mb-1">Social Links:</h3>
-              {Object.entries(form.socialLinks).map(([key, value]) => (
-                <p key={key} className="text-sm text-[#78716c]">
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value || "—"}
-                </p>
-              ))}
-            </div>
+              {(role === "designer" || role === "pending_designer") && (
+                <div>
+                  <h3 className="text-md font-semibold text-[#44403c]">Designer Details:</h3>
+                  <p className="text-sm text-[#78716c]">
+                    <strong>Brand:</strong> {form.designerDetails.brandName || "—"}
+                  </p>
+                  <p className="text-sm text-[#78716c]">
+                    <strong>Portfolio:</strong> {form.designerDetails.portfolioUrl || "—"}
+                  </p>
+                </div>
+              )}
 
-            <div className="mb-4">
-              <h3 className="text-md font-semibold text-[#44403c] mb-1">Location:</h3>
+              <div>
+                <h3 className="text-md font-semibold text-[#44403c]">Social Links:</h3>
+                {Object.entries(form.socialLinks).map(([key, value]) => (
+                  <p key={key} className="text-sm text-[#78716c]">
+                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value || "—"}
+                  </p>
+                ))}
+              </div>
+
+              <div>
+                <h3 className="text-md font-semibold text-[#44403c]">Location:</h3>
                 {fullLocation ? (
                   <p className="text-sm text-[#78716c]">
                     {fullLocation}
@@ -196,86 +201,9 @@ export default function Profile() {
                 ) : (
                   <p className="text-sm text-[#78716c]">No location specified.</p>
                 )}
+              </div>
             </div>
 
-            <div className="mt-10">
-              <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Posts</h3>
-              {posts?.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {postsToShow.map((post) => (
-                    <Link 
-                      to={`/style-diaries/${post._id}`}
-                      key={post._id}
-                      className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
-                    >
-                      {post.image && (
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-40 object-cover"
-                        />
-                      )}
-                      <div className="p-4">
-                        <h4 className="font-semibold text-[#44403c]">{post.title}</h4>
-                        <p className="text-sm text-[#78716c] line-clamp-2">
-                          {post.content || "No content"}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-[#78716c]">You have not created any posts yet.</p>
-              )}
-              {posts?.length > 6 && (
-                <Link
-                  to={`/user/:${userId}/posts`}
-                  className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-                >
-                  View All Posts ({posts.length})
-                </Link>
-              )}
-            </div>
-
-            <div className="mt-10">
-              <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Products</h3>
-              {products?.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {productsToShow.map((product) => (
-                    <Link 
-                      to={`/products/${product._id}`}
-                      key={product._id}
-                      className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
-                    >
-                      {product.images?.[0] && (
-                        <img
-                          src={product.images[0]}
-                          alt={product.title}
-                          className="w-full h-40 object-cover"
-                        />
-                      )}
-                      <div className="p-4">
-                        <h4 className="font-semibold text-[#44403c]">{product.title}</h4>
-                        <p className="text-sm text-[#78716c] line-clamp-2">
-                          {product.description || "No description"}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-[#78716c]">You have not created any products yet.</p>
-              )}
-              {products?.length > 6 && (
-                <Link
-                  to={`/user/:${userId}/posts`}
-                  className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-                >
-                  View All Products ({products.length})
-                </Link>
-              )}
-            </div>
-            
             <ConfirmDelete
               open={showDeletePopup}
               password={passwordInput}
@@ -370,9 +298,89 @@ export default function Profile() {
               <button type="button" onClick={() => setEditMode(false)} className="flex-1 border border-[#aa5a44] text-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc] transition-colors">Cancel</button>
             </div>
             {error && (
-                <div className="text-red-600 text-sm mt-4 text-center">{error}</div>
+              <div className="text-red-600 text-sm mt-4 text-center">{error}</div>
             )}
           </form>
+        )}
+      </div>
+
+      {/* Posts Section */}
+      <div className={cardStyle}>
+        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Posts</h3>
+        {posts?.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {postsToShow.map((post) => (
+              <Link
+                to={`/style-diaries/${post._id}`}
+                key={post._id}
+                className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
+              >
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-40 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h4 className="font-semibold text-[#44403c]">{post.title}</h4>
+                  <p className="text-sm text-[#78716c] line-clamp-2">
+                    {post.content || "No content"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-[#78716c]">You have not created any posts yet.</p>
+        )}
+        {posts?.length > 6 && (
+          <Link
+            to={`/users/${userId}/posts`}
+            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
+          >
+            View All Posts ({posts.length})
+          </Link>
+        )}
+      </div>
+
+      {/* Products Section */}
+      <div className={cardStyle}>
+        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Products</h3>
+        {products?.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {productsToShow.map((product) => (
+              <Link
+                to={`/products/${product._id}`}
+                key={product._id}
+                className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
+              >
+                {product.images?.[0] && (
+                  <img
+                    src={product.images[0]}
+                    alt={product.title}
+                    className="w-full h-60 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h4 className="font-semibold text-[#44403c]">{product.title}</h4>
+                  <p className="text-sm text-[#78716c] line-clamp-2">
+                    {product.description || "No description"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-[#78716c]">You have not created any products yet.</p>
+        )}
+        {products?.length > 6 && (
+          <Link
+            to={`/users/${userId}/products`}
+            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
+          >
+            View All Products ({products.length})
+          </Link>
         )}
       </div>
     </div>

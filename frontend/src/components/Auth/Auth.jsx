@@ -7,16 +7,16 @@ import { login, googleLogin, sendSignupOtp, verifySignupOtp } from '../../action
 import { CLEAR_ERROR } from '../../constants/actionTypes';
 import { jwtDecode } from 'jwt-decode';
 import CropperDialog from './CropperDialog';
-import { Typography, Button, IconButton } from '@mui/material'; // Added IconButton
-import { Visibility, VisibilityOff } from '@mui/icons-material'; // Added Icons
+import { Typography, Button, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { PersonOutline, MailOutline, LockOutlined } from '@mui/icons-material';
 
-// Icons (custom SVGs or replace with a proper icon library)
-const UserIcon = () => <svg className="h-5 w-5 text-gray-500" />;
-const MailIcon = () => <svg className="h-5 w-5 text-gray-500" />;
-const LockIcon = () => <svg className="h-5 w-5 text-gray-500" />;
+// Define regex patterns outside the component so they are not recreated on every render
+const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?!.*\s).{8,}$/;
 
-// Modified Input component to include password toggle
-const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword }) => (
+// Input component with error display
+const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword, onBlur, error }) => (
   <div className="relative w-full mb-4">
     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">{icon}</div>
     <input
@@ -25,24 +25,23 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, ha
       placeholder={placeholder}
       value={value}
       onChange={handleChange}
-      // Added right padding to make space for the icon
-      className="w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2"
+      onBlur={onBlur} // Added onBlur event handler
+      className={`w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2 ${error ? 'border-red-500 focus:ring-red-200' : 'border-[#D5D0B8] focus:ring-[#DCC5B2]'}`}
       style={{
         backgroundColor: '#F0E4D3',
-        borderColor: '#D5D0B8',
         color: '#000000',
         accentColor: '#DCC5B2',
       }}
       required
     />
-    {/* Conditionally render the toggle icon for password fields */}
     {(name === 'password' || name === 'confirmPassword') && (
       <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-        <IconButton onClick={handleShowPassword} edge="end">
-          {type === 'password' ? <Visibility /> : <VisibilityOff />}
+        <IconButton onClick={handleShowPassword} edge="end" size="small">
+          {type === 'password' ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
         </IconButton>
       </div>
     )}
+    {error && <p className="text-red-500 text-xs mt-1 absolute -bottom-4 left-0">{error}</p>}
   </div>
 );
 
@@ -69,9 +68,47 @@ export default function Auth() {
   const navigate = useNavigate();
   const { error } = useSelector((state) => state.auth);
 
+  const [validationErrors, setValidationErrors] = useState({});
+
   useEffect(() => {
     return () => dispatch({ type: CLEAR_ERROR });
   }, [dispatch]);
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (name === 'email') {
+      if (!value) error = 'Email is required.';
+      // Apply regex check only if in sign-up mode
+      else if (isSignUp && !emailRegex.test(value)) error = 'Invalid email format.';
+    } else if (name === 'password') {
+      if (!value) error = 'Password is required.';
+      // Apply regex check only if in sign-up mode
+      else if (isSignUp && !passwordRegex.test(value)) {
+        error = 'Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.';
+      }
+    } else if (name === 'confirmPassword' && isSignUp) {
+      if (!value) error = 'Confirm Password is required.';
+      else if (value !== formData.password) error = 'Passwords do not match.';
+    } else if (name === 'firstName' && isSignUp) {
+      if (!value) error = 'First Name is required.';
+    } else if (name === 'lastName' && isSignUp) {
+      if (!value) error = 'Last Name is required.';
+    }
+    setValidationErrors((prev) => ({ ...prev, [name]: error }));
+    return error === '';
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const fieldsToValidate = isSignUp ? ['firstName', 'lastName', 'email', 'password', 'confirmPassword'] : ['email', 'password'];
+    
+    fieldsToValidate.forEach(field => {
+      if (!validateField(field, formData[field])) {
+        isValid = false;
+      }
+    });
+    return isValid;
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -86,38 +123,58 @@ export default function Auth() {
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    // Immediately clear the error for the field as soon as the user starts typing again
+    setValidationErrors((prev) => ({ ...prev, [name]: '' }));
+    setFormData({ ...formData, [name]: value });
     dispatch({ type: CLEAR_ERROR });
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  
+  // New blur handler to trigger validation when an input loses focus
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    validateField(name, value);
   };
 
   const handleShowPassword = () => setShowPassword((prev) => !prev);
 
   const handleSendOtp = async (e) => {
-  e.preventDefault();
-  if (!formData.email) return;
+    e.preventDefault();
+    dispatch({ type: CLEAR_ERROR });
 
-  try {
-    dispatch(sendSignupOtp(formData.email));
-    setOtpStep(true);
-  } catch (err) {
-    console.error("Error sending OTP:", err);
-  }
-};
+    if (!validateForm()) {
+      return;
+    }
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if(isSignUp){
-  try {
-    dispatch(verifySignupOtp(formData, navigate));
-    setOtpStep(false);
-    setFormData(initialState);
-  } catch (err) {
-    console.error("OTP verification failed:", err);
-  }}
-  else{
-    dispatch(login(formData, navigate));
-  }
-};
+    try {
+      await dispatch(sendSignupOtp(formData.email));
+      setOtpStep(true);
+    } catch (err) {
+      console.error("Error sending OTP:", err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    dispatch({ type: CLEAR_ERROR });
+
+    if (isSignUp) {
+      if (otpStep) {
+        try {
+          await dispatch(verifySignupOtp(formData, navigate));
+          setOtpStep(false);
+          setFormData(initialState);
+        } catch (err) {
+          console.error("OTP verification failed:", err);
+        }
+      }
+    } else {
+      if (!validateForm()) {
+        return;
+      }
+      dispatch(login(formData, navigate));
+    }
+  };
 
   const switchMode = () => {
     dispatch({ type: CLEAR_ERROR });
@@ -125,6 +182,7 @@ const handleSubmit = async (e) => {
     setShowPassword(false);
     setFormData(initialState);
     setOtpStep(false);
+    setValidationErrors({});
   };
 
   const googleSuccess = async (res) => {
@@ -162,7 +220,7 @@ const handleSubmit = async (e) => {
               >
                 <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
                 <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
-                <form onSubmit={handleSendOtp}>
+                <form onSubmit={otpStep ? handleSubmit : handleSendOtp}>
                   {openCropper && (
                     <CropperDialog
                       imageSrc={cropSrc}
@@ -181,7 +239,7 @@ const handleSubmit = async (e) => {
                         <img src={imagePreview} alt="Preview" style={{ width: 80, height: 80, borderRadius: '50%',marginLeft:'8.5rem',marginBottom: '1rem' }} />
                       ) : (
                         <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff',marginLeft:'8.5rem',marginBottom: '1rem' }}>
-                          {formData.firstName ? formData.firstName.charAt(0) : 'U'}
+                          <PersonOutline />
                         </div>
                       )}
                       <Typography variant="body2" color="primary">{imagePreview ? 'Change Photo' : 'Upload Profile Photo'}</Typography>
@@ -197,17 +255,15 @@ const handleSubmit = async (e) => {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Input name="firstName" placeholder="First Name" icon={<UserIcon />} value={formData.firstName} handleChange={handleChange} />
-                    <Input name="lastName" placeholder="Last Name" icon={<UserIcon />} value={formData.lastName} handleChange={handleChange} />
+                    <Input name="firstName" placeholder="First Name" icon={<PersonOutline />} value={formData.firstName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.firstName} />
+                    <Input name="lastName" placeholder="Last Name" icon={<PersonOutline />} value={formData.lastName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.lastName} />
                   </div>
-                  <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
-                  {/* Pass the handleShowPassword function to the Input components */}
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} />
-                  <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockIcon />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} />
+                  <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
+                  <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockOutlined />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.confirmPassword} />
                   {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
 
                   <div className="text-center">
-                    {/* OTP input section */}
                     {otpStep && (
                       <div className="text-center mt-6">
                         <h3 className="text-lg font-semibold mb-2">Enter the OTP sent to your email</h3>
@@ -221,16 +277,16 @@ const handleSubmit = async (e) => {
                         />
                         <button
                           className="mt-4 w-48 py-2 rounded-full bg-black text-white font-semibold"
-                          onClick={handleSubmit}
+                          type="submit"
                         >
                           Verify OTP
                         </button>
                       </div>
                     )}
                     {!otpStep && (
-                    <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
-                      SIGN UP
-                    </button>
+                      <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
+                        SIGN UP
+                      </button>
                     )}
                   </div>
                   <div className="mt-4 flex justify-center">
@@ -258,9 +314,8 @@ const handleSubmit = async (e) => {
                 <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
                 <p className="text-black mb-6 text-sm text-center">or use your account</p>
                 <form onSubmit={handleSubmit}>
-                  <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
-                   {/* Pass the handleShowPassword function to the Input component */}
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} />
+                  <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
                   {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
                   <div className="text-center">
                     <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>

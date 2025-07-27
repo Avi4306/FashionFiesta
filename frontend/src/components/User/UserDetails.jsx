@@ -19,7 +19,7 @@ const UserDetails = () => {
   useEffect(() => {
     // Redirect to private profile if the user is viewing their own profile
     if (loggedInProfile?.result?._id === id) {
-      navigate("/user/profile", { replace: true });
+      navigate("/profile", { replace: true });
     } else {
       dispatch(getUserProfileData(id));
     }
@@ -39,7 +39,7 @@ const UserDetails = () => {
   const productsToShow = products?.slice(0, 6);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-10 space-y-8">
       <div className="bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -188,7 +188,7 @@ const UserDetails = () => {
                   <img
                     src={product.images[0]}
                     alt={product.title}
-                    className="w-full h-40 object-cover"
+                    className="w-full h-60 object-cover" // Increased image height from h-40 to h-60
                   />
                 )}
                 <div className="p-4">
