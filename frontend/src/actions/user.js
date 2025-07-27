@@ -68,3 +68,21 @@ export const getFeaturedDesigners = () => async (dispatch) => {
         dispatch({ type: END_LOADING });
     }
 };
+export const fetchUserPosts = (id) => async (dispatch) => {
+  try {
+    const { data } = await api.fetchUserPosts(id);
+    dispatch({ type: FETCH_USER_POSTS, payload: data });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// NEW: Action to fetch all products for a user
+export const fetchUserProducts = (id) => async (dispatch) => {
+  try {
+    const { data } = await api.fetchUserProducts(id);
+    dispatch({ type: FETCH_USER_PRODUCTS, payload: data });
+  } catch (error) {
+    console.log(error);
+  }
+};

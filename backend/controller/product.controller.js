@@ -167,4 +167,57 @@ const updateProduct = ( async(req,res) =>
     }
 })
 
-export {createProduct,getProductById, getProducts, getProductsBySearch,updateProduct,deleteProduct, getProductsByCategory, getCategories} 
+const addReview = async (req, res) => {
+    const { id } = req.params;
+    const { comment, rating } = req.body;
+    console.log('hi')
+
+    if (!req.userId) {
+        return res.status(401).json({ message: "Unauthenticated" });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).send('No product with that id');
+    }
+
+    try {
+        const product = await Product.findById(id);
+
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Check if the user has already reviewed this product
+        const alreadyReviewed = product.reviews.find(
+            (r) => r.user.toString() === req.userId.toString()
+        );
+
+        if (alreadyReviewed) {
+            return res.status(400).json({ message: "Product already reviewed" });
+        }
+        
+        // Create the new review object, including the profilePhoto
+        const review = {
+            name: req.userName,
+            profilePhoto: req.userProfilePhoto, // NEW: Add profile photo
+            rating: Number(rating),
+            comment,
+            user: req.userId,
+            createdAt: new Date().toISOString(),
+        };
+
+        product.reviews.push(review);
+        product.numReviews = product.reviews.length;
+        
+        // Calculate the new average rating
+        product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+
+        const updatedProduct = await product.save();
+        
+        res.status(201).json(updatedProduct);
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong." });
+    }
+};
+
+export {createProduct,getProductById, getProducts, getProductsBySearch,updateProduct,deleteProduct, getProductsByCategory, getCategories, addReview} 

@@ -71,7 +71,17 @@ const productSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User'
             },
-            comment: String,
+            name: { // NEW: Add a name field for the reviewer
+                type: String,
+                required: true,
+            },
+            profilePhoto: { // NEW: Add a profile photo field for the reviewer
+                type: String,
+            },
+            comment: {
+                type: String,
+                required: true,
+            },
             rating: {
                 type: Number,
                 required: true

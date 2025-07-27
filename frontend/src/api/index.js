@@ -52,6 +52,8 @@ export const fetchProducts = ({ category, page = 1, limit = 12, sort = "newest" 
   
 export const deleteProduct = (id) => API.delete(`/products/${id}`);
 
+export const addReview = (id, reviewData) => API.patch(`/products/${id}/review`, reviewData);
+
 export const addToCart = (productId, quantity) => API.post('/cart/add', { productId, quantity });
 export const fetchCart = () => API.get('/cart');
 export const mergeCarts = (localCartItems) => API.post('/cart/merge', { items: localCartItems });

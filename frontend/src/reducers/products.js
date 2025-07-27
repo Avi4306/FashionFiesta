@@ -7,7 +7,8 @@ import {
   CREATE_PRODUCT,
   FETCH_CAROUSELS,
   FETCH_PRODUCT_BY_SEARCH,
-  DELETE_PRODUCT
+  DELETE_PRODUCT,
+  ADD_REVIEW
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -62,6 +63,14 @@ export default function productsData(state = initialState, action) {
         products: state.products.filter(
           (product) => product._id !== action.payload
         ),
+      };
+    case ADD_REVIEW:
+      return {
+          ...state,
+          products: state.products.map((product) =>
+              product._id === action.payload._id ? action.payload : product
+          ),
+          product: action.payload, // Update the single product if it's currently in view
       };
     default:
       return state;

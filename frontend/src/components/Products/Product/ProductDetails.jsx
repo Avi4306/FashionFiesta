@@ -324,24 +324,7 @@ export default function ProductDetails() {
             ({numReviews || "0"} reviews)
           </span>
         </div>
-        {reviews?.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Reviews
-            </h3>
-            <div className="space-y-2">
-              {reviews.map((rev, i) => (
-                <div key={i} className="border rounded-md p-3 bg-gray-50">
-                  <p className="text-sm text-gray-700">{rev.comment}</p>
-                  <p className="text-xs text-gray-500">
-                    Rating: {rev.rating}/5
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {user && <AddReviewSection productId={id} />}
+        <AddReviewSection product={product} />
       </div>
 
       {/* Delete Confirmation Dialog */}

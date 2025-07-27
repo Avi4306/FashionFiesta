@@ -1,40 +1,42 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserProfileData } from "../../actions/user"; // should dispatch user, posts, products
-import { useNavigate } from "react-router-dom";
+import { getUserProfileData } from "../../actions/user";
 
 const roleBadge = {
-  designer: "Designer",
-  pending_designer: "Pending Approval",
-  admin: "Admin",
+  designer: "🧵 Designer",
+  pending_designer: "⏳ Pending Approval",
+  admin: "✔️ Admin",
 };
 
 const UserDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const profile = useSelector((state) => state.auth.authData)
+  const loggedInProfile = useSelector((state) => state.auth.authData);
   const { isLoading, user, posts, products } = useSelector((state) => state.user);
 
   useEffect(() => {
-    // Redirect to private profile if viewing your own profile
-    if (profile?.result?._id === id) {
+    // Redirect to private profile if the user is viewing their own profile
+    if (loggedInProfile?.result?._id === id) {
       navigate("/user/profile", { replace: true });
     } else {
       dispatch(getUserProfileData(id));
     }
-  }, [dispatch, id, profile, navigate]);
+  }, [dispatch, id, loggedInProfile, navigate]);
 
   if (isLoading || !user) {
     return <div className="text-center py-10 text-gray-500">Loading...</div>;
   }
 
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${
-    user?.name?.charAt(0) || "A"
+    user.name?.charAt(0) || "A"
   }`;
 
   const { name, email, bio, profilePhoto, role, designerDetails, socialLinks, location } = user;
+
+  const postsToShow = posts?.slice(0, 6);
+  const productsToShow = products?.slice(0, 6);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
@@ -133,35 +135,81 @@ const UserDetails = () => {
         )}
       </div>
 
-      {/* Posts */}
-      {posts?.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-[#44403c] mb-2">Posts</h3>
+      {/* Posts Section */}
+      <div className="mt-10">
+        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Posts</h3>
+        {postsToShow?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {posts.map((post) => (
-              <div key={post._id} className="border rounded-lg p-4 shadow-sm bg-white">
-                <h4 className="font-semibold text-[#44403c]">{post.title}</h4>
-                <p className="text-sm text-[#78716c] line-clamp-2">{post.content}</p>
-              </div>
+            {postsToShow.map((post) => (
+              <Link 
+                to={`/style-diaries/${post._id}`}
+                key={post._id}
+                className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
+              >
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-40 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h4 className="font-semibold text-[#44403c]">{post.title}</h4>
+                  <p className="text-sm text-[#78716c] line-clamp-2">{post.content || "No content"}</p>
+                </div>
+              </Link>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-[#78716c]">This user has not created any posts yet.</p>
+        )}
+        {posts?.length > 6 && (
+          <Link
+            to={`/users/${id}/posts`}
+            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
+          >
+            View All Posts ({posts.length})
+          </Link>
+        )}
+      </div>
 
-      {/* Products */}
-      {products?.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-[#44403c] mb-2">Products</h3>
+      {/* Products Section */}
+      <div className="mt-10">
+        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Products</h3>
+        {productsToShow?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {products.map((product) => (
-              <div key={product._id} className="border rounded-lg p-4 shadow-sm bg-white">
-                <h4 className="font-semibold text-[#44403c]">{product.title}</h4>
-                <p className="text-sm text-[#78716c]">{product.description}</p>
-              </div>
+            {productsToShow.map((product) => (
+              <Link 
+                to={`/products/${product._id}`}
+                key={product._id}
+                className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
+              >
+                {product.images?.[0] && (
+                  <img
+                    src={product.images[0]}
+                    alt={product.title}
+                    className="w-full h-40 object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <h4 className="font-semibold text-[#44403c]">{product.title}</h4>
+                  <p className="text-sm text-[#78716c] line-clamp-2">{product.description || "No description"}</p>
+                </div>
+              </Link>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-[#78716c]">This user has not created any products yet.</p>
+        )}
+        {products?.length > 6 && (
+          <Link
+            to={`/users/${id}/products`}
+            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
+          >
+            View All Products ({products.length})
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

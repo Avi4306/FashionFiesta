@@ -7,7 +7,8 @@ import {
   CREATE_PRODUCT,
   FETCH_CAROUSELS,
   FETCH_PRODUCT_BY_SEARCH,
-  DELETE_PRODUCT
+  DELETE_PRODUCT,
+  ADD_REVIEW
 } from '../constants/actionTypes';
 
 export const getProductById = (id) => async (dispatch) => {
@@ -119,4 +120,20 @@ export const deleteProduct = (id) => async (dispatch) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+export const addReview = (id, reviewData) => async (dispatch) => {
+    try {
+        dispatch({ type: START_LOADING });
+        const { data } = await api.addReview(id, reviewData);
+
+        // Dispatch an ADD_REVIEW action with the updated product
+        dispatch({ type: ADD_REVIEW, payload: data });
+
+        dispatch({ type: END_LOADING });
+        return data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 };

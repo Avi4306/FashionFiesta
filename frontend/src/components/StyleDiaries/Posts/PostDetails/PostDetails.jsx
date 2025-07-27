@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPost, getPostsBySearch, likePost, deletePost } from '../../../../actions/posts';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import CommentSection from './CommentSection';
+import CommentSection from './CommentSection'; // Assuming this component exists
 import {
     Button,
     Tooltip,
@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import { FaHeart, FaShareAlt, FaTrash } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
 
 dayjs.extend(relativeTime);
 
@@ -29,7 +28,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 const PostDetails = () => {
     const { post, posts, isLoading } = useSelector((state) => state.posts);
-    const { authData } = useSelector((state) => state.auth); // Get logged-in user data
+    const { authData } = useSelector((state) => state.auth);
     const user = authData?.result;
     
     const dispatch = useDispatch();
@@ -38,10 +37,14 @@ const PostDetails = () => {
 
     const [currentImage, setCurrentImage] = useState(null);
     const [likes, setLikes] = useState(post?.likes || []);
-
-    // NEW: States for Dialog and Snackbar
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [showShareSuccess, setShowShareSuccess] = useState(false);
+
+    // NEW: Centralized state for all Snackbar messages
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'info',
+    });
 
     useEffect(() => {
         if (id) {
@@ -53,11 +56,6 @@ const PostDetails = () => {
         if (post) {
             setCurrentImage(post.selectedFiles?.[0] || null);
             setLikes(post.likes);
-        }
-    }, [post]);
-
-    useEffect(() => {
-        if (post) {
             dispatch(getPostsBySearch({ searchQuery: 'none', tags: post.tags.join(',') }));
         }
     }, [post, dispatch]);
@@ -70,7 +68,11 @@ const PostDetails = () => {
 
     const handleLike = () => {
         if (!user) {
-            alert("You need to be logged in to like a post.");
+            setSnackbar({
+                open: true,
+                message: "Please sign in to like a post.",
+                severity: "info",
+            });
             return;
         }
 
@@ -83,24 +85,20 @@ const PostDetails = () => {
         }
     };
 
-    // UPDATED: This function now opens the delete dialog
     const handleDelete = () => {
         setIsDeleteDialogOpen(true);
     };
 
-    // NEW: This function handles the actual deletion
     const handleConfirmDelete = () => {
         dispatch(deletePost(post._id));
         navigate('/');
         setIsDeleteDialogOpen(false);
     };
 
-    // NEW: This function closes the dialog
     const handleCloseDialog = () => {
         setIsDeleteDialogOpen(false);
     };
 
-    // UPDATED: The fallback now uses a Snackbar
     const handleShare = async () => {
         if (navigator.share) {
             try {
@@ -115,19 +113,23 @@ const PostDetails = () => {
         } else {
             try {
                 await navigator.clipboard.writeText(window.location.href);
-                setShowShareSuccess(true);
+                setSnackbar({
+                    open: true,
+                    message: "Post link copied to clipboard!",
+                    severity: "success",
+                });
             } catch (error) {
                 console.error("Failed to copy:", error);
             }
         }
     };
 
-    // NEW: Function to close the share snackbar
+    // Unified Snackbar close handler
     const handleSnackbarClose = (event, reason) => {
         if (reason === "clickaway") {
             return;
         }
-        setShowShareSuccess(false);
+        setSnackbar({ ...snackbar, open: false });
     };
 
     // --- Loading State ---
@@ -147,7 +149,6 @@ const PostDetails = () => {
                 {/* --- Main Post Section --- */}
                 <div className="bg-card-bg p-6 sm:p-8 lg:p-12 rounded-2xl shadow-lg">
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12">
-
                         {/* --- Left Column: Post Content --- */}
                         <div className="md:col-span-3">
                             <div className="mb-4">
@@ -157,31 +158,27 @@ const PostDetails = () => {
                                     </span>
                                 ))}
                             </div>
-
                             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary my-4 leading-tight">{post.title}</h1>
-                            
                             <div className="flex items-center justify-between my-6">
                                 <div className="flex items-center">
                                     <Link to = {`/user/${post.creator}`}>
-                                    <img
-                                        className="h-12 w-12 rounded-full object-cover mr-4"
-                                        src={post.creatorPfp || avatarPlaceholder}
-                                        alt={post.name}
-                                    />
+                                        <img
+                                            className="h-12 w-12 rounded-full object-cover mr-4"
+                                            src={post.creatorPfp || avatarPlaceholder}
+                                            alt={post.name}
+                                        />
                                     </Link>
                                     <div>
                                         <p className="font-semibold text-text-primary">{post.name}</p>
                                         <p className="text-sm text-text-secondary">{dayjs(post.createdAt).fromNow()}</p>
                                     </div>
                                 </div>
-                                {/* Like, Delete, and Share buttons */}
                                 <div className="flex items-center space-x-2">
                                     <Button
                                         onClick={handleLike}
                                         variant="outlined"
                                         size="small"
                                         className={`!flex !items-center !gap-1 !capitalize !rounded-full !px-3 !py-1 ${hasLikedPost ? '!text-red-500' : '!text-gray-500'} !border-gray-300 hover:!bg-red-50`}
-                                        disabled={!user}
                                     >
                                         <FaHeart size={16} />
                                         <span>{likes.length}</span>
@@ -203,9 +200,7 @@ const PostDetails = () => {
                                     )}
                                 </div>
                             </div>
-
                             <hr className="my-6 border-gray-200" />
-                            
                             <div className="text-text-secondary text-base md:text-lg leading-relaxed space-y-4">
                                 <p>{post.content}</p>
                             </div>
@@ -237,7 +232,6 @@ const PostDetails = () => {
                             </div>
                         )}
                     </div>
-                    
                     <hr className="my-8 md:my-12 border-gray-200" />
                     <CommentSection post={post} />
                 </div>
@@ -266,7 +260,7 @@ const PostDetails = () => {
                 )}
             </div>
 
-            {/* NEW: Delete Confirmation Dialog */}
+            {/* Delete Confirmation Dialog */}
             <Dialog
                 open={isDeleteDialogOpen}
                 onClose={handleCloseDialog}
@@ -291,15 +285,31 @@ const PostDetails = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* NEW: Snackbar for "Link copied" message */}
+            {/* NEW: Unified Snackbar for all messages */}
             <Snackbar
-                open={showShareSuccess}
-                autoHideDuration={3000}
+                open={snackbar.open}
+                autoHideDuration={6000}
                 onClose={handleSnackbarClose}
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-                <Alert onClose={handleSnackbarClose} severity="success">
-                    Post link copied to clipboard!
+                <Alert
+                    onClose={handleSnackbarClose}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
+                >
+                    <div className="flex-grow">{snackbar.message}</div>
+                    {snackbar.severity === 'info' && (
+                        <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                handleSnackbarClose();
+                                navigate('/auth');
+                            }}
+                        >
+                            SIGN IN
+                        </Button>
+                    )}
                 </Alert>
             </Snackbar>
         </main>

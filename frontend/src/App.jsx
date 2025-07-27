@@ -26,6 +26,8 @@ import ProductDetails from './components/Products/Product/ProductDetails.jsx'
 import CartPage from './components/CartPage.jsx'
 import SearchPage from './components/SearchPage.jsx'
 import FeaturedDesigners from './components/FeaturedDesigners.jsx'
+import UserPostsPage from './components/User/UserPostsPage.jsx'
+import UserProductsPage from './components/User/UserProductsPage.jsx'
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -65,6 +67,8 @@ function App() {
       <Route path="/products/search" element={<SearchPage/>} />
       <Route path="/cart" element={<CartPage/>} />
       <Route path="/users/featured-designers" element={<FeaturedDesigners />} />
+      <Route path="/user/:id/posts" element={<UserPostsPage />} />
+      <Route path="/user/:id/products" element={<UserProductsPage />} />
     </Routes>
     <Footer/>
     </Router>
