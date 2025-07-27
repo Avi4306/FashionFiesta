@@ -155,7 +155,7 @@ const UserDetails = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {products.map((product) => (
               <div key={product._id} className="border rounded-lg p-4 shadow-sm bg-white">
-                <h4 className="font-semibold text-[#44403c]">{product.name}</h4>
+                <h4 className="font-semibold text-[#44403c]">{product.title}</h4>
                 <p className="text-sm text-[#78716c]">{product.description}</p>
               </div>
             ))}

@@ -226,7 +226,7 @@ export default function Profile() {
                         />
                       )}
                       <div className="p-4">
-                        <h4 className="font-semibold text-[#44403c]">{product.name}</h4>
+                        <h4 className="font-semibold text-[#44403c]">{product.title}</h4>
                         <p className="text-sm text-[#78716c] line-clamp-2">
                           {product.description || "No description"}
                         </p>

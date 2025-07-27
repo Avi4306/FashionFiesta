@@ -23,9 +23,9 @@ import Profile from './components/User/Profile.jsx'
 import UserDetails from './components/User/UserDetails.jsx'
 import TrendingStyles from './components/TrendingStyles/TrendingStyles.jsx'
 import ProductDetails from './components/Products/Product/ProductDetails.jsx'
-import Products from './components/Products/Products.jsx'
 import CartPage from './components/CartPage.jsx'
 import SearchPage from './components/SearchPage.jsx'
+import FeaturedDesigners from './components/FeaturedDesigners.jsx'
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -64,6 +64,7 @@ function App() {
       <Route path="/products/:id" element={<ProductDetails/>} />
       <Route path="/products/search" element={<SearchPage/>} />
       <Route path="/cart" element={<CartPage/>} />
+      <Route path="/users/featured-designers" element={<FeaturedDesigners />} />
     </Routes>
     <Footer/>
     </Router>

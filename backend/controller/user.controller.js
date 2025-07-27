@@ -196,3 +196,65 @@ export const getUserProducts = async (req, res) => {
     res.status(500).json({ message: 'Error fetching products' });
   }
 };
+
+export const getFeaturedDesigners = async (req, res) => {
+    try {
+        const topDesignersBySales = await User.aggregate([
+            // Stage 1: Find all verified designers
+            {
+                $match: {
+                    role: 'designer',
+                    'designerDetails.verified': true
+                }
+            },
+            
+            // Stage 2: Join with the products collection
+            {
+                $lookup: {
+                    from: 'products', // Name of the products collection in MongoDB
+                    localField: '_id', // The designer's user ID
+                    foreignField: 'creator', // The designer ID field on the product
+                    as: 'products' // Store the joined products in a new 'products' array field
+                }
+            },
+            
+            // Stage 3: Count the number of products for each designer
+            {
+                $addFields: {
+                    salesCount: { $size: '$products' }
+                }
+            },
+            
+            // Stage 4: Sort by salesCount in descending order
+            {
+                $sort: {
+                    salesCount: -1
+                }
+            },
+            
+            // Stage 5: Limit the results
+            {
+                $limit: 12
+            },
+            
+            // Stage 6: Project only the fields you need for the frontend
+            {
+                $project: {
+                    name: 1,
+                    profilePhoto: 1,
+                    bio: 1,
+                    _id: 1 // Keep the designer's ID
+                }
+            }
+        ]);
+
+        if (!topDesignersBySales || topDesignersBySales.length === 0) {
+            return res.status(404).json({ message: "No featured designers found." });
+        }
+
+        res.status(200).json(topDesignersBySales);
+    } catch (error) {
+        console.error('Error fetching featured designers:', error);
+        res.status(500).json({ message: error.message });
+    }
+};

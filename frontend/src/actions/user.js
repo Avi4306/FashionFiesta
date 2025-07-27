@@ -1,5 +1,5 @@
 import * as api from '../api';
-import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING, AUTH_ERROR } from '../constants/actionTypes';
+import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING, AUTH_ERROR, FETCH_DESIGNERS } from '../constants/actionTypes';
 
 export const getUserProfileData = (id) => async (dispatch) => {
     try {
@@ -55,4 +55,16 @@ export const deleteAccount = (userId, password, navigate) => async (dispatch) =>
     });
     dispatch({ type: END_LOADING });
   }
+};
+
+export const getFeaturedDesigners = () => async (dispatch) => {
+    try {
+        dispatch({ type: START_LOADING });
+        const { data } = await api.fetchFeaturedDesigners();
+        dispatch({ type: FETCH_DESIGNERS, payload: data });
+        dispatch({ type: END_LOADING });
+    } catch (error) {
+        console.error('Failed to fetch designers:', error);
+        dispatch({ type: END_LOADING });
+    }
 };

@@ -98,7 +98,7 @@ export default function NavBar() {
         <div className="hidden md:flex gap-6 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
           <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
-          <Link to="/designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+          <Link to="users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>
 
@@ -194,8 +194,8 @@ export default function NavBar() {
       {isMenuOpen && (
         <div className="md:hidden mt-3 flex flex-col gap-3 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
-          <Link to="/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
-          <Link to="/designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+          <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
+          <Link to="/users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>
       )}

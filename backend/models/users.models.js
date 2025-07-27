@@ -5,6 +5,7 @@ const designerDetailsSchema = new mongoose.Schema({
   portfolioUrl: { type: String },
   verified: { type: Boolean, default: false },
   appliedAt: { type: Date },
+  salesCount: { type: Number, default: 0 },
 }, { _id: false });
 
 const userSchema = new mongoose.Schema({
