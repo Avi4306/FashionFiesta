@@ -7,6 +7,7 @@ import {
   CREATE_PRODUCT,
   FETCH_CAROUSELS,
   FETCH_PRODUCT_BY_SEARCH,
+  DELETE_PRODUCT
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -18,12 +19,13 @@ const initialState = {
   totalProducts: 0,
   categoryCarousels: {}, // 🆕 carousel-specific product groups
   reFetchTrigger: Date.now(),
+  success: false,
 };
 
 export default function productsData(state = initialState, action) {
   switch (action.type) {
     case START_LOADING:
-      return { ...state, isLoading: true };
+      return { ...state, isLoading: true, success : false };
     case END_LOADING:
       return { ...state, isLoading: false };
     case FETCH_PRODUCT:
@@ -45,6 +47,7 @@ export default function productsData(state = initialState, action) {
         products: [...state.products, action.payload],
         totalProducts: state.totalProducts + 1,
         reFetchTrigger: Date.now(),
+        success : true
       };
     case FETCH_CAROUSELS:
       return {
@@ -53,6 +56,13 @@ export default function productsData(state = initialState, action) {
       };
     case FETCH_PRODUCT_BY_SEARCH:
       return { ...state, products: action.payload };
+    case DELETE_PRODUCT:
+      return {
+        ...state,
+        products: state.products.filter(
+          (product) => product._id !== action.payload
+        ),
+      };
     default:
       return state;
   }

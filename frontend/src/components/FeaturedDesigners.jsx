@@ -36,7 +36,6 @@ const FeaturedDesigners = () => {
             </div>
         );
     }
-
     // --- Main Component Render ---
     return (
         <div className="bg-[#FAF7F3] min-h-screen px-4 md:px-16 py-8">
@@ -54,7 +53,7 @@ const FeaturedDesigners = () => {
                         >
                             <div className="p-6 text-center">
                                 <img 
-                                    src={designer.profilePhoto} // Use the profilePhoto from your schema
+                                    src={designer.profilePhoto || `https://placehold.co/40x40/F0E4D3/44403c?text=${designer?.name?.charAt(0) || "A" }`} // Use the profilePhoto from your schema
                                     alt={designer.name} 
                                     className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-[#dcc5b2]" 
                                 />

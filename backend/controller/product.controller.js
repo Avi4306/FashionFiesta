@@ -34,7 +34,6 @@ const createProduct = async (req, res) => {
     });
 
     await newProduct.save();
-    console.log(newProduct)
     res.status(201).json(newProduct);
   } catch (error) {
     console.error("Error creating product:", error);
@@ -43,24 +42,23 @@ const createProduct = async (req, res) => {
 };
 
 
-const deleteProduct = ( async(req,res) =>
-{
-     const {id} = req.params;
-     if (!mongoose.Types.ObjectId.isValid(id)) {
-       return res.status(404).json({ success: false, message: 'Invalid Product ID' });
-     }
-     try{
-       await Product.findByIdAndDelete(id);
-       
-       res.status(200).json({ success: true,message:"Product deleted"});
+const deleteProduct = async (req, res) => {
+    const { id } = req.params;
 
-     }
-     catch(err)
-     {
-       console.error(err)
-       res.status(404).json({ success: false, message: 'Product not found!' })
-     }
-});
+    // Check if the product ID is a valid Mongoose ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).send(`No product with id: ${id}`);
+    }
+
+    try {
+        // Find and delete the product
+        await Product.findByIdAndDelete(id);
+
+        res.json({ message: "Product deleted successfully." });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 const getProductById = async (req, res) => {
   try {

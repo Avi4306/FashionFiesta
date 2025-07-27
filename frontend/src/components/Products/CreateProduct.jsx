@@ -13,6 +13,7 @@ import {
     TextField,
     Typography,
     Snackbar,
+    InputAdornment, // NEW: Import InputAdornment
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 
@@ -148,6 +149,13 @@ const CreateProduct = ({ isOpen, onClose }) => {
                                 required
                                 value={form.price}
                                 onChange={handleChange}
+                                // START OF CHANGE
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">₹</InputAdornment>
+                                    ),
+                                }}
+                                // END OF CHANGE
                             />
                         </Grid>
                         <Grid item xs={6}>

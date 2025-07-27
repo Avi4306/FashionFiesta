@@ -6,7 +6,8 @@ import {
   FETCH_PRODUCTS,
   CREATE_PRODUCT,
   FETCH_CAROUSELS,
-  FETCH_PRODUCT_BY_SEARCH
+  FETCH_PRODUCT_BY_SEARCH,
+  DELETE_PRODUCT
 } from '../constants/actionTypes';
 
 export const getProductById = (id) => async (dispatch) => {
@@ -106,5 +107,16 @@ export const fetchCarousels = () => async (dispatch) => {
     console.error("Error fetching carousels:", error);
   } finally {
     dispatch({ type: END_LOADING });
+  }
+};
+
+export const deleteProduct = (id) => async (dispatch) => {
+  try {
+    await api.deleteProduct(id);
+    
+    // Dispatch the action to remove the product from the state
+    dispatch({ type: DELETE_PRODUCT, payload: id });
+  } catch (error) {
+    console.log(error);
   }
 };

@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPost, getPostsBySearch } from '../../../../actions/posts';
+import { getPost, getPostsBySearch, likePost, deletePost } from '../../../../actions/posts';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import CommentSection from './CommentSection';
+import { Button, Tooltip, IconButton } from '@mui/material';
+import { FaHeart, FaShareAlt, FaTrash } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 dayjs.extend(relativeTime);
 
 const PostDetails = () => {
   const { post, posts, isLoading } = useSelector((state) => state.posts);
+  const { authData } = useSelector((state) => state.auth); // Get logged-in user data
+  const user = authData?.result;
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // State to manage the main image being displayed
   const [currentImage, setCurrentImage] = useState(null);
+  const [likes, setLikes] = useState(post?.likes || []);
 
   useEffect(() => {
     if (id) {
@@ -23,26 +29,61 @@ const PostDetails = () => {
     }
   }, [id, dispatch]);
 
-  // Set the initial image once the post data is loaded
   useEffect(() => {
-    if (post?.selectedFiles?.length > 0) {
-      setCurrentImage(post.selectedFiles[0]);
+    if (post) {
+      setCurrentImage(post.selectedFiles?.[0] || null);
+      setLikes(post.likes);
     }
   }, [post]);
 
-  // Fetch related posts once the main post is loaded
   useEffect(() => {
     if (post) {
       dispatch(getPostsBySearch({ searchQuery: 'none', tags: post.tags.join(',') }));
     }
   }, [post, dispatch]);
-  
-  // Filter out the current post from the recommended list
-  console.log(posts)
+
   const recommendedPosts = posts.data?.length
     ? posts.data.filter(({ _id }) => _id !== post?._id)
     : [];
-  console.log(recommendedPosts)
+
+  const hasLikedPost = likes?.includes(user?._id);
+
+  const handleLike = () => {
+    if (!user) {
+      alert("You need to be logged in to like a post.");
+      return;
+    }
+
+    dispatch(likePost(post._id));
+    // Optimistic UI update
+    if (hasLikedPost) {
+      setLikes(likes.filter((id) => id !== user?._id));
+    } else {
+      setLikes([...likes, user?._id]);
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      dispatch(deletePost(post._id));
+      navigate('/'); // Redirect to the homepage or post list after deletion
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: `Check out this post by ${post.name}!`,
+        url: window.location.href,
+      })
+      .catch((error) => console.log('Error sharing:', error));
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Post link copied to clipboard!');
+    }
+  };
+
   // --- Loading State ---
   if (isLoading || !post) {
     return (
@@ -73,22 +114,54 @@ const PostDetails = () => {
 
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary my-4 leading-tight">{post.title}</h1>
               
-              <div className="flex items-center my-6">
-                <img
-                  className="h-12 w-12 rounded-full object-cover mr-4"
-                  src={post.creatorPfp || avatarPlaceholder} // Using the correct field name
-                  alt={post.name}
-                />
-                <div>
-                  <p className="font-semibold text-text-primary">{post.name}</p>
-                  <p className="text-sm text-text-secondary">{dayjs(post.createdAt).fromNow()}</p>
+              <div className="flex items-center justify-between my-6">
+                <div className="flex items-center">
+                  <Link to = {`/user/${post.creator}`}>
+                  <img
+                    className="h-12 w-12 rounded-full object-cover mr-4"
+                    src={post.creatorPfp || avatarPlaceholder}
+                    alt={post.name}
+                  />
+                  </Link>
+                  <div>
+                    <p className="font-semibold text-text-primary">{post.name}</p>
+                    <p className="text-sm text-text-secondary">{dayjs(post.createdAt).fromNow()}</p>
+                  </div>
+                </div>
+                {/* Like, Delete, and Share buttons */}
+                <div className="flex items-center space-x-2">
+                  <Button
+                    onClick={handleLike}
+                    variant="outlined"
+                    size="small"
+                    className={`!flex !items-center !gap-1 !capitalize !rounded-full !px-3 !py-1 ${hasLikedPost ? '!text-red-500' : '!text-gray-500'} !border-gray-300 hover:!bg-red-50`}
+                    disabled={!user}
+                  >
+                    <FaHeart size={16} />
+                    <span>{likes.length}</span>
+                  </Button>
+                  <Button
+                    onClick={handleShare}
+                    variant="outlined"
+                    size="small"
+                    className="!flex !items-center !gap-1 !capitalize !rounded-full !px-3 !py-1 !text-gray-500 !border-gray-300 hover:!bg-gray-100"
+                  >
+                    <FaShareAlt size={16} />
+                  </Button>
+                  {user?._id === post?.creator && (
+                    <Tooltip title="Delete Post">
+                      <IconButton onClick={handleDelete} className="!text-red-500 hover:!bg-red-50">
+                        <FaTrash />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
 
               <hr className="my-6 border-gray-200" />
               
               <div className="text-text-secondary text-base md:text-lg leading-relaxed space-y-4">
-                <p>{post.content}</p> 
+                <p>{post.content}</p>
               </div>
             </div>
 
@@ -100,7 +173,7 @@ const PostDetails = () => {
                   src={currentImage || "https://placehold.co/600x400/F0E4D3/44403c?text=Image+Not\\nAvailable"}
                   alt={post.title}
                 />
-                 {post.selectedFiles.length > 1 && (
+                {post.selectedFiles.length > 1 && (
                   <div className="flex gap-2 mt-4 overflow-auto">
                     {post.selectedFiles.map((img, idx) => (
                       <img

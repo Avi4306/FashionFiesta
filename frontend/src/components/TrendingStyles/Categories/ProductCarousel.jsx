@@ -26,7 +26,7 @@ const ProductCarousel = ({ category, products }) => {
               className="w-full h-40 object-cover rounded"
             />
             <h3 className="text-lg font-semibold mt-2">{product.title}</h3>
-            <p className="text-gray-500">${product.price}</p>
+            <p className="text-gray-500">₹{product.price}</p>
             </Link>
           </div>
         ))}
