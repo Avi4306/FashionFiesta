@@ -1,12 +1,22 @@
 import React, { useState, forwardRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { deletePost, likePost } from "../../../../actions/posts";
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Snackbar, Button, Tooltip, IconButton } from '@mui/material';
+import {
+    Snackbar,
+    Button,
+    Tooltip,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
+} from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
-import { FaHeart, FaShareAlt, FaTrash } from 'react-icons/fa'; // Using Font Awesome icons
+import { FaHeart, FaShareAlt, FaTrash } from 'react-icons/fa';
 
 dayjs.extend(relativeTime);
 
@@ -21,8 +31,11 @@ const Post = forwardRef(({ post }, ref) => {
     const navigate = useNavigate();
 
     const [likes, setLikes] = useState(post?.likes);
-    const [copied, setCopied] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    // NEW: State for the share success snackbar
+    const [showShareSuccess, setShowShareSuccess] = useState(false);
 
     const hasLikedPost = likes?.includes(userId);
 
@@ -42,8 +55,51 @@ const Post = forwardRef(({ post }, ref) => {
 
     const handleDelete = (e) => {
         e.stopPropagation();
-        if (window.confirm("Are you sure you want to delete this post?")) {
-            dispatch(deletePost(post._id));
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = (e) => {
+        e.stopPropagation();
+        dispatch(deletePost(post._id));
+        setIsDeleteDialogOpen(false);
+    };
+
+    const handleCloseDialog = (e) => {
+        e.stopPropagation();
+        setIsDeleteDialogOpen(false);
+    };
+
+    // NEW: Function to close the share snackbar
+    const handleShareSnackbarClose = (event, reason) => {
+        if (reason === "clickaway") {
+            return;
+        }
+        setShowShareSuccess(false);
+    };
+
+    // UPDATED: Handle share logic with Web Share API fallback
+    const handleShare = async (e) => {
+        e.stopPropagation();
+        const link = `${window.location.origin}/style-diaries/${post._id}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: post.title,
+                    text: `Check out this post by ${post.name}!`,
+                    url: link,
+                });
+            } catch (error) {
+                console.error("Error sharing:", error);
+            }
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            try {
+                await navigator.clipboard.writeText(link);
+                setShowShareSuccess(true);
+            } catch (err) {
+                console.error("Failed to copy:", err);
+            }
         }
     };
 
@@ -53,7 +109,7 @@ const Post = forwardRef(({ post }, ref) => {
     const formattedDate = dayjs(post?.createdAt).fromNow();
 
     return (
-        <div 
+        <div
             onClick={openPost}
             ref={ref}
             className="bg-card-bg rounded-xl shadow-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
@@ -87,7 +143,7 @@ const Post = forwardRef(({ post }, ref) => {
             <div className="p-4 pt-0 flex flex-col flex-grow">
                 {/* Post Title */}
                 <h3 className="font-bold text-lg text-text-primary mb-2">{post?.title}</h3>
-                
+
                 {/* Post Image */}
                 {post?.selectedFiles?.length > 0 && (
                     <div className="w-full h-52 overflow-hidden rounded-md mb-4">
@@ -124,32 +180,18 @@ const Post = forwardRef(({ post }, ref) => {
                         : 'Like'}
                 </button>
 
-                <div className="relative">
+                <div>
                     <button
-                        onClick={async (e) => {
-                            e.stopPropagation();
-                            const link = `${window.location.origin}/style-diaries/${post._id}`;
-                            try {
-                                await navigator.clipboard.writeText(link);
-                                setCopied(true);
-                                setTimeout(() => setCopied(false), 2000);
-                            } catch (err) {
-                                console.error("Failed to copy:", err);
-                            }
-                        }}
+                        onClick={handleShare}
                         className="flex items-center gap-2 text-sm font-semibold text-text-secondary hover:text-blue-500 transition-colors cursor-pointer"
                     >
                         <FaShareAlt className="h-5 w-5" />
                         Share
                     </button>
-                    {copied && (
-                        <div className="absolute top-full right-0 mt-1 text-xs text-green-600 bg-white px-2 py-1 rounded shadow border border-green-200 z-10">
-                            Link copied!
-                        </div>
-                    )}
                 </div>
             </div>
 
+            {/* Snackbar for 'Please sign in to like' */}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
@@ -158,8 +200,8 @@ const Post = forwardRef(({ post }, ref) => {
             >
                 <Alert
                     onClose={(e) => {
-                        e.stopPropagation()
-                        setOpenSnackbar(false)
+                        e.stopPropagation();
+                        setOpenSnackbar(false);
                     }}
                     severity="info"
                     sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
@@ -169,13 +211,50 @@ const Post = forwardRef(({ post }, ref) => {
                         color="inherit"
                         size="small"
                         onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             setOpenSnackbar(false);
                             navigate('/auth');
                         }}
                     >
                         SIGN IN
                     </Button>
+                </Alert>
+            </Snackbar>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={isDeleteDialogOpen}
+                onClose={handleCloseDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Confirm Deletion"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to delete this post? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* NEW: Snackbar for "Link copied" message */}
+            <Snackbar
+                open={showShareSuccess}
+                autoHideDuration={3000}
+                onClose={handleShareSnackbarClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert onClose={handleShareSnackbarClose} severity="success">
+                    Post link copied to clipboard!
                 </Alert>
             </Snackbar>
         </div>

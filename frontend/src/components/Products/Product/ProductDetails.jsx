@@ -13,8 +13,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Snackbar,
 } from "@mui/material";
-import { FaTrash } from "react-icons/fa";
+import MuiAlert from "@mui/material/Alert";
+import { FaTrash, FaShareAlt } from "react-icons/fa";
+
+// Helper component for a more styled snackbar alert
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -27,9 +34,12 @@ export default function ProductDetails() {
 
   // State to manage the main image being displayed
   const [mainImage, setMainImage] = useState(null);
-  
-  // NEW: State to manage the delete confirmation dialog
+
+  // State to manage the delete confirmation dialog
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  // NEW: State for share functionality
+  const [showShareSuccess, setShowShareSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -76,21 +86,49 @@ export default function ProductDetails() {
     navigate("/checkout");
   };
 
-  // UPDATED: This function now just opens the dialog
   const handleDelete = () => {
     setIsDeleteDialogOpen(true);
   };
-  
-  // NEW: This function handles the actual deletion after user confirmation
+
   const handleConfirmDelete = () => {
     dispatch(deleteProduct(id));
     navigate(-1);
     setIsDeleteDialogOpen(false);
   };
 
-  // NEW: This function closes the dialog without deleting
   const handleCloseDialog = () => {
     setIsDeleteDialogOpen(false);
+  };
+
+  // NEW: Function to handle sharing
+  const handleShare = async () => {
+    if (navigator.share) {
+      // Use native Web Share API if supported
+      try {
+        await navigator.share({
+          title: title,
+          text: description,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error("Error sharing:", error);
+      }
+    } else {
+      // Fallback: copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        setShowShareSuccess(true);
+      } catch (error) {
+        console.error("Failed to copy:", error);
+      }
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setShowShareSuccess(false);
   };
 
   const increaseQuantity = () => {
@@ -141,17 +179,27 @@ export default function ProductDetails() {
           <h2 className="text-3xl font-semibold text-gray-800 mb-2">
             {title}
           </h2>
-          {/* Delete Button */}
-          {user?._id === creator?._id && (
-            <Tooltip title="Delete Product">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <Tooltip title="Share Product">
               <IconButton
-                onClick={handleDelete}
-                className="!text-red-500 hover:!bg-red-50"
+                onClick={handleShare}
+                className="!text-gray-500 hover:!bg-gray-100"
               >
-                <FaTrash />
+                <FaShareAlt />
               </IconButton>
             </Tooltip>
-          )}
+            {user?._id === creator?._id && (
+              <Tooltip title="Delete Product">
+                <IconButton
+                  onClick={handleDelete}
+                  className="!text-red-500 hover:!bg-red-50"
+                >
+                  <FaTrash />
+                </IconButton>
+              </Tooltip>
+            )}
+          </div>
         </div>
         {brand && (
           <p className="text-sm text-gray-500 mb-2">
@@ -272,7 +320,9 @@ export default function ProductDetails() {
           <span className="text-yellow-500 font-semibold">
             {rating?.toFixed(1) || "0.0"} / 5
           </span>
-          <span className="text-gray-600 ml-2">({numReviews || "0"} reviews)</span>
+          <span className="text-gray-600 ml-2">
+            ({numReviews || "0"} reviews)
+          </span>
         </div>
         {reviews?.length > 0 && (
           <div className="mt-6">
@@ -293,20 +343,19 @@ export default function ProductDetails() {
         )}
         {user && <AddReviewSection productId={id} />}
       </div>
-      
-      {/* NEW: Delete Confirmation Dialog */}
+
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={isDeleteDialogOpen}
         onClose={handleCloseDialog}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">
-          {"Confirm Deletion"}
-        </DialogTitle>
+        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this product? This action cannot be undone.
+            Are you sure you want to delete this product? This action cannot be
+            undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -318,6 +367,18 @@ export default function ProductDetails() {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* NEW: Snackbar for "Link copied" message */}
+      <Snackbar
+        open={showShareSuccess}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          Link copied to clipboard!
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
