@@ -19,7 +19,7 @@ router.post('/upload', uploadImageToCloudinary);
 router.get('/users/featured-designers', getFeaturedDesigners)
 
 router.get("/", (req, res) => {
-  res.send("🔥 Server is alive");
+  res.send("🔥 Server is alive sacche?");
 });
 
 router.get("/user",(req,res)=>
@@ -27,12 +27,12 @@ router.get("/user",(req,res)=>
     res.send("!USER PAGE");
 })
 
+router.post('/recommend', async (req, res) => {
+  console.log("hitten the recommend url");
+  const id = req.body.id;
+  console.log(`id given is ${id}`);
 
-router.post('/recommend/:id',async (req,res)=>{
-
-    const {id} = req.body.id
-
-     try {
+  try {
     const response = await axios.post('http://localhost:5000/recommend', { id });
     res.json(response.data);
   } catch (error) {
@@ -40,6 +40,11 @@ router.post('/recommend/:id',async (req,res)=>{
     res.status(500).json({ error: 'Recommendation failed' });
   }
 });
+
+router.get('/recommend',(req,res)=>
+{
+   res.send("aato chale che")
+})
 
 router.get('/search', (req, res) => {
   res.sendFile(path.join(__dirname, '../../flask/scan_and_search/templates/index.html'));
