@@ -10,16 +10,18 @@ export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchActive, setSearchActive] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // <-- New: State for search query
+  const [searchQuery, setSearchQuery] = useState("");
 
   const user = useSelector((state) => state.auth.authData);
+  const { cart } = useSelector((state) => state.cart);
+  const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
-  const searchInputRef = useRef(null); // <-- New: Ref for search input
+  const searchInputRef = useRef(null);
 
-  // Sync localStorage with Redux on load
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem("profile"));
     if (profile?.token) {
@@ -33,7 +35,6 @@ export default function NavBar() {
     }
   }, [dispatch]);
 
-  // Check token expiration on route change
   useEffect(() => {
     const token = user?.token;
     if (token) {
@@ -46,7 +47,6 @@ export default function NavBar() {
     }
   }, [location, user]);
 
-  // Close profile dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -57,7 +57,6 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // <-- New: Auto-focus the search bar when it becomes active
   useEffect(() => {
     if (isSearchActive && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -70,12 +69,11 @@ export default function NavBar() {
     setIsProfileOpen(false);
   };
 
-  // <-- New: Function to handle the search logic
   const handleSearch = (e) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
+    if (e.key === "Enter" && searchQuery.trim()) {
       navigate(`/products/search?searchQuery=${searchQuery}`);
-      setSearchActive(false); // Close search bar after searching
-      setSearchQuery(""); // Clear the search bar
+      setSearchActive(false);
+      setSearchQuery("");
     }
   };
 
@@ -98,7 +96,7 @@ export default function NavBar() {
         <div className="hidden md:flex gap-6 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
           <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
-          <Link to="users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+          <Link to="/users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>
 
@@ -113,22 +111,32 @@ export default function NavBar() {
           >
             <CiSearch className="text-gray-700" />
             <input
-              ref={searchInputRef} // <-- New: Attach ref
+              ref={searchInputRef}
               type="text"
               placeholder="Search...?"
               className="bg-transparent w-full outline-none text-sm placeholder-gray-500"
-              value={searchQuery} // <-- New: Connect to state
-              onChange={(e) => setSearchQuery(e.target.value)} // <-- New: Update state on change
-              onKeyDown={handleSearch} // <-- New: Handle search on Enter key
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
             />
           </div>
 
           {/* Icons */}
           <div className="flex items-center gap-4 text-xl text-gray-800">
             <CiHome className="text-3xl mx-1" />
-            <Link to = '/cart'>
-            <PiShoppingCartThin className="text-3xl mx-1" />
-            </Link>
+
+            {/* Cart Icon with Badge */}
+            <div className="relative mx-1">
+              <Link to="/cart">
+                <PiShoppingCartThin className="text-3xl text-gray-800" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            </div>
+
             {/* Profile Dropdown */}
             <div className="relative pt-2" ref={profileRef}>
               {user?.result ? (
