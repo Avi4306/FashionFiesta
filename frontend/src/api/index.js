@@ -57,13 +57,34 @@ export const addReview = (id, reviewData) => API.patch(`/products/${id}/review`,
 export const addToCart = (productId, quantity) => API.post('/cart/add', { productId, quantity });
 export const fetchCart = () => API.get('/cart');
 export const mergeCarts = (localCartItems) => API.post('/cart/merge', { items: localCartItems });
-
-export const updateCartItem = (productId, quantity) => API.patch(`/cart/${productId}`, { quantity });
-
-export const removeCartItem = (productId) => API.delete(`/cart/${productId}`);
+export const updateCartItem = (productId, quantity) => API.patch(`/cart/update/${productId}`, { quantity });
+export const removeCartItem = (productId) => API.delete(`/cart/remove/${productId}`);
+export const clearUserCart = () => API.post('/cart/clear'); // For clearing the entire cart
 
 
 export const uploadImage = (fileData, folderName) =>
   API.post("/upload", { fileData, folderName });
 
 export const recommendProduct = (id) => API.post(`/recommend/${ id }`);
+
+
+
+// --- NEW ADMIN API CALLS ---
+export const adminGetAllUsers = () => API.get('/api/admin/users');
+export const adminCreateUser = (userData) => API.post('/api/admin/users', userData);
+export const adminUpdateUserRole = (id, roleData) => API.patch(`/api/admin/users/${id}/role`, roleData);
+export const adminUpdateUserPassword = (id, passwordData) => API.patch(`/api/admin/users/${id}/password`, passwordData);
+export const adminDeleteUser = (id) => API.delete(`/api/admin/users/${id}`);
+
+export const adminGetAllProducts = () => API.get('/api/admin/products');
+// Add createAdminProduct and updateAdminProduct
+export const adminCreateProduct = (productData) => API.post('/api/admin/products', productData);
+export const adminUpdateProduct = (id, productData) => API.patch(`/api/admin/products/${id}`, productData);
+export const adminDeleteProduct = (id) => API.delete(`/api/admin/products/${id}`);
+
+
+export const adminGetAllPosts = () => API.get('/api/admin/posts');
+// Add createAdminPost and updateAdminPost
+export const adminCreatePost = (postData) => API.post('/api/admin/posts', postData);
+export const adminUpdatePost = (id, postData) => API.patch(`/api/admin/posts/${id}`, postData);
+export const adminDeletePost = (id) => API.delete(`/api/admin/posts/${id}`);

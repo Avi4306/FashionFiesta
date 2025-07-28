@@ -82,9 +82,9 @@ router.post('/search', upload.single('image'), async (req, res) => {
     res.json(response.data);
      console.log("cheackpoint5")
   } catch (error) {
-    console.error('❌ Flask /search error:', error.message);
+    console.error('Flask /search error:', error.message);
     if (error.response) {
-      console.error('🪵 Response:', error.response.data);
+      console.error('Response:', error.response.data);
     }
     res.status(500).json({ error: 'Search failed' });
   }

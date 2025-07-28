@@ -334,7 +334,7 @@ export default function Profile() {
         ) : (
           <p className="text-sm text-[#78716c]">You have not created any posts yet.</p>
         )}
-        {posts?.length > 6 && (
+        {posts?.length > 4 && (
           <Link
             to={`/users/${userId}/posts`}
             className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
@@ -374,7 +374,7 @@ export default function Profile() {
         ) : (
           <p className="text-sm text-[#78716c]">You have not created any products yet.</p>
         )}
-        {products?.length > 6 && (
+        {products?.length > 4 && (
           <Link
             to={`/users/${userId}/products`}
             className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"

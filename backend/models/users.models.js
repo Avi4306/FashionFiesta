@@ -54,43 +54,40 @@ const userSchema = new mongoose.Schema({
   designerDetails: designerDetailsSchema,
   bio: { type: String, default: '' },
   socialLinks: {
-    instagram: {
-      type: String,
-      default: '',
-      // Regex for Instagram handle (e.g., @user_name)
-      match: [
-        /^@[a-z0-9_.]+$/,
-        "Please enter a valid Instagram handle starting with @.",
-      ],
-    },
-    facebook: {
-      type: String,
-      default: '',
-      // Regex for Facebook profile URL
-      match: [
-        /^(https?:\/\/)?(www\.)?facebook\.com\/[a-zA-Z0-9.]+/,
-        "Please enter a valid Facebook profile URL.",
-      ],
-    },
-    twitter: {
-      type: String,
-      default: '',
-      // Regex for Twitter handle (e.g., @user_name)
-      match: [
-        /^@[a-zA-Z0-9_]{1,15}$/,
-        "Please enter a valid Twitter handle starting with @.",
-      ],
-    },
-    website: {
-      type: String,
-      default: '',
-      // Regex for general URL validation
-      match: [
-        /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i,
-        "Please enter a valid website URL.",
-      ],
-    },
+  instagram: {
+    type: String,
+    default: '',
+    match: [
+      /^https?:\/\/(www\.)?instagram\.com\/[a-zA-Z0-9._]+\/?$/,
+      "Please enter a valid Instagram profile URL.",
+    ],
   },
+  facebook: {
+    type: String,
+    default: '',
+    match: [
+      /^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9.]+\/?$/,
+      "Please enter a valid Facebook profile URL.",
+    ],
+  },
+  twitter: {
+    type: String,
+    default: '',
+    match: [
+      /^https?:\/\/(www\.)?twitter\.com\/[a-zA-Z0-9_]{1,15}\/?$/,
+      "Please enter a valid Twitter profile URL.",
+    ],
+  },
+  website: {
+    type: String,
+    default: '',
+    match: [
+      /^(https?:\/\/)(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/\S*)?$/,
+      "Please enter a valid website URL.",
+    ],
+  },
+},
+
   location: {
     city: { type: String, default: '' },
     state: { type: String, default: '' },

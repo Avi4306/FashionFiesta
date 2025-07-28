@@ -1,6 +1,6 @@
 import express from 'express';
 import { getPosts, getPost, getPostsBySearch, createPost, deletePost, likePost, commentPost } from '../controller/posts.controller.js';
-import auth from '../middleware/auth.js';
+import {auth} from '../middleware/auth.js';
 
 const styleDiariesRouter = express.Router();
 styleDiariesRouter.get("/", getPosts);

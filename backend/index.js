@@ -12,6 +12,7 @@ import productRouter from './routes/productRoutes.js';
 import authRouter from './routes/authRoutes.js'
 import cartRouter from './routes/cartRoutes.js';
 import './config/cloudinary.js'
+import adminRouter from './routes/adminRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,7 @@ app.use('/user', userRouter)
 app.use('/products', productRouter)
 app.use('/auth', authRouter)
 app.use('/cart', cartRouter)
+app.use('/admin', adminRouter)
 
 
 app.listen(process.env.PORT, () => {

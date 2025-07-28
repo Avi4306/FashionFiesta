@@ -4,5 +4,6 @@ import auth from './auth.js';
 import user from './user.js';
 import productsData from './products.js';
 import cart from './cart.js'
+import admin from './admin.js';
 
-export default combineReducers({posts, auth, user, productsData, cart}); //posts : posts
+export default combineReducers({posts, auth, user, productsData, cart, admin}); //posts : posts

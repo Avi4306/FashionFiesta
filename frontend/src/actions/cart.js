@@ -1,158 +1,216 @@
+// client/src/actions/cart.js
 import * as api from '../api/index'; // Assuming this is your API file
-import { 
-    ADD_TO_CART_LOCAL, 
-    ADD_TO_CART_SUCCESS, 
-    ADD_TO_CART_FAIL, 
-    FETCH_CART_SUCCESS, 
-    FETCH_CART_FAIL, 
-    MERGE_CART_SUCCESS, 
-    UPDATE_CART_ITEM_QUANTITY, 
-    REMOVE_CART_ITEM 
+import {
+    ADD_TO_CART_LOCAL,
+    ADD_TO_CART_SUCCESS,
+    FETCH_CART_SUCCESS,
+    FETCH_CART_FAIL,
+    MERGE_CART_SUCCESS,
+    UPDATE_CART_QUANTITY_SUCCESS,
+    UPDATE_CART_QUANTITY_LOCAL,
+    REMOVE_CART_ITEM_SUCCESS,
+    REMOVE_CART_ITEM_LOCAL,
+    SET_CART_LOADING,
+    SET_CART_ERROR,
+    CLEAR_CART,
 } from '../constants/actionTypes';
 
-// Load cart from localStorage
+// Helper to load cart from localStorage
 const loadCartFromStorage = () => {
     try {
         const serializedCart = localStorage.getItem('cart');
         if (serializedCart === null) {
             return { items: [] };
         }
-        return JSON.parse(serializedCart);
+        const parsedCart = JSON.parse(serializedCart);
+        return { items: parsedCart.items || [] };
     } catch (e) {
         console.error("Error loading cart from storage", e);
         return { items: [] };
     }
 };
 
-export const getCart = (userId) => async (dispatch) => {
-    if (userId) {
-        // User is logged in, fetch from backend
-        try {
-            const { data } = await api.fetchCart();
-            dispatch({ type: FETCH_CART_SUCCESS, payload: data.cart });
-        } catch (error) {
-            dispatch({ type: FETCH_CART_FAIL, payload: error.response?.data?.message });
-        }
-    } else {
-        // User is a guest, load from localStorage
-        const localCart = loadCartFromStorage();
-        dispatch({ type: FETCH_CART_SUCCESS, payload: localCart });
+// Helper to save cart to localStorage
+const saveCartToStorage = (cartData) => {
+    try {
+        localStorage.setItem('cart', JSON.stringify(cartData));
+    } catch (e) {
+        console.error("Error saving cart to storage", e);
     }
 };
 
-export const addToCart = (product) => async (dispatch, getState) => {
-    const { auth, cart } = getState();
-    const quantity = 1; // Default quantity for addToCart
+// Helper for error dispatching
+const handleActionError = (dispatch, error, defaultMessage) => {
+    console.error("Cart action error:", error.response?.data?.message || error.message);
+    dispatch({ type: SET_CART_ERROR, payload: error.response?.data?.message || defaultMessage });
+};
 
-    if (auth.user) {
-        // User is logged in, call backend API
+// --- GET CART ACTION ---
+// This action will fetch the cart from DB for logged-in users or from localStorage for guests
+export const getCart = (userId) => async (dispatch) => {
+    dispatch({ type: SET_CART_LOADING, payload: true });
+    if (userId) { // User is logged in
+        try {
+            const { data } = await api.fetchCart();
+            dispatch({ type: FETCH_CART_SUCCESS, payload: data.cart });
+            saveCartToStorage(data.cart); // Keep localStorage in sync with DB cart
+        } catch (error) {
+            handleActionError(dispatch, error, 'Failed to fetch cart from server.');
+            dispatch({ type: FETCH_CART_FAIL }); // Specific fail type for fetching
+            // Fallback to local storage if DB fetch fails for a logged-in user
+            const localCart = loadCartFromStorage();
+            dispatch({ type: FETCH_CART_SUCCESS, payload: localCart }); // Load local cart even if server fails
+        } finally {
+            dispatch({ type: SET_CART_LOADING, payload: false });
+        }
+    } else { // User is a guest
+        const localCart = loadCartFromStorage();
+        dispatch({ type: FETCH_CART_SUCCESS, payload: localCart }); // Use FETCH_CART_SUCCESS for local load too
+        dispatch({ type: SET_CART_LOADING, payload: false }); // Ensure loading state is turned off
+    }
+};
+
+// --- ADD TO CART ACTION ---
+export const addToCart = (product, quantity = 1) => async (dispatch, getState) => {
+    const { auth, cart } = getState();
+
+    // Check for product._id presence early
+    if (!product || !product._id) {
+        console.error("Product or product._id is missing for addToCart action.");
+        handleActionError(dispatch, {}, "Invalid product data provided.");
+        return;
+    }
+
+    const isLoggedIn = !!auth.authData?.token; // Assuming authData contains user info and a token
+
+    if (isLoggedIn) {
         try {
             const { data } = await api.addToCart(product._id, quantity);
-            dispatch({ type: ADD_TO_CART_SUCCESS, payload: data.cart });
+            dispatch({ type: ADD_TO_CART_SUCCESS, payload: data.cart }); // Backend should return the updated cart
+            saveCartToStorage(data.cart); // Keep localStorage in sync with DB cart
         } catch (error) {
+            handleActionError(dispatch, error, 'Failed to add item to cart on server.');
             dispatch({ type: ADD_TO_CART_FAIL, payload: error.response?.data?.message });
         }
     } else {
         // User is a guest, update local state and storage immutably
-        const existingCart = cart.cart;
-        const itemIndex = existingCart.items.findIndex(
+        const existingCartItems = cart.cart?.items || [];
+        const itemIndex = existingCartItems.findIndex(
             (item) => item.product._id === product._id
         );
-        
+
         let newItems;
         if (itemIndex > -1) {
-            newItems = existingCart.items.map((item, index) => {
+            newItems = existingCartItems.map((item, index) => {
                 if (index === itemIndex) {
                     return { ...item, quantity: item.quantity + quantity };
                 }
                 return item;
             });
         } else {
-            newItems = [...existingCart.items, { product, quantity }];
+            newItems = [...existingCartItems, { product: product, quantity: quantity }];
         }
-        
-        const updatedCart = {
-            ...existingCart,
-            items: newItems,
-        };
 
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        const updatedCart = { items: newItems };
+        saveCartToStorage(updatedCart);
         dispatch({ type: ADD_TO_CART_LOCAL, payload: updatedCart });
     }
 };
 
+// --- MERGE LOCAL CART (on successful login) ---
 export const mergeLocalCart = (localCartItems) => async (dispatch) => {
+    dispatch({ type: SET_CART_LOADING, payload: true });
     try {
         const { data } = await api.mergeCarts(localCartItems);
-        localStorage.removeItem('cart');
+        localStorage.removeItem('cart'); // Clear local storage after successful merge
         dispatch({ type: MERGE_CART_SUCCESS, payload: data.cart });
-        console.log('merge');
+        saveCartToStorage(data.cart); // Save the merged DB cart to local storage for persistence
+        console.log('Cart merged successfully with backend.');
     } catch (error) {
-        dispatch({ type: ADD_TO_CART_FAIL, payload: error.response?.data?.message });
+        handleActionError(dispatch, error, 'Failed to merge cart with server.');
+        dispatch({ type: FETCH_CART_FAIL });
+    } finally {
+        dispatch({ type: SET_CART_LOADING, payload: false });
     }
 };
 
-// --- NEW/UPDATED ACTIONS ---
-
-export const updateCartItemQuantity = (productId, quantity) => async (dispatch, getState) => {
+// --- UPDATE CART ITEM QUANTITY ACTION ---
+export const updateCartItemQuantity = (productId, newQuantity) => async (dispatch, getState) => {
     const { auth, cart } = getState();
 
-    if (auth.user) {
-        // User is logged in, call backend API to update quantity
+    // Basic validation
+    if (newQuantity < 1) {
+        // If quantity is less than 1, remove the item instead
+        dispatch(removeCartItem(productId));
+        return;
+    }
+
+    const isLoggedIn = !!auth.authData?.token;
+
+    if (isLoggedIn) {
         try {
-            const { data } = await api.updateCartItem(productId, quantity);
-            // Assuming backend returns the updated cart or success message
-            // You might want a specific success type for this, or re-fetch the cart
-            dispatch({
-                type: UPDATE_CART_ITEM_QUANTITY, // Still dispatch local update for immediate UI feedback
-                payload: { productId, quantity },
-            });
-            // Optionally, dispatch FETCH_CART_SUCCESS with data.cart if backend returns full cart
+            const { data } = await api.updateCartItem(productId, newQuantity);
+            dispatch({ type: UPDATE_CART_QUANTITY_SUCCESS, payload: data.cart }); // Backend returns updated cart
+            saveCartToStorage(data.cart);
         } catch (error) {
-            console.error("Error updating cart item quantity:", error);
-            dispatch({ type: ADD_TO_CART_FAIL, payload: error.response?.data?.message }); // Use a generic cart error type
+            handleActionError(dispatch, error, 'Failed to update item quantity on server.');
+            dispatch({ type: FETCH_CART_FAIL });
         }
     } else {
         // Guest user, update local state and localStorage
-        const existingCart = cart.cart;
-        const newItems = existingCart.items.map(item => 
-            item.product._id === productId ? { ...item, quantity: quantity } : item
+        const existingCartItems = cart.cart?.items || [];
+        const newItems = existingCartItems.map(item =>
+            item.product._id === productId ? { ...item, quantity: newQuantity } : item
         );
-        const updatedCart = { ...existingCart, items: newItems };
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-        dispatch({
-            type: UPDATE_CART_ITEM_QUANTITY,
-            payload: { productId, quantity },
-        });
+        const updatedCart = { items: newItems };
+        saveCartToStorage(updatedCart);
+        dispatch({ type: UPDATE_CART_QUANTITY_LOCAL, payload: updatedCart });
     }
 };
 
+// --- REMOVE CART ITEM ACTION ---
 export const removeCartItem = (productId) => async (dispatch, getState) => {
     const { auth, cart } = getState();
 
-    if (auth.user) {
-        // User is logged in, call backend API to remove item
+    const isLoggedIn = !!auth.authData?.token;
+
+    if (isLoggedIn) {
         try {
             await api.removeCartItem(productId);
-            // Assuming backend confirms deletion, then update local state
-            dispatch({
-                type: REMOVE_CART_ITEM, // Still dispatch local update for immediate UI feedback
-                payload: productId,
-            });
-            // Optionally, dispatch FETCH_CART_SUCCESS if backend returns updated cart
+            // After successful removal from DB, re-fetch to ensure sync
+            const { data } = await api.fetchCart();
+            dispatch({ type: REMOVE_CART_ITEM_SUCCESS, payload: data.cart });
+            saveCartToStorage(data.cart);
         } catch (error) {
-            console.error("Error removing cart item:", error);
-            dispatch({ type: ADD_TO_CART_FAIL, payload: error.response?.data?.message }); // Use a generic cart error type
+            handleActionError(dispatch, error, 'Failed to remove item from cart on server.');
+            dispatch({ type: FETCH_CART_FAIL });
         }
     } else {
         // Guest user, update local state and localStorage
-        const existingCart = cart.cart;
-        const newItems = existingCart.items.filter(item => item.product._id !== productId);
-        const updatedCart = { ...existingCart, items: newItems };
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-        dispatch({
-            type: REMOVE_CART_ITEM,
-            payload: productId,
-        });
+        const existingCartItems = cart.cart?.items || [];
+        const newItems = existingCartItems.filter(item => item.product._id !== productId);
+        const updatedCart = { items: newItems };
+        saveCartToStorage(updatedCart);
+        dispatch({ type: REMOVE_CART_ITEM_LOCAL, payload: updatedCart });
+    }
+};
+
+// --- CLEAR CART ACTION ---
+export const clearCart = () => async (dispatch, getState) => {
+    const { auth } = getState();
+    const isLoggedIn = !!auth.authData?.token;
+
+    if (isLoggedIn) {
+        try {
+            await api.clearUserCart();
+            dispatch({ type: CLEAR_CART });
+            saveCartToStorage({ items: [] }); // Clear local storage explicitly
+        } catch (error) {
+            handleActionError(dispatch, error, 'Failed to clear cart on server.');
+        }
+    } else {
+        // Guest user
+        dispatch({ type: CLEAR_CART });
+        saveCartToStorage({ items: [] }); // Clear local storage explicitly
     }
 };
