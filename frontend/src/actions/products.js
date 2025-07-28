@@ -8,7 +8,8 @@ import {
   FETCH_CAROUSELS,
   FETCH_PRODUCT_BY_SEARCH,
   DELETE_PRODUCT,
-  ADD_REVIEW
+  ADD_REVIEW,
+  FETCH_RECOMMENDATIONS
 } from '../constants/actionTypes';
 
 export const getProductById = (id) => async (dispatch) => {
@@ -85,15 +86,28 @@ export const createProduct = (productData) => async (dispatch) => {
   }
 };
 
-export const fetchCarousels = () => async (dispatch) => {
+export const fetchCarousels = (categoriesToFetch) => async (dispatch) => {
   try {
     dispatch({ type: START_LOADING });
+    let categories = [];
+    if (categoriesToFetch && Array.isArray(categoriesToFetch)) {
+      categories = categoriesToFetch;
+    } else {
+      const { data: allCategories } = await api.fetchCategories();
+      categories = allCategories;
+    }
 
-    const { data: categories } = await api.fetchCategories();
-    
+
     const productPromises = categories.map(async (category) => {
-      const { data: products } = await api.fetchProducts({ category, limit: 10 }); 
-      return { category, products };
+      
+      try {
+        const { data: products } = await api.fetchProducts({ category, limit: 15 });
+        return { category, products };
+      } catch (innerError) {
+        // If there's an error with a specific category, it will be logged here.
+        console.error(`Failed to fetch products for category: ${category}`, innerError.message);
+        return { category, products: [] };
+      }
     });
 
     const results = await Promise.all(productPromises);
@@ -105,7 +119,7 @@ export const fetchCarousels = () => async (dispatch) => {
     
     dispatch({ type: FETCH_CAROUSELS, payload: categoryData });
   } catch (error) {
-    console.error("Error fetching carousels:", error);
+    console.error("Error fetching carousels (outer catch):", error.message);
   } finally {
     dispatch({ type: END_LOADING });
   }
@@ -136,4 +150,23 @@ export const addReview = (id, reviewData) => async (dispatch) => {
         console.log(error);
         throw error;
     }
+};
+
+export const fetchRecommendations = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: START_LOADING });
+    console.log(id)
+    // Assuming your api.js has a post method configured
+    const { data } = await api.recommendProduct(id);
+    console.log(data)
+
+    // This will dispatch the recommended products to your reducer
+    dispatch({ type: FETCH_RECOMMENDATIONS, payload: data });
+    
+    dispatch({ type: END_LOADING });
+  } catch (error) {
+    console.error('Frontend error fetching recommendations:', error);
+    // You might want to dispatch an error action here as well
+    dispatch({ type: END_LOADING });
+  }
 };

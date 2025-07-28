@@ -1,3 +1,4 @@
+import { recommendProduct } from '../api';
 import {
   FETCH_PRODUCT,
   FETCH_PRODUCTS,
@@ -8,7 +9,8 @@ import {
   FETCH_CAROUSELS,
   FETCH_PRODUCT_BY_SEARCH,
   DELETE_PRODUCT,
-  ADD_REVIEW
+  ADD_REVIEW,
+  FETCH_RECOMMENDATIONS
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -21,6 +23,7 @@ const initialState = {
   categoryCarousels: {}, // 🆕 carousel-specific product groups
   reFetchTrigger: Date.now(),
   success: false,
+  recommendedProducts : []
 };
 
 export default function productsData(state = initialState, action) {
@@ -71,6 +74,11 @@ export default function productsData(state = initialState, action) {
               product._id === action.payload._id ? action.payload : product
           ),
           product: action.payload, // Update the single product if it's currently in view
+      };
+    case FETCH_RECOMMENDATIONS:
+      return {
+        ...state,
+        recommendedProducts: action.payload,
       };
     default:
       return state;

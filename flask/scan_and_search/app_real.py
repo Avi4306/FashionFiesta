@@ -12,7 +12,7 @@ from flask_cors import CORS
 # === Config ===
 app = Flask(__name__)
 
-print("✅ Running correct app.py in flask/scan_and_search")
+print("Running correct app.py in flask/scan_and_search")
 
 
 CORS(app)
@@ -46,21 +46,21 @@ def needs_rebuild():
         ]
         return len(saved) != len(current_images)
     except Exception as e:
-        print(f"⚠️ Error reading feature file: {e}")
+        print(f" Error reading feature file: {e}")
         return True
 
 if needs_rebuild():
-    print("🔄 Rebuilding feature dataset...")
+    print(" Rebuilding feature dataset...")
     build_feature_dataset(DATASET_FOLDER, FEATURES_PATH)
 else:
-    print("✅ Feature dataset up to date.")
+    print(" Feature dataset up to date.")
 
 # === Load Feature DB ===
 try:
     with open(FEATURES_PATH, 'r') as f:
         features_db = json.load(f)
 except Exception as e:
-    print(f"❌ Failed to load image features: {e}")
+    print(f" Failed to load image features: {e}")
     features_db = {}
 
 # === Load Text Data ===
@@ -69,7 +69,7 @@ try:
         data = json.load(f)
     df = pd.DataFrame(data)
 except Exception as e:
-    print(f"❌ Failed to load text dataset: {e}")
+    print(f" Failed to load text dataset: {e}")
     df = pd.DataFrame(columns=['id', 'title', 'brand', 'price', 'ratings', 'imageURL'])
 
 df['title'] = df['title'].fillna('')
@@ -95,13 +95,13 @@ def index():
 
 @app.before_request
 def before_any():
-    print("🚨 Received request to:", request.path)
+    print(" Received request to:", request.path)
 
 
 @app.route('/search', methods=['POST'])
 def search():
-    print("📩 /search route triggered")
-    print("📥 Flask received files:", request.files)
+    print(" /search route triggered")
+    print(" Flask received files:", request.files)
     
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
@@ -128,7 +128,7 @@ def search():
 
             return jsonify({'matches': matches})
         except Exception as e:
-            print(f"❌ Error in similarity search: {e}")
+            print(f" Error in similarity search: {e}")
             return jsonify({'error': 'Image processing failed'}), 500
 
     return jsonify({'error': 'Invalid file type'}), 400
@@ -138,7 +138,7 @@ def search():
 def recommend():
     data = request.get_json()
     item_id = str(data.get('id'))
-
+    print("Flask received ID:", item_id)
     if item_id not in id_to_index:
         return jsonify({'error': 'Item not found'}), 404
 

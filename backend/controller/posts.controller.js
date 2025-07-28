@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 export const getPosts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 30;
+    const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
 
     const [posts, total] = await Promise.all([
