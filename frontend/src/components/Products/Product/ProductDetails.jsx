@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getProductById, deleteProduct } from "../../../actions/products";
+import { getProductById, deleteProduct, fetchRecommendations } from "../../../actions/products";
 import { addToCart } from "../../../actions/cart";
 import AddReviewSection from "./AddReviewSection";
+import ProductCarousel from "../../TrendingStyles/Categories/ProductCarousel";
 import { FaTrash, FaShareAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 
-// --- Sub-components with Themed Styling ---
+// --- Sub-components (Unchanged) ---
 
 const ImageGallery = ({ images, title, mainImage, setMainImage }) => (
   <div>
@@ -19,7 +20,7 @@ const ImageGallery = ({ images, title, mainImage, setMainImage }) => (
       />
     </div>
     {images?.length > 1 && (
-      <div className="mt-4 flex gap-4">
+      <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
         {images.map((img, idx) => (
           <div
             key={idx}
@@ -115,41 +116,56 @@ export default function ProductDetails() {
   const navigate = useNavigate();
 
   const [quantity, setQuantity] = useState(1);
-  const { product, isLoading } = useSelector((state) => state.productsData);
+  const { product, isLoading, recommendedProducts } = useSelector((state) => state.productsData);
   const user = useSelector((state) => state.auth?.authData?.result);
+
   const [mainImage, setMainImage] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showShareSuccess, setShowShareSuccess] = useState(false);
   
-  // ... (Handlers and useEffects remain the same)
   useEffect(() => {
-    if (id) dispatch(getProductById(id));
+    if (id) {
+        dispatch(getProductById(id));
+        dispatch(fetchRecommendations(id));
+    }
   }, [dispatch, id]);
 
   useEffect(() => {
-    if (product?.images?.length > 0) setMainImage(product.images[0]);
+    if (product?.images?.length > 0) {
+        setMainImage(product.images[0]);
+    }
   }, [product]);
 
   const handleAddToCart = () => dispatch(addToCart(product, quantity));
+
   const handleBuyNow = () => {
     dispatch(addToCart(product, quantity));
     navigate("/checkout");
   };
+
   const handleConfirmDelete = () => {
     dispatch(deleteProduct(id));
     setIsDeleteDialogOpen(false);
     navigate(-1);
   };
+
   const handleShare = async () => {
     if (navigator.share) {
-      await navigator.share({ title: product.title, text: product.description, url: window.location.href });
+      try {
+        await navigator.share({ title: product.title, text: product.description, url: window.location.href });
+      } catch (error) {
+        console.error("Error sharing:", error);
+      }
     } else {
-      await navigator.clipboard.writeText(window.location.href);
-      setShowShareSuccess(true);
-      setTimeout(() => setShowShareSuccess(false), 2500);
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        setShowShareSuccess(true);
+        setTimeout(() => setShowShareSuccess(false), 2500);
+      } catch (error) {
+        console.error("Failed to copy:", error);
+      }
     }
   };
-
 
   if (isLoading || !product) {
     return <div className="bg-[#faf7f3] p-10 text-center text-gray-500 min-h-screen">Loading Product...</div>;
@@ -161,10 +177,8 @@ export default function ProductDetails() {
     <div className="bg-[#faf7f3]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-2">
-          {/* Left Column: Image Gallery */}
           <ImageGallery images={product.images} title={product.title} mainImage={mainImage} setMainImage={setMainImage} />
 
-          {/* Right Column: Product Information */}
           <div className="flex flex-col">
             <ProductHeader 
               title={product.title} 
@@ -204,6 +218,13 @@ export default function ProductDetails() {
             </div>
           </div>
         </div>
+        
+        {/* Recommendations Section */}
+        {recommendedProducts?.length > 0 && (
+          <div className="mt-16 pt-10 border-t border-[#dcc5b2]">
+             <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts }} />
+          </div>
+        )}
       </div>
 
       {/* Custom Dialog for Delete Confirmation */}
@@ -238,7 +259,6 @@ export default function ProductDetails() {
               <span className="text-sm font-medium">Link copied to clipboard!</span>
           </div>
       </div>
-
     </div>
   );
 }

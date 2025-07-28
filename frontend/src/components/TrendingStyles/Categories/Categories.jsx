@@ -10,10 +10,14 @@ const Categories = () => {
     (state) => state.productsData
   );
 
+  // Define the specific categories you want to fetch
+  const specificCategories = ["Men", "Women", "Kids", "Accessories"];
+
   useEffect(() => {
     // The effect now runs whenever a new product is added
-    dispatch(fetchCarousels());
-  }, [dispatch, reFetchTrigger]); // <-- Added reFetchTrigger here
+    // Pass the specific categories to the fetchCarousels action creator
+    dispatch(fetchCarousels(specificCategories));
+  }, [dispatch, reFetchTrigger]); // <-- Added specificCategories here
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -21,7 +25,10 @@ const Categories = () => {
   return (
     <div className="p-4">
       {Object.entries(categoryCarousels).map(([category, products]) => (
-        <ProductCarousel key={category} category={category} products={products} />
+        // Render a carousel only if the category is in the specificCategories array
+        specificCategories.includes(category) && (
+          <ProductCarousel key={category} category={category} products={products} />
+        )
       ))}
     </div>
   );
