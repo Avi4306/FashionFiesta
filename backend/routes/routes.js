@@ -30,15 +30,27 @@ router.get("/user",(req,res)=>
 
 router.post('/recommend/:id',async (req,res)=>{
 
-    const {id} = req.body.id
-
+    const {id} = req.params
+    console.log("Received ID from frontend:", id);
      try {
     const response = await axios.post('http://localhost:5000/recommend', { id });
     res.json(response.data);
   } catch (error) {
-    console.error('Flask error:', error.message);
+    console.error('Error calling Flask server:');
+    if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Status:', error.response.status);
+        console.error('Data:', error.response.data);
+    } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+    } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Request error:', error.message);
+    }
     res.status(500).json({ error: 'Recommendation failed' });
-  }
+}
 });
 
 router.get('/search', (req, res) => {

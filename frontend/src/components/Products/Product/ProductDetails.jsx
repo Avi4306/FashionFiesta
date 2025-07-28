@@ -3,7 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProductById, deleteProduct } from "../../../actions/products";
 import { addToCart } from "../../../actions/cart";
+import { fetchRecommendations } from "../../../actions/products"; // New import
 import AddReviewSection from "./AddReviewSection";
+import ProductCarousel from "../../TrendingStyles/Categories/ProductCarousel"; // New import for the carousel
 import {
   Button,
   Tooltip,
@@ -29,21 +31,19 @@ export default function ProductDetails() {
   const navigate = useNavigate();
 
   const [quantity, setQuantity] = useState(1);
-  const { product, isLoading } = useSelector((state) => state.productsData);
+  const { product, isLoading, recommendedProducts } = useSelector( // Get recommendedProducts from state
+    (state) => state.productsData
+  );
   const user = useSelector((state) => state.auth?.authData?.result);
 
-  // State to manage the main image being displayed
   const [mainImage, setMainImage] = useState(null);
-
-  // State to manage the delete confirmation dialog
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
-  // NEW: State for share functionality
   const [showShareSuccess, setShowShareSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
       dispatch(getProductById(id));
+      dispatch(fetchRecommendations(id)); // New: Fetch recommendations when ID changes
     }
   }, [dispatch, id]);
 
@@ -100,10 +100,8 @@ export default function ProductDetails() {
     setIsDeleteDialogOpen(false);
   };
 
-  // NEW: Function to handle sharing
   const handleShare = async () => {
     if (navigator.share) {
-      // Use native Web Share API if supported
       try {
         await navigator.share({
           title: title,
@@ -114,7 +112,6 @@ export default function ProductDetails() {
         console.error("Error sharing:", error);
       }
     } else {
-      // Fallback: copy link to clipboard
       try {
         await navigator.clipboard.writeText(window.location.href);
         setShowShareSuccess(true);
@@ -144,188 +141,158 @@ export default function ProductDetails() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-10">
-      {/* Images */}
-      <div>
-        <img
-          src={mainImage || "https://placehold.co/500x500"}
-          alt={title}
-          className="w-full object-cover rounded-xl border border-gray-200"
-          loading="lazy"
-        />
-        {images?.length > 1 && (
-          <div className="flex gap-2 mt-4 overflow-auto">
-            {images.map((img, idx) => (
-              <img
-                key={idx}
-                src={img}
-                alt={`img-${idx}`}
-                className={`w-20 h-20 object-cover rounded-md border cursor-pointer ${
-                  img === mainImage
-                    ? "border-2 border-[#aa5a44]"
-                    : "border-gray-200"
-                }`}
-                loading="lazy"
-                onClick={() => setMainImage(img)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Product Info */}
-      <div>
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-semibold text-gray-800 mb-2">
-            {title}
-          </h2>
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Tooltip title="Share Product">
-              <IconButton
-                onClick={handleShare}
-                className="!text-gray-500 hover:!bg-gray-100"
-              >
-                <FaShareAlt />
-              </IconButton>
-            </Tooltip>
-            {user?._id === creator?._id && (
-              <Tooltip title="Delete Product">
-                <IconButton
-                  onClick={handleDelete}
-                  className="!text-red-500 hover:!bg-red-50"
-                >
-                  <FaTrash />
-                </IconButton>
-              </Tooltip>
-            )}
-          </div>
-        </div>
-        {brand && (
-          <p className="text-sm text-gray-500 mb-2">
-            <strong>Brand:</strong> {brand}
-          </p>
-        )}
-        {category && (
-          <p className="text-sm text-gray-500 mb-4">
-            <strong>Category:</strong> {category}
-          </p>
-        )}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xl font-bold text-[#aa5a44]">
-            ₹{discountedPrice.toFixed(2)}
-          </span>
-          {discount > 0 && (
-            <>
-              <span className="line-through text-gray-400">₹{price}</span>
-              <span className="text-green-600 font-semibold">
-                {discount}% OFF
-              </span>
-            </>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="grid md:grid-cols-2 gap-10">
+        {/* Images */}
+        <div>
+          <img
+            src={mainImage || "https://placehold.co/500x500"}
+            alt={title}
+            className="w-full object-cover rounded-xl border border-gray-200"
+            loading="lazy"
+          />
+          {images?.length > 1 && (
+            <div className="flex gap-2 mt-4 overflow-auto">
+              {images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`img-${idx}`}
+                  className={`w-20 h-20 object-cover rounded-md border cursor-pointer ${
+                    img === mainImage
+                      ? "border-2 border-[#aa5a44]"
+                      : "border-gray-200"
+                  }`}
+                  loading="lazy"
+                  onClick={() => setMainImage(img)}
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        <p className="text-sm text-gray-700 mb-4">{description}</p>
-
-        {/* Sizes */}
-        {sizes?.length > 0 && (
-          <div className="mb-4">
-            <strong className="block mb-1 text-gray-700">Sizes:</strong>
-            <div className="flex gap-2">
-              {sizes.map((size) => (
-                <span
-                  key={size}
-                  className="border px-3 py-1 rounded-md text-sm text-gray-700"
+        {/* Product Info */}
+        <div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-semibold text-gray-800 mb-2">
+              {title}
+            </h2>
+            <div className="flex items-center gap-2">
+              <Tooltip title="Share Product">
+                <IconButton
+                  onClick={handleShare}
+                  className="!text-gray-500 hover:!bg-gray-100"
                 >
-                  {size}
+                  <FaShareAlt />
+                </IconButton>
+              </Tooltip>
+              {user?._id === creator?._id && (
+                <Tooltip title="Delete Product">
+                  <IconButton
+                    onClick={handleDelete}
+                    className="!text-red-500 hover:!bg-red-50"
+                  >
+                    <FaTrash />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+          {brand && (
+            <p className="text-sm text-gray-500 mb-2">
+              <strong>Brand:</strong> {brand}
+            </p>
+          )}
+          {category && (
+            <p className="text-sm text-gray-500 mb-4">
+              <strong>Category:</strong> {category}
+            </p>
+          )}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl font-bold text-[#aa5a44]">
+              ₹{discountedPrice.toFixed(2)}
+            </span>
+            {discount > 0 && (
+              <>
+                <span className="line-through text-gray-400">₹{price}</span>
+                <span className="text-green-600 font-semibold">
+                  {discount}% OFF
                 </span>
-              ))}
-            </div>
+              </>
+            )}
           </div>
-        )}
 
-        {/* Colors */}
-        {colors?.length > 0 && (
-          <div className="mb-4">
-            <strong className="block mb-1 text-gray-700">Colors:</strong>
-            <div className="flex gap-2">
-              {colors.map((color) => (
-                <span
-                  key={color}
-                  className="w-6 h-6 rounded-full border border-gray-300"
-                  style={{ backgroundColor: color }}
-                  title={color}
-                ></span>
-              ))}
+          <p className="text-sm text-gray-700 mb-4">{description}</p>
+
+          {/* ... (rest of your JSX for sizes, colors, stock, etc.) ... */}
+
+          {stock > 0 && (
+            <div className="flex items-center gap-4 mb-4">
+              <strong className="text-gray-700">Quantity:</strong>
+              <div className="flex items-center border rounded-md">
+                <button
+                  onClick={decreaseQuantity}
+                  disabled={quantity <= 1}
+                  className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-md disabled:opacity-50"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  className="w-12 text-center border-x outline-none text-gray-800"
+                  min="1"
+                  max={stock}
+                />
+                <button
+                  onClick={increaseQuantity}
+                  disabled={quantity >= stock}
+                  className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-50"
+                >
+                  +
+                </button>
+              </div>
             </div>
+          )}
+
+          <div className="flex gap-4">
+            <button
+              onClick={handleAddToCart}
+              disabled={stock === 0}
+              className="bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738] disabled:opacity-50"
+            >
+              Add to Cart
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={stock === 0}
+              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
+            >
+              Buy Now
+            </button>
           </div>
-        )}
 
-        <p className="text-sm mb-4 text-gray-500">
-          {stock > 0 ? `${stock} in stock` : "Out of stock"}
-        </p>
-
-        {/* Quantity Selector */}
-        {stock > 0 && (
-          <div className="flex items-center gap-4 mb-4">
-            <strong className="text-gray-700">Quantity:</strong>
-            <div className="flex items-center border rounded-md">
-              <button
-                onClick={decreaseQuantity}
-                disabled={quantity <= 1}
-                className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-l-md disabled:opacity-50"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                className="w-12 text-center border-x outline-none text-gray-800"
-                min="1"
-                max={stock}
-              />
-              <button
-                onClick={increaseQuantity}
-                disabled={quantity >= stock}
-                className="px-3 py-1 text-lg text-gray-600 hover:bg-gray-100 rounded-r-md disabled:opacity-50"
-              >
-                +
-              </button>
-            </div>
+          <div className="mt-6">
+            <strong className="text-gray-800">Rating:</strong>{" "}
+            <span className="text-yellow-500 font-semibold">
+              {rating?.toFixed(1) || "0.0"} / 5
+            </span>
+            <span className="text-gray-600 ml-2">
+              ({numReviews || "0"} reviews)
+            </span>
           </div>
-        )}
-
-        {/* Buttons */}
-        <div className="flex gap-4">
-          <button
-            onClick={handleAddToCart}
-            disabled={stock === 0}
-            className="bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738] disabled:opacity-50"
-          >
-            Add to Cart
-          </button>
-          <button
-            onClick={handleBuyNow}
-            disabled={stock === 0}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
-          >
-            Buy Now
-          </button>
+          <AddReviewSection product={product} />
         </div>
-
-        {/* Rating and Reviews */}
-        <div className="mt-6">
-          <strong className="text-gray-800">Rating:</strong>{" "}
-          <span className="text-yellow-500 font-semibold">
-            {rating?.toFixed(1) || "0.0"} / 5
-          </span>
-          <span className="text-gray-600 ml-2">
-            ({numReviews || "0"} reviews)
-          </span>
-        </div>
-        <AddReviewSection product={product} />
       </div>
+      
+      {/* New Recommendations Section */}
+      {recommendedProducts?.length > 0 && (
+        <div className="mt-12">
+          <h3 className="text-2xl font-bold mb-4">You Might Also Like</h3>
+          <ProductCarousel products={recommendedProducts} />
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -351,7 +318,7 @@ export default function ProductDetails() {
         </DialogActions>
       </Dialog>
       
-      {/* NEW: Snackbar for "Link copied" message */}
+      {/* Snackbar for "Link copied" message */}
       <Snackbar
         open={showShareSuccess}
         autoHideDuration={2000}

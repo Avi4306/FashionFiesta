@@ -8,7 +8,8 @@ import {
   FETCH_CAROUSELS,
   FETCH_PRODUCT_BY_SEARCH,
   DELETE_PRODUCT,
-  ADD_REVIEW
+  ADD_REVIEW,
+  FETCH_RECOMMENDATIONS
 } from '../constants/actionTypes';
 
 export const getProductById = (id) => async (dispatch) => {
@@ -96,19 +97,11 @@ export const fetchCarousels = (categoriesToFetch) => async (dispatch) => {
       categories = allCategories;
     }
 
-    console.log('Categories being processed:', categories);
 
     const productPromises = categories.map(async (category) => {
-      console.log(`Attempting to fetch products for category: ${category}`);
       
-      // Let's use a try/catch here for each API call to isolate the issue.
       try {
-        // Use the destructuring that you know is correct now.
         const { data: products } = await api.fetchProducts({ category, limit: 15 });
-        
-        // Let's log the actual data received to be 100% sure.
-        console.log(`Successfully fetched ${products.length} products for ${category}. Products:`, products);
-        
         return { category, products };
       } catch (innerError) {
         // If there's an error with a specific category, it will be logged here.
@@ -124,9 +117,6 @@ export const fetchCarousels = (categoriesToFetch) => async (dispatch) => {
       return acc;
     }, {});
     
-    // Log the final categoryData object to see what's being sent to the reducer.
-    console.log('Final categoryData:', categoryData);
-
     dispatch({ type: FETCH_CAROUSELS, payload: categoryData });
   } catch (error) {
     console.error("Error fetching carousels (outer catch):", error.message);
@@ -160,4 +150,23 @@ export const addReview = (id, reviewData) => async (dispatch) => {
         console.log(error);
         throw error;
     }
+};
+
+export const fetchRecommendations = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: START_LOADING });
+    console.log(id)
+    // Assuming your api.js has a post method configured
+    const { data } = await api.recommendProduct(id);
+    console.log(data)
+
+    // This will dispatch the recommended products to your reducer
+    dispatch({ type: FETCH_RECOMMENDATIONS, payload: data });
+    
+    dispatch({ type: END_LOADING });
+  } catch (error) {
+    console.error('Frontend error fetching recommendations:', error);
+    // You might want to dispatch an error action here as well
+    dispatch({ type: END_LOADING });
+  }
 };

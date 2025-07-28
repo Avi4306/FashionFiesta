@@ -65,3 +65,5 @@ export const removeCartItem = (productId) => API.delete(`/cart/${productId}`);
 
 export const uploadImage = (fileData, folderName) =>
   API.post("/upload", { fileData, folderName });
+
+export const recommendProduct = (id) => API.post(`/recommend/${ id }`);
