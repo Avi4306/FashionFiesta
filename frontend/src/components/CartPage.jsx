@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateCartItemQuantity, removeCartItem } from '../actions/cart'; 
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -72,7 +73,7 @@ export default function CartPage() {
                   onClick={() => handleRemoveItem(item.product._id)}
                   className="text-red-500 hover:text-red-700"
                 >
-                  Remove
+                  <DeleteOutlineOutlinedIcon fontSize='large' />
                 </button>
               </div>
             </div>

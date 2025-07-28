@@ -59,13 +59,14 @@ const TrendingStyles = () => {
             >
                 <Button
                     variant="contained"
-                    color="primary"
+                    
                     onClick={handleOpenCreateProduct}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                     sx={{
                         transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), padding 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                         display: 'flex',
+                        backgroundColor: '#ccb5a2',
                         alignItems: 'center',
                         justifyContent: 'flex-start',
                         overflow: 'hidden',

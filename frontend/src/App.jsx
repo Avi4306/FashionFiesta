@@ -28,6 +28,7 @@ import SearchPage from './components/SearchPage.jsx'
 import FeaturedDesigners from './components/FeaturedDesigners.jsx'
 import UserPostsPage from './components/User/UserPostsPage.jsx'
 import UserProductsPage from './components/User/UserProductsPage.jsx'
+import ScrollToTop from './components/ScrollToTop.jsx';
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -37,6 +38,7 @@ function App() {
   const user = JSON.parse(localStorage.getItem('profile'));
   return (<>
     <Router>
+      <ScrollToTop />
     <Header />
     <NavBar />
     <Routes>
