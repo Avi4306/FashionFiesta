@@ -85,15 +85,36 @@ export const createProduct = (productData) => async (dispatch) => {
   }
 };
 
-export const fetchCarousels = () => async (dispatch) => {
+export const fetchCarousels = (categoriesToFetch) => async (dispatch) => {
   try {
     dispatch({ type: START_LOADING });
+    let categories = [];
+    if (categoriesToFetch && Array.isArray(categoriesToFetch)) {
+      categories = categoriesToFetch;
+    } else {
+      const { data: allCategories } = await api.fetchCategories();
+      categories = allCategories;
+    }
 
-    const { data: categories } = await api.fetchCategories();
-    
+    console.log('Categories being processed:', categories);
+
     const productPromises = categories.map(async (category) => {
-      const { data: products } = await api.fetchProducts({ category, limit: 10 }); 
-      return { category, products };
+      console.log(`Attempting to fetch products for category: ${category}`);
+      
+      // Let's use a try/catch here for each API call to isolate the issue.
+      try {
+        // Use the destructuring that you know is correct now.
+        const { data: products } = await api.fetchProducts({ category, limit: 15 });
+        
+        // Let's log the actual data received to be 100% sure.
+        console.log(`Successfully fetched ${products.length} products for ${category}. Products:`, products);
+        
+        return { category, products };
+      } catch (innerError) {
+        // If there's an error with a specific category, it will be logged here.
+        console.error(`Failed to fetch products for category: ${category}`, innerError.message);
+        return { category, products: [] };
+      }
     });
 
     const results = await Promise.all(productPromises);
@@ -103,9 +124,12 @@ export const fetchCarousels = () => async (dispatch) => {
       return acc;
     }, {});
     
+    // Log the final categoryData object to see what's being sent to the reducer.
+    console.log('Final categoryData:', categoryData);
+
     dispatch({ type: FETCH_CAROUSELS, payload: categoryData });
   } catch (error) {
-    console.error("Error fetching carousels:", error);
+    console.error("Error fetching carousels (outer catch):", error.message);
   } finally {
     dispatch({ type: END_LOADING });
   }
