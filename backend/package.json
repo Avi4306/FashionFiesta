@@ -6,11 +6,12 @@
   "license": "ISC",
   "author": "",
   "main": "index.js",
-  "scripts": {
-    "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\"",
-    "server": "nodemon backend/index.js",
-    "flask": "cd flask/scan_and_search && python app_real.py"
-  },
+"scripts": {
+  "server": "nodemon backend/index.js",
+  "flask": "set PYTHONIOENCODING=utf-8 && python ../flask/scan_and_search/app.py",
+  "dev": "concurrently --prefix name --names server,flask -c blue,green --cwd . \"npm:server\" \"npm:flask\""
+},
+
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
     "axios": "^1.10.0",
@@ -23,7 +24,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.2",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.5"
+    "nodemailer": "^7.0.5",
+    "razorpay": "^2.9.6"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

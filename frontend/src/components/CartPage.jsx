@@ -9,6 +9,7 @@ import {
   getCart, // Import the getCart action
   mergeLocalCart, // Import the mergeLocalCart action
 } from '../actions/cart';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -134,7 +135,7 @@ export default function CartPage() {
                   onClick={() => handleRemoveItem(item.product._id)}
                   className="text-red-500 hover:text-red-700"
                 >
-                  Remove
+                  <DeleteOutlineOutlinedIcon fontSize='large' />
                 </button>
               </div>
             </div>

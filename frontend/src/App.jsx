@@ -18,6 +18,7 @@ import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import AboutUs from "./components/AboutUs/AboutUs.jsx";
 import Auth from './components/Auth/Auth.jsx';
 import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails.jsx';
+import { Navigate } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute.jsx'; // Your existing PrivateRoute
 import Profile from './components/User/Profile.jsx';
 import UserDetails from './components/User/UserDetails.jsx';
@@ -28,7 +29,7 @@ import SearchPage from './components/SearchPage.jsx';
 import FeaturedDesigners from './components/FeaturedDesigners.jsx';
 import UserPostsPage from './components/User/UserPostsPage.jsx';
 import UserProductsPage from './components/User/UserProductsPage.jsx';
-
+import ScrollToTop from './components/ScrollToTop.jsx';
 // --- NEW IMPORTS FOR ADMIN PANEL ---
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // The role-based protected route component
 import AdminDashboard from './components/Admin/AdminDashboard.jsx'; // Admin Dashboard component
@@ -50,6 +51,7 @@ function App() {
   return (
     <>
       <Router>
+        <ScrollToTop />
         <Header />
         <NavBar />
         <Routes>

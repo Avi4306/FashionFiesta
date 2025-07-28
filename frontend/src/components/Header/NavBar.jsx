@@ -12,7 +12,10 @@ export default function NavBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const user = useSelector((state) => state.auth.authData); // This 'user' object contains user.result and user.token
+  const user = useSelector((state) => state.auth.authData);
+  const { cart } = useSelector((state) => state.cart);
+  const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,7 +60,6 @@ export default function NavBar() {
     }
   }, [location, user, dispatch, navigate]); // Added dispatch and navigate to dependency array
 
-  // Close profile dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -83,10 +85,10 @@ export default function NavBar() {
 
   // Function to handle the search logic
   const handleSearch = (e) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
+    if (e.key === "Enter" && searchQuery.trim()) {
       navigate(`/products/search?searchQuery=${searchQuery}`);
-      setSearchActive(false); // Close search bar after searching
-      setSearchQuery(""); // Clear the search bar
+      setSearchActive(false);
+      setSearchQuery("");
     }
   };
 
@@ -112,7 +114,7 @@ export default function NavBar() {
         <div className="hidden md:flex gap-6 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
           <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
-          <Link to="users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+          <Link to="/users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
           {/* NEW: Admin Panel link in desktop nav for quick access for admins (optional) */}
           {isAdmin && (
@@ -138,17 +140,27 @@ export default function NavBar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
             />
           </div>
 
           {/* Icons */}
           <div className="flex items-center gap-4 text-xl text-gray-800">
-            <Link to="/"> {/* Changed from CiHome to Link */}
-                <CiHome className="text-3xl mx-1 hover:text-[#aa5a44]" />
-            </Link>
-            <Link to='/cart'>
-              <PiShoppingCartThin className="text-3xl mx-1 hover:text-[#aa5a44]" />
-            </Link>
+            <CiHome className="text-3xl mx-1" />
+
+            {/* Cart Icon with Badge */}
+            <div className="relative mx-1">
+              <Link to="/cart">
+                <PiShoppingCartThin className="text-3xl text-gray-800" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            </div>
 
             {/* Profile Dropdown */}
             <div className="relative pt-2" ref={profileRef}>
