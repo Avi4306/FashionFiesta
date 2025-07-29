@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
 CORS(app)
 
-print("✅ Running correct app.py in flask/scan_and_search")
+print("[OK] Running correct app.py in flask/scan_and_search")
 
 # Paths
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
@@ -43,21 +43,21 @@ def needs_rebuild():
         ]
         return len(saved) != len(current_images)
     except Exception as e:
-        print(f"⚠️ Error reading feature file: {e}")
+        print(f"[WARN] Error reading feature file: {e}")
         return True
 
 # === Build or Load Features ===
 if needs_rebuild():
-    print("🔄 Rebuilding feature dataset...")
+    print("[INFO] Rebuilding feature dataset...")
     build_feature_dataset(DATASET_FOLDER, FEATURES_PATH)
 else:
-    print("✅ Feature dataset up to date.")
+    print("[OK] Feature dataset up to date.")
 
 try:
     with open(FEATURES_PATH, 'r') as f:
         features_db = json.load(f)
 except Exception as e:
-    print(f"❌ Failed to load image features: {e}")
+    print(f"[ERROR] Failed to load image features: {e}")
     features_db = {}
 
 # === Load Text Data ===
@@ -66,7 +66,7 @@ try:
         data = json.load(f)
     df = pd.DataFrame(data)
 except Exception as e:
-    print(f"❌ Failed to load text dataset: {e}")
+    print(f"[ERROR] Failed to load text dataset: {e}")
     df = pd.DataFrame(columns=['_id', 'title', 'brand', 'price', 'ratings', 'imageURL'])
 
 # Extract _id from MongoDB format
@@ -88,7 +88,7 @@ try:
     cosine_sim = cosine_similarity(tfidf_matrix)
     id_to_index = {str(row['_id']): idx for idx, row in df.iterrows()}
 except Exception as e:
-    print(f"❌ TF-IDF failed: {e}")
+    print(f"[ERROR] TF-IDF failed: {e}")
     tfidf_matrix = None
     cosine_sim = []
     id_to_index = {}
@@ -104,11 +104,11 @@ def index():
 
 @app.before_request
 def before_any():
-    print("🚨 Received request to:", request.path)
+    print("[DEBUG] Received request to:", request.path)
 
 @app.route('/search', methods=['POST'])
 def search():
-    print("📩 /search route triggered")
+    print("[DEBUG] /search route triggered")
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
 
@@ -134,14 +134,14 @@ def search():
 
             return jsonify({'matches': matches})
         except Exception as e:
-            print(f"❌ Error in similarity search: {e}")
+            print(f"[ERROR] Error in similarity search: {e}")
             return jsonify({'error': 'Image processing failed'}), 500
 
     return jsonify({'error': 'Invalid file type'}), 400
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
-    print("📩 /recommend route triggered")
+    print("[DEBUG] /recommend route triggered")
     data = request.get_json()
     item_id = str(data.get('_id'))
 

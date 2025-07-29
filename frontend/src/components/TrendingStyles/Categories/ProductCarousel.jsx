@@ -18,7 +18,7 @@ const renderStars = (rating = 0) => {
 
 const ProductCarousel = ({ category, products }) => {
   const navigate = useNavigate();
-  const productList = products?.products || [];
+  const productList = Array.isArray(products?.products) ? products.products : [];
 
   return (
     <div className="bg-[#fff] py-8 md:py-12">

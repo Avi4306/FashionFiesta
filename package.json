@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\"",
     "server": "nodemon backend/index.js",
-    "flask": "cd flask/scan_and_search && python app_real.py"
+    "flask": "cd flask/scan_and_search && python app.py"
   },
   "dependencies": {
     "@mui/x-data-grid": "^8.9.1",
