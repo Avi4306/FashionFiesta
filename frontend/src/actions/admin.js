@@ -7,16 +7,18 @@ import {
   UPDATE_ADMIN_USER_PASSWORD,
   DELETE_ADMIN_USER,
   FETCH_ADMIN_PRODUCTS,
-  CREATE_ADMIN_PRODUCT, // Added
-  UPDATE_ADMIN_PRODUCT, // Added
+  CREATE_ADMIN_PRODUCT,
+  UPDATE_ADMIN_PRODUCT,
   DELETE_ADMIN_PRODUCT,
   FETCH_ADMIN_POSTS,
-  CREATE_ADMIN_POST, // Added
-  UPDATE_ADMIN_POST, // Added
+  CREATE_ADMIN_POST,
+  UPDATE_ADMIN_POST,
   DELETE_ADMIN_POST,
   SET_ADMIN_ERROR,
   CLEAR_ADMIN_ERROR,
-  AUTH
+  AUTH,
+  START_ADMIN_LOADING, // Imported
+  END_ADMIN_LOADING,   // Imported
 } from '../constants/actionTypes';
 
 // Helper to handle dispatching success/error messages
@@ -37,12 +39,17 @@ const handleError = (dispatch, error, defaultMessage) => {
 };
 
 // --- User Management Actions ---
-export const getAdminUsers = () => async (dispatch) => {
+export const getAdminUsers = (page = 1, limit = 10) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING }); // Dispatch loading start
   try {
-    const { data } = await api.adminGetAllUsers();
-    return handleResponse(dispatch, FETCH_ADMIN_USERS, data, 'Users fetched successfully.');
+    console.log("Fetching users with page:", page, "limit:", limit);
+    const { data } = await api.adminGetAllUsers(page, limit);
+    console.log(data)
+    return handleResponse(dispatch, FETCH_ADMIN_USERS, data, 'Users fetched successfully with pagination.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to fetch users.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING }); // Dispatch loading end
   }
 };
 
@@ -55,36 +62,30 @@ export const createAdminUser = (userData) => async (dispatch) => {
   }
 };
 
-export const updateAdminUserRole = (id, role) => async (dispatch, getState) => { // <-- Add getState here
+export const updateAdminUserRole = (id, role) => async (dispatch, getState) => {
   try {
     const { data } = await api.adminUpdateUserRole(id, { role });
-    // 'data' here is the updated user object returned from your backend
     handleResponse(dispatch, UPDATE_ADMIN_USER_ROLE, data, `User role updated to ${role}.`);
 
-    // --- NEW LOGIC TO UPDATE CURRENT USER'S LOCAL STORAGE AND AUTH STATE ---
     const currentState = getState();
-    const currentUserAuthData = currentState.auth.authData; // Get the current logged-in user's auth data
+    const currentUserAuthData = currentState.auth.authData;
 
-    // Check if the user whose role was updated is the same as the currently logged-in user
     if (currentUserAuthData && currentUserAuthData.result?._id === data._id) {
-      // Construct the new authData for the current user
-      // We take the existing token but update the 'result' object with the new user data
       const updatedAuthDataForCurrentUser = {
         ...currentUserAuthData,
-        result: data, // 'data' contains the full updated user object (including the new role)
+        result: data,
       };
 
-      // Dispatch the AUTH action to update the main auth state and localStorage
       dispatch({ type: AUTH, data: updatedAuthDataForCurrentUser });
       console.log("Logged-in user's role updated in Redux auth state and localStorage.");
     }
-    // --- END NEW LOGIC ---
 
-    return { success: true, data }; // Return success for component feedback
+    return { success: true, data };
   } catch (error) {
     return handleError(dispatch, error, 'Failed to update user role.');
   }
 };
+
 export const updateAdminUserPassword = (id, newPassword) => async (dispatch) => {
   try {
     const { data } = await api.adminUpdateUserPassword(id, { newPassword });
@@ -104,18 +105,22 @@ export const deleteAdminUser = (id) => async (dispatch) => {
 };
 
 // --- Product Management Actions ---
-export const getAdminProducts = () => async (dispatch) => {
+export const getAdminProducts = (page = 1, limit = 10) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING }); // Dispatch loading start
   try {
-    const { data } = await api.adminGetAllProducts();
-    return handleResponse(dispatch, FETCH_ADMIN_PRODUCTS, data, 'Products fetched successfully.');
+    console.log("Fetching products with page:", page, "limit:", limit);
+    const { data } = await api.adminGetAllProducts(page, limit);
+    return handleResponse(dispatch, FETCH_ADMIN_PRODUCTS, data, 'Products fetched successfully with pagination.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to fetch products.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING }); // Dispatch loading end
   }
 };
 
 export const createAdminProduct = (productData) => async (dispatch) => {
   try {
-    const { data } = await api.adminCreateProduct(productData); // Call the API to create
+    const { data } = await api.adminCreateProduct(productData);
     return handleResponse(dispatch, CREATE_ADMIN_PRODUCT, data, 'Product created successfully.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to create product.');
@@ -124,7 +129,7 @@ export const createAdminProduct = (productData) => async (dispatch) => {
 
 export const updateAdminProduct = (id, productData) => async (dispatch) => {
   try {
-    const { data } = await api.adminUpdateProduct(id, productData); // Call the API to update
+    const { data } = await api.adminUpdateProduct(id, productData);
     return handleResponse(dispatch, UPDATE_ADMIN_PRODUCT, data, 'Product updated successfully.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to update product.');
@@ -141,18 +146,22 @@ export const deleteAdminProduct = (id) => async (dispatch) => {
 };
 
 // --- Post Management Actions ---
-export const getAdminPosts = () => async (dispatch) => {
+export const getAdminPosts = (page = 1, limit = 10) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING }); // Dispatch loading start
   try {
-    const { data } = await api.adminGetAllPosts();
-    return handleResponse(dispatch, FETCH_ADMIN_POSTS, data, 'Posts fetched successfully.');
+    console.log("Fetching posts with page:", page, "limit:", limit);
+    const { data } = await api.adminGetAllPosts(page, limit);
+    return handleResponse(dispatch, FETCH_ADMIN_POSTS, data, 'Posts fetched successfully with pagination.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to fetch posts.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING }); // Dispatch loading end
   }
 };
 
 export const createAdminPost = (postData) => async (dispatch) => {
   try {
-    const { data } = await api.adminCreatePost(postData); // Call the API to create
+    const { data } = await api.adminCreatePost(postData);
     return handleResponse(dispatch, CREATE_ADMIN_POST, data, 'Post created successfully.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to create post.');
@@ -161,7 +170,7 @@ export const createAdminPost = (postData) => async (dispatch) => {
 
 export const updateAdminPost = (id, postData) => async (dispatch) => {
   try {
-    const { data } = await api.adminUpdatePost(id, postData); // Call the API to update
+    const { data } = await api.adminUpdatePost(id, postData);
     return handleResponse(dispatch, UPDATE_ADMIN_POST, data, 'Post updated successfully.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to update post.');

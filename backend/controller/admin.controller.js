@@ -8,9 +8,24 @@ import bcrypt from 'bcryptjs'; // Import bcrypt for password hashing
 // --- User Management ---
 export const getAllUsers = async (req, res) => {
   try {
-    // Exclude password field from the results for security
-    const users = await User.find().select('-password');
-    res.status(200).json(users);
+    const page = parseInt(req.query.page) || 1; // Current page, default to 1
+    const limit = parseInt(req.query.limit) || 10; // Items per page, default to 10
+
+    const skipIndex = (page - 1) * limit;
+
+    const users = await User.find()
+      .select('-password')
+      .skip(skipIndex)
+      .limit(limit);
+
+    const totalUsers = await User.countDocuments(); // Get total count for pagination info
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      totalItems: totalUsers,
+      users: users,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -134,11 +149,24 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// --- Product Management (Example - You'll need Product model and add more CRUD ops) ---
 export const getAllProductsAdmin = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.status(200).json(products);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skipIndex = (page - 1) * limit;
+
+    const products = await Product.find()
+      .skip(skipIndex)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments();
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      totalItems: totalProducts,
+      products: products,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -155,8 +183,22 @@ export const deleteProductAdmin = async (req, res) => {
 // --- Post Management (Example - You'll need Post model and add more CRUD ops) ---
 export const getAllPostsAdmin = async (req, res) => {
   try {
-    const posts = await Post.find();
-    res.status(200).json(posts);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skipIndex = (page - 1) * limit;
+
+    const posts = await Post.find()
+      .skip(skipIndex)
+      .limit(limit);
+
+    const totalPosts = await Post.countDocuments();
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+      totalItems: totalPosts,
+      posts: posts,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

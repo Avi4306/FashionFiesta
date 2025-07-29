@@ -1,13 +1,10 @@
-// client/src/components/Admin/ProductFormModal.jsx
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux'; // No longer need useSelector here
 import { FaTimes } from 'react-icons/fa';
 
-const ProductFormModal = ({ productId, onClose, createProduct, updateProduct }) => {
+// Modified to accept initialProductData as a prop
+const ProductFormModal = ({ productId, onClose, createProduct, updateProduct, initialProductData }) => {
   const dispatch = useDispatch();
-  const existingProduct = useSelector((state) =>
-    productId ? state.products.products.find((p) => p._id === productId) : null
-  );
 
   const [formData, setFormData] = useState({
     name: '',
@@ -22,14 +19,15 @@ const ProductFormModal = ({ productId, onClose, createProduct, updateProduct }) 
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (productId && existingProduct) {
+    // Use initialProductData prop to pre-fill the form when editing
+    if (productId && initialProductData) {
       setFormData({
-        name: existingProduct.name,
-        description: existingProduct.description,
-        price: existingProduct.price,
-        category: existingProduct.category,
-        tags: existingProduct.tags ? existingProduct.tags.join(', ') : '',
-        selectedFile: existingProduct.selectedFile || '',
+        name: initialProductData.name,
+        description: initialProductData.description,
+        price: initialProductData.price,
+        category: initialProductData.category,
+        tags: initialProductData.tags ? initialProductData.tags.join(', ') : '',
+        selectedFile: initialProductData.images && initialProductData.images.length > 0 ? initialProductData.images[0] : '', // Assuming 'images' is an array and we take the first one
       });
     } else {
       // Reset form for new product
@@ -43,7 +41,7 @@ const ProductFormModal = ({ productId, onClose, createProduct, updateProduct }) 
       });
     }
     setError(null);
-  }, [productId, existingProduct]);
+  }, [productId, initialProductData]); // Depend on initialProductData instead of existingProduct from store
 
   const handleChange = (e) => {
     const { name, value } = e.target;

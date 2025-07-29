@@ -6,15 +6,17 @@ import {
   UPDATE_ADMIN_USER_PASSWORD,
   DELETE_ADMIN_USER,
   FETCH_ADMIN_PRODUCTS,
-  CREATE_ADMIN_PRODUCT, // Added this import
-  UPDATE_ADMIN_PRODUCT, // Added this import
+  CREATE_ADMIN_PRODUCT,
+  UPDATE_ADMIN_PRODUCT,
   DELETE_ADMIN_PRODUCT,
   FETCH_ADMIN_POSTS,
-  CREATE_ADMIN_POST, // Added this import
-  UPDATE_ADMIN_POST, // Added this import
+  CREATE_ADMIN_POST,
+  UPDATE_ADMIN_POST,
   DELETE_ADMIN_POST,
   SET_ADMIN_ERROR,
   CLEAR_ADMIN_ERROR,
+  START_ADMIN_LOADING,
+  END_ADMIN_LOADING
   // You might want to add START_LOADING, END_LOADING here if you want a global admin loading state
 } from '../constants/actionTypes';
 
@@ -22,16 +24,45 @@ const initialState = {
   users: [],
   products: [],
   posts: [],
+  // Pagination specific states for each resource
+  usersPagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+  },
+  productsPagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+  },
+  postsPagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+  },
   error: null,
-  loading: false, // Optional: Add loading state for UI feedback
+  isLoading: false, // Optional: Add loading state for UI feedback
 };
 
 const admin = (state = initialState, action) => {
   switch (action.type) {
     // --- User Management Cases ---
     case FETCH_ADMIN_USERS:
-      return { ...state, users: action.payload, error: null };
+      return {
+        ...state,
+        users: action.payload.users, // Store only the users array
+        usersPagination: {          // Store pagination info
+          currentPage: action.payload.currentPage,
+          totalPages: action.payload.totalPages,
+          totalItems: action.payload.totalItems,
+        },
+        error: null,
+      };
     case CREATE_ADMIN_USER:
+      // When a new user is created, it's typically added to the start/end of the current view
+      // You might also want to re-fetch the first page to ensure correct pagination counts
+      // For simplicity, here we just add it to the existing array.
+      // If you are relying heavily on `totalItems`, consider re-fetching for accuracy.
       return { ...state, users: [...state.users, action.payload], error: null };
     case UPDATE_ADMIN_USER_ROLE:
     case UPDATE_ADMIN_USER_PASSWORD:
@@ -43,6 +74,10 @@ const admin = (state = initialState, action) => {
         error: null,
       };
     case DELETE_ADMIN_USER:
+      // When a user is deleted, you might want to re-fetch the current page
+      // to ensure the list remains full if possible, and update pagination info.
+      // For simplicity, here we just filter it out.
+      // If you are relying heavily on `totalItems`, consider re-fetching for accuracy.
       return {
         ...state,
         users: state.users.filter((user) => user._id !== action.payload),
@@ -51,10 +86,19 @@ const admin = (state = initialState, action) => {
 
     // --- Product Management Cases ---
     case FETCH_ADMIN_PRODUCTS:
-      return { ...state, products: action.payload, error: null };
-    case CREATE_ADMIN_PRODUCT: // Handle creation of a new product
+      return {
+        ...state,
+        products: action.payload.products, // Store only the products array
+        productsPagination: {             // Store pagination info
+          currentPage: action.payload.currentPage,
+          totalPages: action.payload.totalPages,
+          totalItems: action.payload.totalItems,
+        },
+        error: null,
+      };
+    case CREATE_ADMIN_PRODUCT:
       return { ...state, products: [...state.products, action.payload], error: null };
-    case UPDATE_ADMIN_PRODUCT: // Handle updating an existing product
+    case UPDATE_ADMIN_PRODUCT:
       return {
         ...state,
         products: state.products.map((product) =>
@@ -71,10 +115,19 @@ const admin = (state = initialState, action) => {
 
     // --- Post Management Cases ---
     case FETCH_ADMIN_POSTS:
-      return { ...state, posts: action.payload, error: null };
-    case CREATE_ADMIN_POST: // Handle creation of a new post
+      return {
+        ...state,
+        posts: action.payload.posts, // Store only the posts array
+        postsPagination: {          // Store pagination info
+          currentPage: action.payload.currentPage,
+          totalPages: action.payload.totalPages,
+          totalItems: action.payload.totalItems,
+        },
+        error: null,
+      };
+    case CREATE_ADMIN_POST:
       return { ...state, posts: [...state.posts, action.payload], error: null };
-    case UPDATE_ADMIN_POST: // Handle updating an existing post
+    case UPDATE_ADMIN_POST:
       return {
         ...state,
         posts: state.posts.map((post) =>
@@ -96,14 +149,22 @@ const admin = (state = initialState, action) => {
       return { ...state, error: null };
 
     // --- Optional Loading States ---
-    // Uncomment and use these if you want to manage loading within this reducer
-    /*
-    case 'START_ADMIN_LOADING': // You'll need to define this action type
-      return { ...state, loading: true };
-    case 'END_ADMIN_LOADING': // You'll need to define this action type
-      return { ...state, loading: false };
-    */
-
+    case START_ADMIN_LOADING:
+      return { 
+        ...state, 
+        isLoading: true,
+        users: [],
+        products: [],
+        posts: [],
+        error: null 
+      };
+    case END_ADMIN_LOADING:
+      return { ...state, isLoading: false };
+      
+    case SET_ADMIN_ERROR:
+      return { ...state, error: action.payload };
+    case CLEAR_ADMIN_ERROR:
+      return { ...state, error: null };
     default:
       return state;
   }

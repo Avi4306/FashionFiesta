@@ -1,13 +1,10 @@
-// client/src/components/Admin/PostFormModal.jsx
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux'; // No longer need useSelector here
 import { FaTimes } from 'react-icons/fa'; // For a close icon
 
-const PostFormModal = ({ postId, onClose, createPost, updatePost }) => {
+// Modified to accept initialPostData as a prop
+const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostData }) => {
   const dispatch = useDispatch();
-  const existingPost = useSelector((state) =>
-    postId ? state.posts.posts.find((p) => p._id === postId) : null
-  );
 
   const [formData, setFormData] = useState({
     title: '',
@@ -19,12 +16,13 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (postId && existingPost) {
+    // Use initialPostData prop to pre-fill the form when editing
+    if (postId && initialPostData) {
       setFormData({
-        title: existingPost.title,
-        message: existingPost.message,
-        tags: existingPost.tags ? existingPost.tags.join(', ') : '',
-        selectedFile: existingPost.selectedFile || '', // Pre-fill if image exists
+        title: initialPostData.title,
+        message: initialPostData.message,
+        tags: initialPostData.tags ? initialPostData.tags.join(', ') : '',
+        selectedFile: initialPostData.selectedFile || '', // Pre-fill if image exists
       });
     } else {
       // Reset form for new post
@@ -36,7 +34,7 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost }) => {
       });
     }
     setError(null); // Clear errors on modal open/ID change
-  }, [postId, existingPost]);
+  }, [postId, initialPostData]); // Depend on initialPostData instead of existingPost from store
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
