@@ -22,6 +22,7 @@ export default function NavBar() {
   const profileRef = useRef(null);
   const searchInputRef = useRef(null);
 
+  // Sync localStorage with Redux on load and handle token expiration
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem("profile"));
     if (profile?.token) {
@@ -30,22 +31,34 @@ export default function NavBar() {
         dispatch({ type: "LOGOUT" });
         navigate("/auth");
       } else {
-        dispatch({ type: "AUTH", data: profile });
+        // Dispatch only if user data is not already in Redux or if it's outdated
+        if (!user || user.token !== profile.token) {
+           dispatch({ type: "AUTH", data: profile });
+        }
       }
     }
-  }, [dispatch]);
+  }, [dispatch, user, navigate]); // Added user and navigate to dependency array
 
+  // Check token expiration on route change (more robust check with user from Redux)
   useEffect(() => {
     const token = user?.token;
     if (token) {
-      const decodedToken = jwtDecode(token);
-      if (decodedToken.exp * 1000 < new Date().getTime()) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.exp * 1000 < new Date().getTime()) {
+          dispatch({ type: "LOGOUT" });
+          setIsProfileOpen(false);
+          navigate("/auth");
+        }
+      } catch (error) {
+        // Handle invalid token format or other jwtDecode errors
+        console.error("Error decoding token:", error);
         dispatch({ type: "LOGOUT" });
         setIsProfileOpen(false);
         navigate("/auth");
       }
     }
-  }, [location, user]);
+  }, [location, user, dispatch, navigate]); // Added dispatch and navigate to dependency array
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -57,6 +70,7 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Auto-focus the search bar when it becomes active
   useEffect(() => {
     if (isSearchActive && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -69,6 +83,7 @@ export default function NavBar() {
     setIsProfileOpen(false);
   };
 
+  // Function to handle the search logic
   const handleSearch = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
       navigate(`/products/search?searchQuery=${searchQuery}`);
@@ -80,6 +95,9 @@ export default function NavBar() {
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${
     user?.result?.name?.charAt(0) || "A"
   }`;
+
+  // Check if the user has an 'admin' role
+  const isAdmin = user?.result?.role === 'admin';
 
   return (
     <nav className="w-full bg-[#faf7f3] px-4 md:px-12 py-3 shadow-sm z-50">
@@ -98,11 +116,15 @@ export default function NavBar() {
           <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
           <Link to="/users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
+          {/* NEW: Admin Panel link in desktop nav for quick access for admins (optional) */}
+          {isAdmin && (
+            <Link to="/admin" className="hover:text-[#aa5a44] text-red-600 font-bold">Admin Panel</Link>
+          )}
         </div>
 
         {/* Right Icons */}
         <div className="flex items-center gap-8">
-          {/* Search */}
+          {/* Search Input */}
           <div
             className={`flex items-center border-b border-[#dcc5b2] h-9 px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
               isSearchActive ? "w-56" : "w-32"
@@ -144,7 +166,8 @@ export default function NavBar() {
                   <button onClick={() => setIsProfileOpen(!isProfileOpen)}>
                     <img
                       className="h-9 w-9 rounded-full object-cover cursor-pointer"
-                      src={user.result.imageUrl || avatarPlaceholder}
+                      // CORRECTED: Use profilePhoto if available, otherwise imageUrl (for older Google logins)
+                      src={user.result.profilePhoto || user.result.imageUrl || avatarPlaceholder}
                       alt={user.result.name}
                     />
                   </button>
@@ -159,6 +182,16 @@ export default function NavBar() {
                         </p>
                       </div>
                       <div className="p-2">
+                        {/* NEW: Admin Panel Link - visible only if user is admin */}
+                        {isAdmin && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-[#F0E4D3] rounded-md"
+                          >
+                            Admin Panel
+                          </Link>
+                        )}
                         <p className="w-full text-left block px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md">
                           Your Orders
                         </p>
@@ -201,10 +234,23 @@ export default function NavBar() {
       {/* Mobile Nav Links */}
       {isMenuOpen && (
         <div className="md:hidden mt-3 flex flex-col gap-3 text-base font-semibold font-montserrat">
-          <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
-          <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
-          <Link to="/users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
-          <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
+          <Link to="/" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Home</Link>
+          <Link to="/products/trending" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Trending Styles</Link>
+          <Link to="/users/featured-designers" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Featured Designers</Link>
+          <Link to="/style-diaries" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Style Diaries</Link>
+          {/* NEW: Admin Panel link in mobile nav */}
+          {isAdmin && (
+            <Link to="/admin" className="hover:text-[#aa5a44] text-red-600 font-bold" onClick={() => setIsMenuOpen(false)}>Admin Panel</Link>
+          )}
+          {/* Add other mobile-specific links here if needed */}
+          {user?.result && ( // Show logout in mobile if logged in
+            <button
+                onClick={() => {handleLogout(); setIsMenuOpen(false);}}
+                className="w-full text-left px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md"
+            >
+                Logout
+            </button>
+          )}
         </div>
       )}
     </nav>

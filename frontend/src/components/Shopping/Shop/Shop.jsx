@@ -42,7 +42,7 @@ const Shop = () => {
                 <div className="p-4">
                   <h2 className="font-semibold">{product.title}</h2>
                   <p className="text-sm text-gray-600">{product.category}</p>
-                  <p className="mt-1 font-bold">${product.price.toFixed(2)}</p>
+                  <p className="mt-1 font-bold">₹{product.price.toFixed(2)}</p>
                 </div>
               </div>
             ))}
