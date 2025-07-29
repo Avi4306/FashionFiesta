@@ -37,10 +37,10 @@ const Paginate = ({ page, count }) => {
               fontWeight: 500,
               mx: "4px",
               "&.Mui-selected": {
-                backgroundColor: "primary.main",
+                backgroundColor: "#ccb5a2",
                 color: "#fff",
                 "&:hover": {
-                  backgroundColor: "primary.dark",
+                  backgroundColor: "#dcc5b2",
                 },
               },
               "&:hover": {
