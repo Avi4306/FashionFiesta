@@ -155,10 +155,8 @@ export const addReview = (id, reviewData) => async (dispatch) => {
 export const fetchRecommendations = (id) => async (dispatch) => {
   try {
     dispatch({ type: START_LOADING });
-    console.log(id)
     // Assuming your api.js has a post method configured
     const { data } = await api.recommendProduct(id);
-    console.log(data)
 
     // This will dispatch the recommended products to your reducer
     dispatch({ type: FETCH_RECOMMENDATIONS, payload: data });

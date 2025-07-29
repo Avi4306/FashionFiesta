@@ -225,9 +225,9 @@ export default function ProductDetails() {
         </div>
         
         {/* Recommendations Section */}
-        {recommendedProducts?.length > 0 && (
+        {recommendedProducts?.recommended?.length > 0 && (
           <div className="mt-16 pt-10 border-t border-[#dcc5b2]">
-             <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts }} />
+             <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts?.recommended }} />
           </div>
         )}
       </div>

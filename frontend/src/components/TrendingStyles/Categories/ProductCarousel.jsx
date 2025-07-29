@@ -54,7 +54,7 @@ const ProductCarousel = ({ category, products }) => {
               <Link to={`/products/${product._id}`} className="block">
                 <div className="relative overflow-hidden rounded-lg">
                   <img
-                    src={product.images[0]}
+                    src={product.images}
                     alt={product.title}
                     className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                   />
