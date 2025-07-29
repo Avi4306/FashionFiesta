@@ -130,6 +130,7 @@ export default function CreateProduct({ isOpen, onClose }) {
     }
     const productData = { ...form, price: Number(form.price), discount: Number(form.discount), stock: Number(form.stock), sizes: form.sizes.split(",").map(s => s.trim()).filter(Boolean), colors: form.colors.split(",").map(c => c.trim()).filter(Boolean), tags: form.tags.split(",").map(t => t.trim()).filter(Boolean), images: base64Images };
     dispatch(createProduct(productData));
+    onClose()
   };
   
   useEffect(() => {
