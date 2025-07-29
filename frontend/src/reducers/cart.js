@@ -3,6 +3,7 @@
 import {
     ADD_TO_CART_LOCAL,
     ADD_TO_CART_SUCCESS,
+    ADD_TO_CART_FAIL,
     FETCH_CART_SUCCESS,
     FETCH_CART_FAIL,
     MERGE_CART_SUCCESS,
@@ -78,13 +79,9 @@ const cartReducer = (state = initialState, action) => {
         case REMOVE_CART_ITEM_LOCAL:
             return {
                 ...state,
-                cart: {
-                    ...state.cart,
-                    items: state.cart.items.filter(
-                        (item) => item.product._id !== action.payload // action.payload is just the productId
-                    ),
-                },
+                cart: action.payload,
                 error: null,
+                loading: false, 
             };
 
         case CLEAR_CART:

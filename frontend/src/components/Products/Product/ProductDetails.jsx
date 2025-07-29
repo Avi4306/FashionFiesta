@@ -122,6 +122,7 @@ export default function ProductDetails() {
   const [mainImage, setMainImage] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showShareSuccess, setShowShareSuccess] = useState(false);
+  const [showAddToCartSuccess, setShowAddToCartSuccess] = useState(false); // New state for add to cart confirmation
   
   useEffect(() => {
     if (id) {
@@ -136,7 +137,11 @@ export default function ProductDetails() {
     }
   }, [product]);
 
-  const handleAddToCart = () => dispatch(addToCart(product, quantity));
+  const handleAddToCart = () => {
+    dispatch(addToCart(product, quantity));
+    setShowAddToCartSuccess(true); // Show success snackbar
+    setTimeout(() => setShowAddToCartSuccess(false), 2500); // Hide after 2.5 seconds
+  };
 
   const handleBuyNow = () => {
     dispatch(addToCart(product, quantity));
@@ -257,6 +262,14 @@ export default function ProductDetails() {
           <div className="flex items-center gap-3 rounded-full bg-[#5a4e46] px-4 py-2 text-white shadow-lg">
               <FaCheckCircle className="text-[#a3b18a]" />
               <span className="text-sm font-medium">Link copied to clipboard!</span>
+          </div>
+      </div>
+
+      {/* Custom Snackbar for Add to Cart Success */}
+      <div className={`fixed bottom-5 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ${showAddToCartSuccess ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <div className="flex items-center gap-3 rounded-full bg-[#5a4e46] px-4 py-2 text-white shadow-lg">
+              <FaCheckCircle className="text-[#a3b18a]" />
+              <span className="text-sm font-medium">Item added to cart!</span>
           </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import * as api from '../api/index'; // Assuming this is your API file
 import {
     ADD_TO_CART_LOCAL,
     ADD_TO_CART_SUCCESS,
+    ADD_TO_CART_FAIL,
     FETCH_CART_SUCCESS,
     FETCH_CART_FAIL,
     MERGE_CART_SUCCESS,
@@ -157,14 +158,17 @@ export const updateCartItemQuantity = (productId, newQuantity) => async (dispatc
             dispatch({ type: FETCH_CART_FAIL });
         }
     } else {
-        // Guest user, update local state and localStorage
-        const existingCartItems = cart.cart?.items || [];
-        const newItems = existingCartItems.map(item =>
-            item.product._id === productId ? { ...item, quantity: newQuantity } : item
+        // Local update for guest user
+        // Calculate the new cart based on current Redux state and save to local storage
+        const currentCart = getState().cart.cart; // Get current cart from Redux store
+        const updatedItems = currentCart.items.map(item =>
+            item.product._id === productId ? { ...item, quantity : newQuantity } : item
         );
+        const newItems = { ...currentCart, items: updatedItems };
         const updatedCart = { items: newItems };
         saveCartToStorage(updatedCart);
-        dispatch({ type: UPDATE_CART_QUANTITY_LOCAL, payload: updatedCart });
+        // Dispatch the local action which your reducer handles and saves to localStorage
+        dispatch({ type: UPDATE_CART_QUANTITY_LOCAL, payload: { productId, quantity: newQuantity } }); // Reducer expects {productId, quantity}
     }
 };
 

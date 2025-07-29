@@ -42,6 +42,7 @@ export const FETCH_CART_FAIL = 'FETCH_CART_FAIL';
 // For adding to cart
 export const ADD_TO_CART_SUCCESS = 'ADD_TO_CART_SUCCESS'; // When API call succeeds (logged in)
 export const ADD_TO_CART_LOCAL = 'ADD_TO_CART_LOCAL';     // When updated locally (guest)
+export const ADD_TO_CART_FAIL = 'ADD_TO_CART_FAIL'
 
 // For updating item quantity
 export const UPDATE_CART_QUANTITY_SUCCESS = 'UPDATE_CART_QUANTITY_SUCCESS'; // When API call succeeds (logged in)
