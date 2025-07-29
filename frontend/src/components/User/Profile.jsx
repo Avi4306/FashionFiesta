@@ -147,7 +147,7 @@ export default function Profile() {
             <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
               <button
                 onClick={() => setEditMode(true)}
-                className="flex-1 bg-[#aa5a44] text-white py-2 px-4 rounded-lg hover:bg-[#8e4738] transition-colors"
+                className="flex-1 bg-[#ccb5a2] text-white py-2 px-4 rounded-lg hover:bg-[#dcc5b2] transition-colors"
               >
                 Edit Profile
               </button>

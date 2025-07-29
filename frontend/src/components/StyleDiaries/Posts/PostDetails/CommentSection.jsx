@@ -1,106 +1,124 @@
-import React from 'react'
-import { useState, useRef } from 'react'
-import { Button, TextField, Typography, Avatar } from '@mui/material'
-import { useDispatch } from 'react-redux'
-import { commentPost } from '../../../../actions/posts'
+import React from 'react';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Link} from 'react-router-dom'
+import { commentPost } from '../../../../actions/posts'; // Make sure this path is correct
+
 dayjs.extend(relativeTime);
 
 const CommentSection = ({ post }) => {
     const dispatch = useDispatch();
     const user = JSON.parse(localStorage.getItem('profile'));
-    const [comments, setComments] = useState(post?.comments || []);
+    
+    const initialComments = (post?.comments || []).map(c => ({
+        ...c,
+        timestamp: c.timestamp || post.createdAt 
+    }));
+    const [comments, setComments] = useState(initialComments);
     const [comment, setComment] = useState('');
+
     const handleCommentSubmit = async () => {
         if (!comment.trim()) return;
-        const commentData = {
-            name : user?.result?.name,
+
+        const newComment = {
+            name: user?.result?.name,
             comment,
             profilePhoto: user?.result?.profilePhoto,
-            userId : user?.result?._id || user.result.sub
-    };
-        setComments([...comments, commentData]);
+            userId: user?.result?._id || user.result.sub,
+            timestamp: new Date().toISOString()
+        };
+
+        setComments([...comments, newComment]);
         setComment('');
-        dispatch(commentPost(commentData, post._id));
-    }
-  return (
-        <div>
-            {/* Themed Section Header */}
-            <h3 className="text-2xl font-bold text-[#44403c] dark:text-[#dcc5b2] mb-6">Comments ({comments.length})</h3>
+        dispatch(commentPost(newComment, post._id));
+    };
+
+    return (
+        <div className="font-sans">
+            {/* Main Heading (Always Dark) */}
+            <h3 className="text-2xl font-bold text-[#44382f] mb-6">
+                Comments ({comments.length})
+            </h3>
 
             {/* List of Comments */}
-            <div className="space-y-6 max-h-[500px] overflow-y-auto pr-4 mb-8">
-                {comments.map((comment, index) => {
-                    // Splitting "Name: The comment text" to style them differently
-                    const name = comment.name;
-                    const commentText = comment.comment;
-                    const time = dayjs(post?.createdAt).fromNow()
-                    // Themed placeholder avatar using your hex codes
-                    const avatarPlaceholder = comment.profilePhoto ||`https://placehold.co/40x40/F0E4D3/44403c?text=${name?.charAt(0)}`;
-                    const profileLink = ((user?.result?.id || user?.result?.sub) === comment.userId) ? "/user/profile" : `/user/${comment.userId}`;
+            <div className="space-y-5 max-h-[500px] overflow-y-auto pr-2">
+                {comments.map((c, index) => {
+                    const name = c.name;
+                    const commentText = c.comment;
+                    const time = dayjs(c.timestamp).fromNow();
+                    const avatarPlaceholder = c.profilePhoto || `https://ui-avatars.com/api/?name=${name?.charAt(0)}&background=F5F1ED&color=44382f&bold=true`;
+                    const profileLink = ((user?.result?._id || user?.result?.sub) === c.userId) ? "/user/profile" : `/user/${c.userId}`;
                     
                     return (
                         <div key={index} className="flex items-start gap-4">
-                            <Link to = {profileLink}>
-                            <img 
-                                src={avatarPlaceholder}
-                                alt={name} 
-                                className="h-10 w-10 rounded-full"
-                            />
+                            <Link to={profileLink}>
+                                <img 
+                                    src={avatarPlaceholder}
+                                    alt={name} 
+                                    className="h-10 w-10 rounded-full"
+                                />
                             </Link>
-                            {/* Themed comment bubble using your light accent color */}
-                            <div className="flex-1 bg-[#F0E4D3] dark:bg-[#292524] p-4 rounded-lg">
-                                <Link to = {profileLink}>
-                                <p className="font-semibold text-sm text-[#44403c] dark:text-[#e7e5e4]">{name}</p>
-                                <span className="text-xs text-[#78716c] dark:text-[#a8a29e]">{time}</span>
-                                <p className="text-[#78716c] dark:text-[#a8a29e] mt-1">{commentText}</p>
-                                </Link>
+                            <div className="flex-1">
+                                {/* Comment Bubble (Always Light) */}
+                                <div className="bg-white px-4 py-3 rounded-xl border border-[#e0d5c6] shadow-sm">
+                                    <div className="flex items-baseline gap-2">
+                                        <Link to={profileLink} className="group">
+                                            {/* Name (Always Dark) */}
+                                            <span className="font-semibold text-sm text-[#44382f] group-hover:underline">
+                                                {name}
+                                            </span>
+                                        </Link>
+                                        {/* Timestamp (Always Dark-ish) */}
+                                        <span className="text-xs text-[#9d8f81]">{time}</span>
+                                    </div>
+                                    {/* Comment Text (Always Dark) */}
+                                    <p className="text-[#5c5046] mt-1.5">{commentText}</p>
+                                </div>
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            {/* Themed "Add a Comment" Form */}
-            <div className="mt-6">
-                {(user?.result?.name || user?.result?.sub) ? (
+            {/* "Add a Comment" Form */}
+            <div className="mt-8 pt-6 border-t border-[#e0d5c6]">
+                {user?.result ? (
                     <div>
                         <textarea
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            placeholder={`Commenting as ${user.result.name}...`}
+                            placeholder="Add your thoughts..."
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey && comment.trim()) {
-                                e.preventDefault(); // Prevents new line when shift is not pressed
-                                handleCommentSubmit();
-                                }}}
-                            className="w-full p-3 border rounded-lg bg-transparent border-[#DCC5B2] dark:border-[#44403c] text-[#dcc5b2] dark:text-[#c19580] focus:ring-2 focus:ring-[#d97706] focus:border-transparent transition-shadow"
+                                    e.preventDefault();
+                                    handleCommentSubmit();
+                                }
+                            }}
+                            className="w-full p-3 border-2 rounded-lg bg-[#F5F1ED] border-[#e0d5c6] text-[#44382f] placeholder:text-[#9d8f81] focus:ring-2 focus:ring-[#a19386] focus:border-[#a19386] transition-all"
                             rows="3"
                         />
-                        <div className="flex justify-end gap-4 mt-2">
-                            {comment.trim() && (
-                                <button
-                                    onClick={() => setComment('')}
-                                    className="py-2 px-4 rounded-lg text-sm font-semibold text-[#78716c] dark:text-[#a8a29e] hover:bg-[#F0E4D3] dark:hover:bg-[#292524] transition-colors"
-                                >
-                                    Clear
-                                </button>
-                            )}
+                        <div className="flex justify-end items-center gap-3 mt-3">
+                            <button
+                                onClick={() => setComment('')}
+                                className="py-2 px-4 rounded-lg text-sm font-semibold text-[#887a6d] hover:bg-[#F5F1ED] transition-colors"
+                            >
+                                Cancel
+                            </button>
                             <button
                                 disabled={!comment.trim()}
                                 onClick={handleCommentSubmit}
-                                className="bg-[#d97706] text-white py-2 px-6 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-[#44382f] text-white py-2 px-6 rounded-lg text-sm font-semibold hover:bg-[#362d27] transition-all disabled:bg-[#a19386] disabled:cursor-not-allowed"
                             >
-                                Comment
+                                Post Comment
                             </button>
                         </div>
                     </div>
                 ) : (
-                    <p className="text-[#78716c] dark:text-[#a8a29e] p-4 text-center bg-[#F0E4D3] dark:bg-[#292524] rounded-lg">
-                        Please <a href="/auth" className="font-semibold text-[#d97706] hover:underline">sign in</a> to join the conversation.
-                    </p>
+                    <div className="text-center text-[#887a6d] p-4 rounded-lg bg-[#F5F1ED] border border-[#e0d5c6]">
+                        <Link to="/auth" className="font-semibold text-[#5c5046] hover:underline">Sign in</Link> to join the discussion.
+                    </div>
                 )}
             </div>
         </div>

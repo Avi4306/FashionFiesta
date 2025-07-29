@@ -28,7 +28,8 @@
     "mui-chips-input": "^7.0.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
-    "react-easy-crop": "^5.5.0"
+    "react-easy-crop": "^5.5.0",
+    "react-simple-typewriter": "^5.0.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
