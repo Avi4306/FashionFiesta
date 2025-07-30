@@ -1,44 +1,45 @@
-
 import mongoose from 'mongoose'
 import Product from '../models/products.models.js'
 
 const createProduct = async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      price,
-      discount,
-      category,
-      brand,
-      stock,
-      sizes,
-      colors,
-      tags,
-      images,
-    } = req.body;
+    try {
+        const {
+            title,
+            description,
+            price,
+            discount,
+            category,
+            brand,
+            stock,
+            sizes,
+            colors,
+            tags,
+            images,
+        } = req.body;
 
-    const newProduct = new Product({
-      title,
-      description,
-      price,
-      discount,
-      category,
-      brand,
-      stock,
-      sizes,
-      colors,
-      tags,
-      images,
-      creator: req.userId,
-    });
+        // No changes needed here for Option 1, as 'role' is part of the User model,
+        // and 'creator' simply stores the User's ObjectId.
+        const newProduct = new Product({
+            title,
+            description,
+            price,
+            discount,
+            category,
+            brand,
+            stock,
+            sizes,
+            colors,
+            tags,
+            images,
+            creator: req.userId,
+        });
 
-    await newProduct.save();
-    res.status(201).json(newProduct);
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ message: "Failed to create product" });
-  }
+        await newProduct.save();
+        res.status(201).json(newProduct);
+    } catch (error) {
+        console.error("Error creating product:", error);
+        res.status(500).json({ message: "Failed to create product" });
+    }
 };
 
 
@@ -61,49 +62,53 @@ const deleteProduct = async (req, res) => {
 };
 
 const getProductById = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).populate('creator', 'name');
-    if (!product) return res.status(404).json({ message: 'Product not found' });
+    try {
+        // --- MODIFIED: Populate 'name', 'profilePhoto', AND 'role' from the 'User' model ---
+        const product = await Product.findById(req.params.id).populate('creator', 'name profilePhoto role');
+        if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    res.status(200).json(product);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
+        res.status(200).json(product);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
+    }
 };
 
 const getProducts = async (req, res) => {
-  try {
-    const { category, page = 1, limit = 12, sort = "newest" } = req.query;
+    try {
+        const { category, page = 1, limit = 12, sort = "newest" } = req.query;
 
-    const numericPage = parseInt(page, 10);
-    const numericLimit = parseInt(limit, 10);
+        const numericPage = parseInt(page, 10);
+        const numericLimit = parseInt(limit, 10);
 
-    const filter = category ? { category } : {};
-    const skip = (numericPage - 1) * numericLimit;
+        const filter = category ? { category } : {};
+        const skip = (numericPage - 1) * numericLimit;
 
-    const sortOptions = {
-      price_asc: { price: 1 },
-      price_desc: { price: -1 },
-      rating: { rating: -1 },
-      newest: { createdAt: -1 },
-    };
+        const sortOptions = {
+            price_asc: { price: 1 },
+            price_desc: { price: -1 },
+            rating: { rating: -1 },
+            newest: { createdAt: -1 },
+        };
 
-    const totalProducts = await Product.countDocuments(filter);
+        const totalProducts = await Product.countDocuments(filter);
 
-    const products = await Product.find(filter)
-      .sort(sortOptions[sort] || { createdAt: -1 })
-      .skip(skip)
-      .limit(numericLimit);
-    res.json({
-      products,
-      currentPage: numericPage,
-      totalPages: Math.ceil(totalProducts / numericLimit),
-      totalProducts,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+        // --- MODIFIED: Populate 'name', 'profilePhoto', AND 'role' from the 'User' model ---
+        const products = await Product.find(filter)
+            .sort(sortOptions[sort] || { createdAt: -1 })
+            .skip(skip)
+            .limit(numericLimit)
+            .populate('creator', 'name profilePhoto role'); // Add 'role' to populate here
+
+        res.json({
+            products,
+            currentPage: numericPage,
+            totalPages: Math.ceil(totalProducts / numericLimit),
+            totalProducts,
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 };
 
 const getProductsBySearch = async (req, res) => {
@@ -112,11 +117,12 @@ const getProductsBySearch = async (req, res) => {
     try {
         // Create a case-insensitive regex for the search term
         const title = new RegExp(searchQuery, 'i');
-        
+
         // Find products that match the title OR tags.
-        const products = await Product.find({ 
-            $or: [{ title }, { tags: { $in: searchQuery.split(',') } }] 
-        });
+        // --- MODIFIED: Populate 'name', 'profilePhoto', AND 'role' from the 'User' model ---
+        const products = await Product.find({
+            $or: [{ title }, { tags: { $in: searchQuery.split(',') } }]
+        }).populate('creator', 'name profilePhoto role'); // Add 'role' to populate here
 
         res.status(200).json({ data: products });
     } catch (error) {
@@ -126,39 +132,42 @@ const getProductsBySearch = async (req, res) => {
 
 // Get products by category (for carousel)
 const getProductsByCategory = async (req, res) => {
-  const { category, limit } = req.query;
-  try {
-    const query = category ? { category } : {};
-    const products = await Product.find(query)
-      .limit(Number(limit) || 10)
-      .sort({ createdAt: -1 });
-    res.status(200).json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+    const { category, limit } = req.query;
+    try {
+        const query = category ? { category } : {};
+        // --- MODIFIED: Populate 'name', 'profilePhoto', AND 'role' from the 'User' model ---
+        const products = await Product.find(query)
+            .limit(Number(limit) || 10)
+            .sort({ createdAt: -1 })
+            .populate('creator', 'name profilePhoto role'); // Add 'role' to populate here
+
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 };
 
 // Get distinct categories
 const getCategories = async (req, res) => {
-  try {
-    const categories = await Product.distinct("category");
-    res.json(categories);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+    try {
+        const categories = await Product.distinct("category");
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 };
 
 const updateProduct = ( async(req,res) =>
 {
-  const {id} = req.params;
-  const product = req.body;
-  if(!mongoose.Types.ObjectId.isValid(id))
-  {
-     return res.status(404).json(({ success: false, message: 'invalid Product' }))
-  }
+    const {id} = req.params;
+    const product = req.body;
+    if(!mongoose.Types.ObjectId.isValid(id))
+    {
+        return res.status(404).json(({ success: false, message: 'invalid Product' }))
+    }
     try{
-          const updatedProduct = await Product.findByIdAndUpdate(id,product);
-          res.status(200).json({ success: true,data:updatedProduct})    
+            const updatedProduct = await Product.findByIdAndUpdate(id, product, { new: true });
+            res.status(200).json({ success: true,data:updatedProduct})
     }
     catch(err)
     {
@@ -175,7 +184,15 @@ const addReview = async (req, res) => {
     if (!req.userId) {
         return res.status(401).json({ message: "Unauthenticated" });
     }
-    
+
+    if (!req.userName) {
+        return res.status(400).json({ message: "Reviewer name is required." });
+    }
+
+    // You might also want to include req.userRole in the review if it's relevant,
+    // though typically reviews only need name/photo.
+    // const reviewerRole = req.userRole;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).send('No product with that id');
     }
@@ -195,11 +212,11 @@ const addReview = async (req, res) => {
         if (alreadyReviewed) {
             return res.status(400).json({ message: "Product already reviewed" });
         }
-        
+
         // Create the new review object, including the profilePhoto
         const review = {
             name: req.userName,
-            profilePhoto: req.userProfilePhoto, // NEW: Add profile photo
+            profilePhoto: req.userProfilePhoto || '', // Using || '' for safety if photo is optional
             rating: Number(rating),
             comment,
             user: req.userId,
@@ -208,16 +225,17 @@ const addReview = async (req, res) => {
 
         product.reviews.push(review);
         product.numReviews = product.reviews.length;
-        
+
         // Calculate the new average rating
         product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
 
         const updatedProduct = await product.save();
-        
+
         res.status(201).json(updatedProduct);
     } catch (error) {
+        console.error("Error adding review:", error);
         res.status(500).json({ message: "Something went wrong." });
     }
 };
 
-export {createProduct,getProductById, getProducts, getProductsBySearch,updateProduct,deleteProduct, getProductsByCategory, getCategories, addReview} 
+export { createProduct, getProductById, getProducts, getProductsBySearch, updateProduct, deleteProduct, getProductsByCategory, getCategories, addReview }

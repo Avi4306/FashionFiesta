@@ -7,7 +7,7 @@ import AddReviewSection from "./AddReviewSection";
 import ProductCarousel from "../../TrendingStyles/Categories/ProductCarousel";
 import { FaTrash, FaShareAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 
-// --- Sub-components (Unchanged) ---
+// --- Sub-components ---
 
 const ImageGallery = ({ images, title, mainImage, setMainImage }) => (
   <div>
@@ -44,12 +44,34 @@ const ProductHeader = ({ title, brand, category, user, creator, onShare, onDelet
         <p className="text-sm font-medium text-[#b8a18f]">{brand || "Brand"}</p>
         <h1 className="text-4xl font-extrabold tracking-tight text-[#5a4e46]">{title}</h1>
         <p className="mt-1 text-sm text-[#857262]">Category: {category}</p>
+
+        {/* --- NEW: Display Creator Info --- */}
+        {creator && ( // Ensure creator object exists and is populated
+          <div className="mt-2 flex items-center gap-2 text-sm text-[#857262]">
+              <img
+                src={creator.profilePhoto || `https://placehold.co/40x40/F0E4D3/44403c?text=${user?.result?.name?.charAt(0) || "A"}`}
+                alt={creator.name || 'Creator'}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+              <span className="font-semibold text-[#5a4e46] ml-1">
+                {creator.name || 'Unknown Creator'}
+              </span>
+              {creator.role && (
+                <span className="ml-2 rounded-full bg-[#dfd0b8] px-2 py-0.5 text-xs font-medium text-[#5a4e46] capitalize">
+                  {creator.role}
+                </span>
+              )}
+          </div>
+        )}
+        {/* --- END NEW --- */}
+
       </div>
       <div className="flex flex-shrink-0 items-center gap-2">
         <button onClick={onShare} className="rounded-full p-2 text-[#857262] transition hover:bg-[#dfd0b8] hover:text-[#5a4e46]">
           <FaShareAlt size={18} />
         </button>
-        {user?._id === creator?._id && (
+        {/* Show delete button if user is the creator OR if user is an admin */}
+        {(user?._id === creator?._id || user?.role === 'admin') && (
           <button onClick={onDelete} className="rounded-full p-2 text-[#cb6d6a] transition hover:bg-[#cb6d6a]/10">
             <FaTrash size={18} />
           </button>
@@ -117,13 +139,13 @@ export default function ProductDetails() {
 
   const [quantity, setQuantity] = useState(1);
   const { product, isLoading, recommendedProducts } = useSelector((state) => state.productsData);
-  const user = useSelector((state) => state.auth?.authData?.result);
+  const user = useSelector((state) => state.auth?.authData?.result); // Ensure this path correctly gets your user object, including their role
 
   const [mainImage, setMainImage] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showShareSuccess, setShowShareSuccess] = useState(false);
   const [showAddToCartSuccess, setShowAddToCartSuccess] = useState(false); // New state for add to cart confirmation
-  
+
   useEffect(() => {
     if (id) {
         dispatch(getProductById(id));
@@ -151,7 +173,7 @@ export default function ProductDetails() {
   const handleConfirmDelete = () => {
     dispatch(deleteProduct(id));
     setIsDeleteDialogOpen(false);
-    navigate(-1);
+    navigate(-1); // Go back to the previous page after deletion
   };
 
   const handleShare = async () => {
@@ -185,23 +207,23 @@ export default function ProductDetails() {
           <ImageGallery images={product.images} title={product.title} mainImage={mainImage} setMainImage={setMainImage} />
 
           <div className="flex flex-col">
-            <ProductHeader 
-              title={product.title} 
-              brand={product.brand} 
+            <ProductHeader
+              title={product.title}
+              brand={product.brand}
               category={product.category}
-              user={user}
-              creator={product.creator}
+              user={user} // Pass the logged-in user object
+              creator={product.creator} // Pass the populated creator object
               onShare={handleShare}
               onDelete={() => setIsDeleteDialogOpen(true)}
             />
             <ProductPricing price={product.price} discount={product.discount} />
             <p className="text-base leading-relaxed text-[#857262]">{product.description}</p>
-            
+
             <div className="mt-6">
                 <ProductVariants variants={product.sizes} label="Available Sizes" />
                 <ProductVariants variants={product.colors} label="Available Colors" />
             </div>
-            
+
             <div className={`mt-2 rounded-full px-3 py-1 text-sm font-semibold inline-block self-start ${stock > 0 ? 'bg-[#a3b18a]/20 text-[#588157]' : 'bg-[#cb6d6a]/10 text-[#cb6d6a]'}`}>
                 {stock > 0 ? `${stock} in stock` : "Out of stock"}
             </div>
@@ -212,7 +234,7 @@ export default function ProductDetails() {
                     <button onClick={handleBuyNow} disabled={stock === 0} className="flex-1 rounded-lg bg-[#ccb5a2] px-6 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#b8a18f] disabled:opacity-50 disabled:cursor-not-allowed">
                         Buy Now
                     </button>
-                    <button onClick={handleAddToCart} disabled={stock === 0} className="flex-1 rounded-lg border-2 border-[#ccb5a2] bg-transparent px-6 py-3.5 text-base font-semibold text-[#ccb5a2] shadow-sm transition hover:bg-[#ccb5a2] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button onClick={handleAddToCart} disabled={stock === 0} className="flex-1 rounded-lg border-2 border-[#ccb5b2] bg-transparent px-6 py-3.5 text-base font-semibold text-[#ccb5b2] shadow-sm transition hover:bg-[#ccb5b2] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
                         Add to Cart
                     </button>
                 </div>
@@ -223,11 +245,11 @@ export default function ProductDetails() {
             </div>
           </div>
         </div>
-        
+
         {/* Recommendations Section */}
         {recommendedProducts?.recommended?.length > 0 && (
           <div className="mt-16 pt-10 border-t border-[#dcc5b2]">
-             <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts?.recommended }} />
+               <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts?.recommended }} />
           </div>
         )}
       </div>
