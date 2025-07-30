@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCarousels } from "../../../actions/products";
 import ProductCarousel from "./ProductCarousel";
+import ProductCarouselSkeleton from "./ProductCarouselSkeleton";
 
 const Categories = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,14 @@ const Categories = () => {
     dispatch(fetchCarousels(specificCategories));
   }, [dispatch, reFetchTrigger]); // <-- Added specificCategories here
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) 
+    return (
+      <div className="p-4">
+        {specificCategories.map((category) => (
+          <ProductCarouselSkeleton key={category} />
+        ))}
+      </div>
+    );
   if (error) return <p>Error: {error}</p>;
 
   return (

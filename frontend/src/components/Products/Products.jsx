@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../actions/products";
 import ProductCard from "./Product/Product";
 import Pagination from "../Pagination/Pagination";
+import ProductCardSkeleton from "./Product/ProductCardSkeleton";
 
 const Products = () => {
   const { category } = useParams();
@@ -16,6 +17,9 @@ const Products = () => {
   const { products, isLoading, totalPages, currentPage, totalProducts, reFetchTrigger } = useSelector(
     (state) => state.productsData
   );
+
+  // 🆕 Moved itemsPerPage declaration here, before it's used in the JSX
+  const itemsPerPage = 9; // Assuming your API's default limit is 9, adjust if different
 
   useEffect(() => {
     dispatch(getProducts(category, page, sort));
@@ -48,19 +52,25 @@ const Products = () => {
       </div>
 
       {isLoading ? (
-        <p className="text-gray-500">Loading...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {[...Array(itemsPerPage)].map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))}
+        </div>
       ) : products.length === 0 ? (
         <p className="text-gray-500">No products found.</p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {products.map((product) => (
-              <ProductCard key={product._id} product={product} />
+              <ProductCard key={product._id} product={product} creator={product.creator} />
             ))}
           </div>
 
           {totalPages > 1 && (
-            <Pagination page={currentPage} count={totalPages} onChange={handlePageChange} />
+            <div className="mt-8 flex justify-center">
+              <Pagination page={currentPage} count={totalPages} onChange={handlePageChange} />
+            </div>
           )}
         </>
       )}

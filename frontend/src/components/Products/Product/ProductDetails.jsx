@@ -1,87 +1,86 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom"; // Link added if not already
 import { useDispatch, useSelector } from "react-redux";
 import { getProductById, deleteProduct, fetchRecommendations } from "../../../actions/products";
 import { addToCart } from "../../../actions/cart";
 import AddReviewSection from "./AddReviewSection";
 import ProductCarousel from "../../TrendingStyles/Categories/ProductCarousel";
 import { FaTrash, FaShareAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
-// --- Sub-components ---
+// 🆕 Import the new skeleton component
+import ProductDetailsSkeleton from "./ProductDetailsSkeleton";
 
+// --- Sub-components (keep as is) ---
 const ImageGallery = ({ images, title, mainImage, setMainImage }) => (
-  <div>
-    <div className="aspect-square w-full overflow-hidden rounded-xl border border-[#dcc5b2] bg-white">
-      <img
-        src={mainImage || "https://placehold.co/600x600"}
-        alt={title}
-        className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-        loading="lazy"
-      />
+    // ... (Your existing ImageGallery code) ...
+    <div>
+        <div className="aspect-square w-full overflow-hidden rounded-xl border border-[#dcc5b2] bg-white">
+            <img
+                src={mainImage || "https://placehold.co/600x600"}
+                alt={title}
+                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                loading="lazy"
+            />
+        </div>
+        {images?.length > 1 && (
+            <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
+                {images.map((img, idx) => (
+                    <div
+                        key={idx}
+                        className={`h-20 w-20 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${
+                            img === mainImage ? "border-[#ccb5a2]" : "border-transparent"
+                        }`}
+                        onClick={() => setMainImage(img)}
+                    >
+                        <img src={img} alt={`Thumbnail ${idx}`} className="h-full w-full object-cover" loading="lazy" />
+                    </div>
+                ))}
+            </div>
+        )}
     </div>
-    {images?.length > 1 && (
-      <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
-        {images.map((img, idx) => (
-          <div
-            key={idx}
-            className={`h-20 w-20 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${
-              img === mainImage ? "border-[#ccb5a2]" : "border-transparent"
-            }`}
-            onClick={() => setMainImage(img)}
-          >
-            <img src={img} alt={`Thumbnail ${idx}`} className="h-full w-full object-cover" loading="lazy" />
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
 );
 
 const ProductHeader = ({ title, brand, category, user, creator, onShare, onDelete }) => (
-  <div>
-    <div className="flex items-start justify-between">
-      <div>
-        <p className="text-sm font-medium text-[#b8a18f]">{brand || "Brand"}</p>
-        <h1 className="text-4xl font-extrabold tracking-tight text-[#5a4e46]">{title}</h1>
-        <p className="mt-1 text-sm text-[#857262]">Category: {category}</p>
+    // ... (Your existing ProductHeader code) ...
+    <div>
+        <div className="flex items-start justify-between">
+            <div>
+                <p className="text-sm font-medium text-[#b8a18f]">{brand || "Brand"}</p>
+                <h1 className="text-4xl font-extrabold tracking-tight text-[#5a4e46]">{title}</h1>
+                <p className="mt-1 text-sm text-[#857262]">Category: {category}</p>
 
-        {/* --- NEW: Display Creator Info --- */}
-        {creator && ( // Ensure creator object exists and is populated
-          <div className="mt-2 flex items-center gap-2 text-sm text-[#857262]">
-            <Link to = {`/user/${creator._id}`}>
-              <img
-                src={creator.profilePhoto || `https://placehold.co/40x40/F0E4D3/44403c?text=${user?.result?.name?.charAt(0) || "A"}`}
-                alt={creator.name || 'Creator'}
-                className="h-8 w-8 rounded-full object-cover"
-              />
-              </Link>
-              <span className="font-semibold text-[#5a4e46] ml-1">
-                {creator.name || 'Unknown Creator'}
-              </span>
-              {creator.role && (
-                <span className="ml-2 rounded-full bg-[#dfd0b8] px-2 py-0.5 text-xs font-medium text-[#5a4e46] capitalize">
-                  {creator.role}
-                </span>
-              )}
-          </div>
-        )}
-        {/* --- END NEW --- */}
-
-      </div>
-      <div className="flex flex-shrink-0 items-center gap-2">
-        <button onClick={onShare} className="rounded-full p-2 text-[#857262] transition hover:bg-[#dfd0b8] hover:text-[#5a4e46]">
-          <FaShareAlt size={18} />
-        </button>
-        {/* Show delete button if user is the creator OR if user is an admin */}
-        {(user?._id === creator?._id || user?.role === 'admin') && (
-          <button onClick={onDelete} className="rounded-full p-2 text-[#cb6d6a] transition hover:bg-[#cb6d6a]/10">
-            <FaTrash size={18} />
-          </button>
-        )}
-      </div>
+                {creator && (
+                    <div className="mt-2 flex items-center gap-2 text-sm text-[#857262]">
+                        <Link to={`/user/${creator._id}`}>
+                            <img
+                                src={creator.profilePhoto || `https://placehold.co/40x40/F0E4D3/44403c?text=${creator?.name?.charAt(0) || "A"}`}
+                                alt={creator.name || 'Creator'}
+                                className="h-8 w-8 rounded-full object-cover"
+                            />
+                        </Link>
+                        <span className="font-semibold text-[#5a4e46] ml-1">
+                            {creator.name || 'Unknown Creator'}
+                        </span>
+                        {creator.role && (
+                            <span className="ml-2 rounded-full bg-[#dfd0b8] px-2 py-0.5 text-xs font-medium text-[#5a4e46] capitalize">
+                                {creator.role}
+                            </span>
+                        )}
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-shrink-0 items-center gap-2">
+                <button onClick={onShare} className="rounded-full p-2 text-[#857262] transition hover:bg-[#dfd0b8] hover:text-[#5a4e46]">
+                    <FaShareAlt size={18} />
+                </button>
+                {(user?._id === creator?._id || user?.role === 'admin') && (
+                    <button onClick={onDelete} className="rounded-full p-2 text-[#cb6d6a] transition hover:bg-[#cb6d6a]/10">
+                        <FaTrash size={18} />
+                    </button>
+                )}
+            </div>
+        </div>
     </div>
-  </div>
 );
 
 const ProductPricing = ({ price, discount }) => {
@@ -102,35 +101,35 @@ const ProductPricing = ({ price, discount }) => {
 };
 
 const ProductVariants = ({ variants, label }) => (
-  variants?.length > 0 && (
-    <div className="mb-6">
-      <strong className="block text-sm font-medium text-[#5a4e46]">{label}:</strong>
-      <div className="mt-2 flex flex-wrap gap-3">
-        {variants.map((variant) => (
-          <span key={variant} className="rounded-md bg-[#dfd0b8] px-3 py-1.5 text-sm font-medium text-[#5a4e46]">
-            {variant}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
+    variants?.length > 0 && (
+        <div className="mb-6">
+            <strong className="block text-sm font-medium text-[#5a4e46]">{label}:</strong>
+            <div className="mt-2 flex flex-wrap gap-3">
+                {variants.map((variant) => (
+                    <span key={variant} className="rounded-md bg-[#dfd0b8] px-3 py-1.5 text-sm font-medium text-[#5a4e46]">
+                        {variant}
+                    </span>
+                ))}
+            </div>
+        </div>
+    )
 );
 
 const QuantitySelector = ({ quantity, setQuantity, stock }) => (
-  stock > 0 && (
-    <div className="mb-6 flex items-center gap-4">
-      <strong className="text-sm font-medium text-[#5a4e46]">Quantity:</strong>
-      <div className="flex items-center">
-        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={quantity <= 1} className="h-10 w-10 rounded-l-md border border-[#dcc5b2] text-xl font-bold text-[#857262] transition hover:bg-[#dfd0b8] disabled:opacity-50">
-          -
-        </button>
-        <span className="flex h-10 w-14 items-center justify-center border-y border-[#dcc5b2] text-lg font-medium text-[#5a4e46]">{quantity}</span>
-        <button onClick={() => setQuantity(q => Math.min(stock, q + 1))} disabled={quantity >= stock} className="h-10 w-10 rounded-r-md border border-[#dcc5b2] text-xl font-bold text-[#857262] transition hover:bg-[#dfd0b8] disabled:opacity-50">
-          +
-        </button>
-      </div>
-    </div>
-  )
+    stock > 0 && (
+        <div className="mb-6 flex items-center gap-4">
+            <strong className="text-sm font-medium text-[#5a4e46]">Quantity:</strong>
+            <div className="flex items-center">
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={quantity <= 1} className="h-10 w-10 rounded-l-md border border-[#dcc5b2] text-xl font-bold text-[#857262] transition hover:bg-[#dfd0b8] disabled:opacity-50">
+                    -
+                </button>
+                <span className="flex h-10 w-14 items-center justify-center border-y border-[#dcc5b2] text-lg font-medium text-[#5a4e46]">{quantity}</span>
+                <button onClick={() => setQuantity(q => Math.min(stock, q + 1))} disabled={quantity >= stock} className="h-10 w-10 rounded-r-md border border-[#dcc5b2] text-xl font-bold text-[#857262] transition hover:bg-[#dfd0b8] disabled:opacity-50">
+                    +
+                </button>
+            </div>
+        </div>
+    )
 );
 
 // --- Main ProductDetails Component ---
@@ -142,12 +141,12 @@ export default function ProductDetails() {
 
   const [quantity, setQuantity] = useState(1);
   const { product, isLoading, recommendedProducts } = useSelector((state) => state.productsData);
-  const user = useSelector((state) => state.auth?.authData?.result); // Ensure this path correctly gets your user object, including their role
+  const user = useSelector((state) => state.auth?.authData?.result);
 
   const [mainImage, setMainImage] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showShareSuccess, setShowShareSuccess] = useState(false);
-  const [showAddToCartSuccess, setShowAddToCartSuccess] = useState(false); // New state for add to cart confirmation
+  const [showAddToCartSuccess, setShowAddToCartSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -164,8 +163,8 @@ export default function ProductDetails() {
 
   const handleAddToCart = () => {
     dispatch(addToCart(product, quantity));
-    setShowAddToCartSuccess(true); // Show success snackbar
-    setTimeout(() => setShowAddToCartSuccess(false), 2500); // Hide after 2.5 seconds
+    setShowAddToCartSuccess(true);
+    setTimeout(() => setShowAddToCartSuccess(false), 2500);
   };
 
   const handleBuyNow = () => {
@@ -176,7 +175,7 @@ export default function ProductDetails() {
   const handleConfirmDelete = () => {
     dispatch(deleteProduct(id));
     setIsDeleteDialogOpen(false);
-    navigate(-1); // Go back to the previous page after deletion
+    navigate(-1);
   };
 
   const handleShare = async () => {
@@ -197,8 +196,9 @@ export default function ProductDetails() {
     }
   };
 
+  // 🆕 Conditional rendering for skeleton loading
   if (isLoading || !product) {
-    return <div className="bg-[#faf7f3] p-10 text-center text-gray-500 min-h-screen">Loading Product...</div>;
+    return <ProductDetailsSkeleton />;
   }
 
   const { stock } = product;
@@ -214,8 +214,8 @@ export default function ProductDetails() {
               title={product.title}
               brand={product.brand}
               category={product.category}
-              user={user} // Pass the logged-in user object
-              creator={product.creator} // Pass the populated creator object
+              user={user}
+              creator={product.creator}
               onShare={handleShare}
               onDelete={() => setIsDeleteDialogOpen(true)}
             />
@@ -252,7 +252,7 @@ export default function ProductDetails() {
         {/* Recommendations Section */}
         {recommendedProducts?.recommended?.length > 0 && (
           <div className="mt-16 pt-10 border-t border-[#dcc5b2]">
-               <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts?.recommended }} />
+                <ProductCarousel category="You Might Also Like" products={{ products: recommendedProducts?.recommended }} />
           </div>
         )}
       </div>
