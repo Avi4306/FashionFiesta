@@ -79,7 +79,7 @@ export default function CartPage() {
             <div key={item.product._id} className="flex items-center justify-between border-b py-4">
               <div className="flex items-center space-x-4">
                 {/* Ensure product.image exists or provide a fallback */}
-                <img src={item.product.image || 'https://via.placeholder.com/80'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
+                <img src={item.product.images?.[0] || 'https://via.placeholder.com/80'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
                 <div>
                   <h3 className="font-semibold text-lg">{item.product.name}</h3>
                   <p className="text-gray-600">₹{item.product.price.toFixed(2)}</p>
