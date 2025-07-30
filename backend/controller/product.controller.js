@@ -113,19 +113,50 @@ const getProducts = async (req, res) => {
 
 const getProductsBySearch = async (req, res) => {
     const { searchQuery } = req.query;
+    // 🆕 Add pagination parameters
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 9; // Default to 9 items per page (you can adjust this)
+    const skip = (page - 1) * limit;
 
     try {
-        // Create a case-insensitive regex for the search term
-        const title = new RegExp(searchQuery, 'i');
+        const titleRegex = new RegExp(searchQuery, 'i'); // Case-insensitive regex for title
+        // Split search query by comma for tags, trim each tag, and filter out empty strings
+        const searchTags = searchQuery.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
 
-        // Find products that match the title OR tags.
-        // --- MODIFIED: Populate 'name', 'profilePhoto', AND 'role' from the 'User' model ---
-        const products = await Product.find({
-            $or: [{ title }, { tags: { $in: searchQuery.split(',') } }]
-        }).populate('creator', 'name profilePhoto role'); // Add 'role' to populate here
+        // Build the query filter
+        let queryFilter = {
+            $or: [
+                { title: titleRegex }, // Search by title
+            ]
+        };
 
-        res.status(200).json({ data: products });
+        // If there are valid tags in the search query, add them to the $or condition
+        if (searchTags.length > 0) {
+            queryFilter.$or.push({ tags: { $in: searchTags } }); // Search by tags
+        }
+
+        // 1. Get the total count of products matching the filter (without pagination)
+        const totalProducts = await Product.countDocuments(queryFilter);
+
+        // 2. Calculate total pages
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        // 3. Find products with pagination, and populate creator info
+        const products = await Product.find(queryFilter)
+            .populate('creator', 'name profilePhoto role') // Populate 'name', 'profilePhoto', and 'role'
+            .skip(skip)   // Skip documents for pagination
+            .limit(limit); // Limit documents per page
+
+        // Return paginated data along with metadata
+        res.status(200).json({
+            data: products,
+            currentPage: page,
+            totalPages: totalPages,
+            totalProducts: totalProducts,
+            // You can also include the limit if needed: limit: limit,
+        });
     } catch (error) {
+        console.error("Error in getProductsBySearch:", error.message); // Log full error
         res.status(404).json({ message: error.message });
     }
 };

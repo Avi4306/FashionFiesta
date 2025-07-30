@@ -1,4 +1,3 @@
-import { recommendProduct } from '../api';
 import {
   FETCH_PRODUCT,
   FETCH_PRODUCTS,
@@ -14,6 +13,7 @@ import {
 } from '../constants/actionTypes';
 
 const initialState = {
+  searchProducts : [],
   isLoading: false,
   product: null,
   products: [],
@@ -59,7 +59,13 @@ export default function productsData(state = initialState, action) {
         categoryCarousels: action.payload, // { category: [products] }
       };
     case FETCH_PRODUCT_BY_SEARCH:
-      return { ...state, products: action.payload };
+      return {
+        ...state,
+        searchProducts: action.payload.data, // The actual product array from backend's `data` field
+        searchCurrentPage: action.payload.currentPage,
+        searchTotalPages: action.payload.totalPages,
+        searchTotalProducts: action.payload.totalProducts,
+      };
     case DELETE_PRODUCT:
       return {
         ...state,

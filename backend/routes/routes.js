@@ -7,7 +7,7 @@ import multer from 'multer';
 import FormData from 'form-data';
 import { uploadImageToCloudinary } from '../controller/upload.js';
 import { getFeaturedDesigners } from '../controller/user.controller.js';
-// import {genotp , sendotp} from '../controller/auth.controller'
+import {getSuggestions} from '../controller/suggestion.controller.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,6 +17,7 @@ const upload = multer({ dest: 'temp_uploads/' });
 
 router.post('/upload', uploadImageToCloudinary);
 router.get('/users/featured-designers', getFeaturedDesigners)
+router.get('/suggestions', getSuggestions)
 
 router.get("/", (req, res) => {
   res.send("🔥 Server is alive sacche?");

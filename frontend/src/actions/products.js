@@ -80,7 +80,7 @@ export const createProduct = (productData) => async (dispatch) => {
     }
 
     const { data } = await api.createProduct(finalProductData);
-    dispatch({ type: "CREATE_PRODUCT", payload: data });
+    dispatch({ type: CREATE_PRODUCT, payload: data });
   } catch (error) {
     console.error('Create Product Error:', error.message);
   }

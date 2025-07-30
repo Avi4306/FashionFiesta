@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CiHome, CiSearch } from "react-icons/ci";
 import { PiShoppingCartThin } from "react-icons/pi";
@@ -6,6 +6,7 @@ import { HiMenu, HiX } from "react-icons/hi";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
+import { getSuggestions, clearSuggestions } from '../../actions/search';
 
 // 🤸 New 3D variant for the dropdown menu
 const dropdownVariants = {
@@ -27,8 +28,11 @@ export default function NavBar() {
   const [isSearchActive, setSearchActive] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [hoveredLink, setHoveredLink] = useState(null); // For the magic link indicator
+  const [hoveredLink, setHoveredLink] = useState(null);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1); // 🆕 New state for active suggestion
 
+  // Get suggestions and loading state from Redux store
+  const { suggestions, loading: suggestionsLoading } = useSelector((state) => state.search);
   const user = useSelector((state) => state.auth.authData);
   const { cart } = useSelector((state) => state.cart);
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
@@ -38,6 +42,8 @@ export default function NavBar() {
   const location = useLocation();
   const profileRef = useRef(null);
   const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null);
+  const suggestionsListRef = useRef(null); // 🆕 Ref for the suggestions list
 
   // Sync localStorage with Redux on load and handle token expiration
   useEffect(() => {
@@ -75,16 +81,23 @@ export default function NavBar() {
     }
   }, [location, user, dispatch, navigate]);
 
-  // Handle closing dropdown on click outside
+  // Handle closing dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
+      // Ensure suggestions are cleared when clicking outside the entire search area
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setSearchActive(false); // Deactivate search when clicking outside
+        setSearchQuery(""); // Clear search query
+        dispatch(clearSuggestions()); // Clear suggestions
+        setActiveSuggestionIndex(-1); // Reset active suggestion
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [dispatch]);
 
   // Auto-focus the search bar when it becomes active
   useEffect(() => {
@@ -93,18 +106,78 @@ export default function NavBar() {
     }
   }, [isSearchActive]);
 
+  // --- Search Suggestion Logic ---
+  // Debounce effect for fetching suggestions
+  useEffect(() => {
+    setActiveSuggestionIndex(-1); // Reset active suggestion when query changes
+    if (searchQuery.trim() === "") {
+        dispatch(clearSuggestions()); // Clear suggestions immediately if query is empty
+        return;
+    }
+
+    const handler = setTimeout(() => {
+      dispatch(getSuggestions(searchQuery));
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery, dispatch]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    if (e.key === "Enter") {
+      if (activeSuggestionIndex !== -1 && suggestions[activeSuggestionIndex]) {
+        // If an item is highlighted, select it
+        handleSuggestionClick(suggestions[activeSuggestionIndex]);
+      } else if (searchQuery.trim()) {
+        // Otherwise, perform a normal search
+        navigate(`/products/search?searchQuery=${searchQuery}`);
+        setSearchActive(false);
+        setSearchQuery("");
+        dispatch(clearSuggestions());
+        setActiveSuggestionIndex(-1);
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault(); // Prevent cursor from moving to end of input
+      setActiveSuggestionIndex((prevIndex) =>
+        prevIndex < suggestions.length - 1 ? prevIndex + 1 : 0
+      );
+      // Optional: scroll into view
+      if (suggestionsListRef.current) {
+        const activeItem = suggestionsListRef.current.children[activeSuggestionIndex + 1];
+        activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault(); // Prevent cursor from moving to start of input
+      setActiveSuggestionIndex((prevIndex) =>
+        prevIndex > 0 ? prevIndex - 1 : suggestions.length - 1
+      );
+      // Optional: scroll into view
+      if (suggestionsListRef.current) {
+        const activeItem = suggestionsListRef.current.children[activeSuggestionIndex - 1];
+        activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    navigate(`/products/search?searchQuery=${suggestion}`);
+    setSearchActive(false);
+    setSearchQuery("");
+    dispatch(clearSuggestions());
+    setActiveSuggestionIndex(-1);
+  };
+  // --- End Search Suggestion Logic ---
+
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
     navigate("/");
     setIsProfileOpen(false);
-  };
-
-  const handleSearch = (e) => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-      navigate(`/products/search?searchQuery=${searchQuery}`);
-      setSearchActive(false);
-      setSearchQuery("");
-    }
   };
 
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${user?.result?.name?.charAt(0) || "A"}`;
@@ -129,13 +202,13 @@ export default function NavBar() {
         </motion.button>
 
         {/* ✨ Desktop Nav Links with Magic Indicator */}
-        <div 
+        <div
           className="hidden md:flex gap-2 text-base font-semibold font-montserrat"
           onMouseLeave={() => setHoveredLink(null)}
         >
           {navLinks.map((link) => (
-            <Link 
-              key={link.name} 
+            <Link
+              key={link.name}
               to={link.path}
               className="relative px-3 py-2 transition-colors duration-200 hover:text-black"
               onMouseEnter={() => setHoveredLink(link.name)}
@@ -153,7 +226,7 @@ export default function NavBar() {
             </Link>
           ))}
           {isAdmin && (
-            <Link 
+            <Link
               to="/admin"
               className="relative px-3 py-2 transition-colors duration-200 text-red-600 font-bold"
               onMouseEnter={() => setHoveredLink("admin")}
@@ -174,15 +247,75 @@ export default function NavBar() {
 
         {/* Right Icons with playful hover */}
         <div className="flex items-center gap-4 lg:gap-8">
-          {/* Search Input */}
-          <div>
+          {/* Search Input with Suggestions */}
+          <div className="relative" ref={searchContainerRef}>
             <div
               className={`flex items-center border-b-2 border-[#dcc5b2] h-9 px-3 py-1 rounded-md shadow-sm cursor-text transition-all duration-300 ${isSearchActive ? "w-56 bg-white" : "w-32"}`}
               onClick={() => setSearchActive(true)}
             >
               <CiSearch className="text-gray-700" />
-              <input ref={searchInputRef} type="text" placeholder="Search..." className="bg-transparent w-full outline-none text-sm placeholder-gray-500 ml-2" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleSearch} onBlur={() => setSearchActive(false)} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search..."
+                className="bg-transparent w-full outline-none text-sm placeholder-gray-500 ml-2"
+                value={activeSuggestionIndex !== -1 && suggestions[activeSuggestionIndex] ? suggestions[activeSuggestionIndex] : searchQuery} // 🆕 Show active suggestion if highlighted
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchSubmit} // Handles Enter, ArrowUp, ArrowDown
+                onFocus={() => {
+                  setSearchActive(true);
+                  if (searchQuery.trim()) {
+                    dispatch(getSuggestions(searchQuery));
+                  }
+                }}
+                onBlur={() => {
+                  // Delay hiding to allow clicks/selection on suggestions
+                  setTimeout(() => {
+                    // Check if focus went outside the entire search container
+                    if (!searchContainerRef.current.contains(document.activeElement)) {
+                      setSearchActive(false);
+                      setSearchQuery(""); // Clear search query on blur
+                      dispatch(clearSuggestions());
+                      setActiveSuggestionIndex(-1);
+                    }
+                  }, 150);
+                }}
+              />
             </div>
+            <AnimatePresence>
+              {/* Only show suggestions if search is active, there are suggestions, and not currently loading */}
+              {isSearchActive && suggestions.length > 0 && !suggestionsLoading && (
+                <motion.div
+                  ref={suggestionsListRef} /* 🆕 Assign ref here */
+                  className="absolute left-0 mt-2 w-full bg-white border border-[#F0E4D3] rounded-md shadow-lg z-30 max-h-60 overflow-y-auto"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className={`px-4 py-2 text-sm text-gray-800 cursor-pointer ${
+                        index === activeSuggestionIndex ? "bg-[#e0d5c6]" : "hover:bg-[#e0d5c6]" // Highlight active suggestion
+                      }`}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent input from losing focus immediately
+                        handleSuggestionClick(suggestion);
+                      }}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+              {/* Optional: Show loading indicator */}
+              {isSearchActive && suggestionsLoading && searchQuery.trim() && (
+                  <div className="absolute left-0 mt-2 w-full bg-white border border-[#F0E4D3] rounded-md shadow-lg z-30 p-2 text-sm text-gray-600">
+                    Loading suggestions...
+                  </div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Icons */}

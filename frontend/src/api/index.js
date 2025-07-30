@@ -40,7 +40,25 @@ export const deleteUserAccount = (userId, password) => API.delete(`/user/${userI
 
 export const fetchProduct = (id) => API.get(`/products/${id}`);
 // export const fetchProducts = (query) => API.get(`/products?${query}`);
-export const fetchProductsBySearch = (searchQuery) => API.get(`/products/search?searchQuery=${searchQuery.search || 'none'}`);
+export const fetchProductsBySearch = (searchOptions) => {
+    const { search, tags, page, limit } = searchOptions;
+
+    // Build the query string dynamically
+    let queryString = `?searchQuery=${search || 'none'}`;
+
+    if (tags && tags.length > 0) {
+        // If tags exist, join them with commas for the backend
+        queryString += `&tags=${tags.join(',')}`;
+    }
+    if (page) {
+        queryString += `&page=${page}`;
+    }
+    if (limit) {
+        queryString += `&limit=${limit}`;
+    }
+
+    return API.get(`/products/search${queryString}`);
+};
 export const createProduct = (productData) => API.post('/products', productData);
 
 export const fetchCategories = () => API.get("/products/categories/list");
@@ -86,3 +104,5 @@ export const adminGetAllPosts = (page = 1, limit = 10) => API.get(`/admin/posts?
 export const adminCreatePost = (postData) => API.post('/admin/posts', postData);
 export const adminUpdatePost = (id, postData) => API.patch(`/admin/posts/${id}`, postData);
 export const adminDeletePost = (id) => API.delete(`/admin/posts/${id}`);
+
+export const fetchSearchSuggestions = (query) => API.get(`/suggestions?q=${query}`);
