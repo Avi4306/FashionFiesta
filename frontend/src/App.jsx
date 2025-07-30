@@ -29,14 +29,12 @@ import FeaturedDesigners from './components/FeaturedDesigners.jsx';
 import UserPostsPage from './components/User/UserPostsPage.jsx';
 import UserProductsPage from './components/User/UserProductsPage.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
-// --- NEW IMPORTS FOR ADMIN PANEL ---
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // The role-based protected route component
 import AdminDashboard from './components/Admin/AdminDashboard.jsx'; // Admin Dashboard component
 import AdminUserManagement from './components/Admin/AdminUserManagement.jsx'; // Admin User Management
 import AdminProductManagement from './components/Admin/AdminProductManagement.jsx'; // Admin Product Management
 import AdminPostManagement from './components/Admin/AdminPostManagement.jsx'; // Admin Post Management
-// --- END NEW IMPORTS ---
-
+import ImageSearchForm from './components/ImageSearch.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -126,7 +124,7 @@ function App() {
               <p><Link to="/" style={{ color: '#44403c', textDecoration: 'underline' }}>Go to Home</Link></p>
             </div>
           } />
-
+          <Route path='/search' element = {<ImageSearchForm/>}/>
         </Routes>
         <Footer />
       </Router>
