@@ -7,6 +7,7 @@ const roleBadge = {
   designer: "🧵 Designer",
   pending_designer: "⏳ Pending Approval",
   admin: "✔️ Admin",
+  customer: "🛒 Customer", // Added customer for completeness
 };
 
 const UserDetails = () => {
@@ -26,7 +27,7 @@ const UserDetails = () => {
   }, [dispatch, id, loggedInProfile, navigate]);
 
   if (isLoading || !user) {
-    return <div className="text-center py-10 text-gray-500">Loading...</div>;
+    return <div className="text-center py-10 text-gray-500">Loading user profile...</div>;
   }
 
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${
@@ -35,8 +36,8 @@ const UserDetails = () => {
 
   const { name, email, bio, profilePhoto, role, designerDetails, socialLinks, location } = user;
 
-  const postsToShow = posts?.slice(0, 6);
-  const productsToShow = products?.slice(0, 6);
+  const postsToShow = posts?.slice(0, 4); // Limit to 4 posts
+  const productsToShow = products?.slice(0, 4); // Limit to 4 products
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 space-y-8">
@@ -51,11 +52,9 @@ const UserDetails = () => {
           <div>
             <h2 className="text-xl font-semibold text-[#44403c] flex items-center gap-2">
               {name}
-              {role !== "customer" && (
-                <span className="text-sm bg-[#f0e4d3] text-[#aa5a44] px-2 py-1 rounded-full">
-                  {roleBadge[role]}
-                </span>
-              )}
+              <span className="text-sm bg-[#f0e4d3] text-[#aa5a44] px-2 py-1 rounded-full">
+                {roleBadge[role] || "Unknown Role"} {/* Fallback for unknown roles */}
+              </span>
             </h2>
             <p className="text-sm text-[#78716c]">{email}</p>
           </div>
@@ -135,13 +134,25 @@ const UserDetails = () => {
         )}
       </div>
 
+      ---
+
       {/* Posts Section */}
-      <div className="mt-10">
-        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Posts</h3>
+      <div className="bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]">
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-[#44403c]">Posts</h3>
+            {posts?.length > 4 && (
+                <Link
+                    to={`/user/${id}/posts`}
+                    className="text-sm text-[#aa5a44] border border-[#aa5a44] px-3 py-1 rounded-lg hover:bg-[#f3e5dc] transition-colors"
+                >
+                    See All Posts ({posts.length})
+                </Link>
+            )}
+        </div>
         {postsToShow?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {postsToShow.map((post) => (
-              <Link 
+              <Link
                 to={`/style-diaries/${post._id}`}
                 key={post._id}
                 className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
@@ -163,23 +174,27 @@ const UserDetails = () => {
         ) : (
           <p className="text-sm text-[#78716c]">This user has not created any posts yet.</p>
         )}
-        {posts?.length > 4 && (
-          <Link
-            to={`/users/${id}/posts`}
-            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-          >
-            View All Posts ({posts.length})
-          </Link>
-        )}
       </div>
 
+      ---
+
       {/* Products Section */}
-      <div className="mt-10">
-        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Products</h3>
+      <div className="bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]">
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-[#44403c]">Products</h3>
+            {products?.length > 4 && (
+                <Link
+                    to={`/user/${id}/products`}
+                    className="text-sm text-[#aa5a44] border border-[#aa5a44] px-3 py-1 rounded-lg hover:bg-[#f3e5dc] transition-colors"
+                >
+                    See All Products ({products.length})
+                </Link>
+            )}
+        </div>
         {productsToShow?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {productsToShow.map((product) => (
-              <Link 
+              <Link
                 to={`/products/${product._id}`}
                 key={product._id}
                 className="bg-white border border-[#f0e4d3] rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden block"
@@ -188,7 +203,7 @@ const UserDetails = () => {
                   <img
                     src={product.images[0]}
                     alt={product.title}
-                    className="w-full h-60 object-cover" // Increased image height from h-40 to h-60
+                    className="w-full h-60 object-cover"
                   />
                 )}
                 <div className="p-4">
@@ -200,14 +215,6 @@ const UserDetails = () => {
           </div>
         ) : (
           <p className="text-sm text-[#78716c]">This user has not created any products yet.</p>
-        )}
-        {products?.length > 4 && (
-          <Link
-            to={`/users/${id}/products`}
-            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-          >
-            View All Products ({products.length})
-          </Link>
         )}
       </div>
     </div>

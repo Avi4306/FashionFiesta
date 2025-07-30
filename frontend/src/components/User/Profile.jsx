@@ -13,13 +13,13 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const authData = useSelector((state) => state.auth.authData);
-  const { posts, products } = useSelector((state) => state.user);
-  const { error } = useSelector((state) => state.auth);
+  const { posts, products, isLoading: userPostsProductsLoading } = useSelector((state) => state.user);
+  const { error, isLoading: authLoading } = useSelector((state) => state.auth);
   const userId = authData?.result?._id;
 
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", profilePhoto: "", bio: "",
+    name: "", email: "", profilePhoto: "", bio: "", role: "", // Added role to form state
     designerDetails: { brandName: "", portfolioUrl: "" },
     socialLinks: { instagram: "", facebook: "", twitter: "", website: "" },
     location: { city: "", state: "", country: "" },
@@ -35,6 +35,7 @@ export default function Profile() {
       const { result } = authData;
       setForm({
         name: result.name || "", email: result.email || "", profilePhoto: result.profilePhoto || "", bio: result.bio || "",
+        role: result.role || "customer", // Initialize role from authData
         designerDetails: {
           brandName: result.designerDetails?.brandName || "",
           portfolioUrl: result.designerDetails?.portfolioUrl || "",
@@ -60,11 +61,17 @@ export default function Profile() {
     }
   }, [dispatch, userId]);
 
-  if (!authData || !authData.result) {
-    return <div className="text-center py-10 text-gray-500">Loading profile...</div>;
+  // Clear error state when edit mode changes, or on component mount
+  useEffect(() => {
+    dispatch({ type: CLEAR_ERROR });
+  }, [editMode, dispatch]);
+
+
+  if (authLoading || userPostsProductsLoading || !authData || !authData.result) {
+    return <div className="text-center py-10 text-gray-500">Loading profile data...</div>;
   }
 
-  const role = authData.result.role || "customer";
+  const role = authData.result.role || "customer"; // Use the actual role from authData for display
   const avatarPlaceholder = `https://placehold.co/80x80/F0E4D3/44403c?text=${form.name.charAt(0) || "U"}`;
 
   const handleLogout = () => {
@@ -110,13 +117,14 @@ export default function Profile() {
     admin: "✔️ Admin",
     designer: "🧵 Designer",
     pending_designer: "⏳ Pending",
+    customer: "🛒 Customer", // Added customer for completeness
   };
 
   const locationParts = [form.location?.city, form.location?.state, form.location?.country].filter(Boolean);
   const fullLocation = locationParts.join(", ");
 
-  const postsToShow = posts?.slice(0, 6);
-  const productsToShow = products?.slice(0, 6);
+  const postsToShow = posts?.slice(0, 4); // Limit to 4 posts
+  const productsToShow = products?.slice(0, 4); // Limit to 4 products
 
   const cardStyle = "bg-[#faf7f3] rounded-xl shadow-md p-6 border border-[#f0e4d3]";
 
@@ -134,11 +142,9 @@ export default function Profile() {
               <div>
                 <h2 className="text-xl font-semibold text-[#44403c] flex items-center gap-2">
                   {form.name}
-                  {role !== "customer" && (
-                    <span className="text-sm bg-[#f0e4d3] text-[#aa5a44] px-2 py-1 rounded-full">
-                      {roleBadge[role]}
-                    </span>
-                  )}
+                  <span className="text-sm bg-[#f0e4d3] text-[#aa5a44] px-2 py-1 rounded-full">
+                    {roleBadge[role]}
+                  </span>
                 </h2>
                 <p className="text-sm text-[#78716c]">{form.email}</p>
               </div>
@@ -165,7 +171,7 @@ export default function Profile() {
               </button>
             </div>
 
-            <div className="space-y-4"> {/* Added space-y-4 here */}
+            <div className="space-y-4">
               <div>
                 <h3 className="text-md font-semibold text-[#44403c]">Bio:</h3>
                 <p className="text-sm text-[#78716c]">{form.bio || "No bio yet."}</p>
@@ -261,6 +267,19 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* Display Role in Edit Mode (Read-Only) */}
+            <div>
+                <label htmlFor="role" className="block text-sm font-medium text-[#44403c] mb-1">Your Role:</label>
+                <input
+                    id="role"
+                    name="role"
+                    value={roleBadge[form.role] || form.role || "customer"}
+                    readOnly
+                    className="w-full border px-3 py-2 rounded-md bg-gray-100 text-[#78716c] cursor-not-allowed"
+                    placeholder="Role"
+                />
+            </div>
+
             <input name="name" value={form.name} onChange={handleChange} className="w-full border px-3 py-2 rounded-md" placeholder="Name" />
             <textarea name="bio" value={form.bio} onChange={handleChange} rows={3} className="w-full border px-3 py-2 rounded-md" placeholder="Bio" />
 
@@ -304,9 +323,21 @@ export default function Profile() {
         )}
       </div>
 
+      ---
+
       {/* Posts Section */}
       <div className={cardStyle}>
-        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Posts</h3>
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-[#44403c]">Your Posts</h3>
+            {posts?.length > 4 && (
+                <Link
+                    to={`/user/${userId}/posts`}
+                    className="text-sm text-[#aa5a44] border border-[#aa5a44] px-3 py-1 rounded-lg hover:bg-[#f3e5dc] transition-colors"
+                >
+                    See All Posts ({posts.length})
+                </Link>
+            )}
+        </div>
         {posts?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {postsToShow.map((post) => (
@@ -334,19 +365,23 @@ export default function Profile() {
         ) : (
           <p className="text-sm text-[#78716c]">You have not created any posts yet.</p>
         )}
-        {posts?.length > 4 && (
-          <Link
-            to={`/users/${userId}/posts`}
-            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-          >
-            View All Posts ({posts.length})
-          </Link>
-        )}
       </div>
+
+      ---
 
       {/* Products Section */}
       <div className={cardStyle}>
-        <h3 className="text-lg font-semibold text-[#44403c] mb-4">Your Products</h3>
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-[#44403c]">Your Products</h3>
+            {products?.length > 4 && (
+                <Link
+                    to={`/user/${userId}/products`}
+                    className="text-sm text-[#aa5a44] border border-[#aa5a44] px-3 py-1 rounded-lg hover:bg-[#f3e5dc] transition-colors"
+                >
+                    See All Products ({products.length})
+                </Link>
+            )}
+        </div>
         {products?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {productsToShow.map((product) => (
@@ -373,14 +408,6 @@ export default function Profile() {
           </div>
         ) : (
           <p className="text-sm text-[#78716c]">You have not created any products yet.</p>
-        )}
-        {products?.length > 4 && (
-          <Link
-            to={`/users/${userId}/products`}
-            className="mt-4 w-full text-center block text-[#aa5a44] border border-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc]"
-          >
-            View All Products ({products.length})
-          </Link>
         )}
       </div>
     </div>
