@@ -53,6 +53,7 @@ export const getCart = (userId) => async (dispatch) => {
     if (userId) { // User is logged in
         try {
             const { data } = await api.fetchCart();
+            console.log(data)
             dispatch({ type: FETCH_CART_SUCCESS, payload: data.cart });
             saveCartToStorage(data.cart); // Keep localStorage in sync with DB cart
         } catch (error) {

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'; // Keep useState if you use it elsewhere
-import { useDispatch, useSelector } from 'react-redux'; // Import useSelector
+import { useState, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import './App.css'; // Your main CSS file
+import './App.css';
+
+// Component Imports (truncated for brevity, assume all are correctly imported)
 import Header from './components/Header/Header';
 import NavBar from './components/Header/NavBar';
 import OOTW from './components/OOTWsection/OOTW';
@@ -12,13 +14,11 @@ import TrendingSection from './components/Categories/TrendingSection';
 import BlogSection from './components/Blog/Blog.jsx';
 import Designers from './components/Designer/Designers.jsx';
 import Footer from './components/Footer/Footer.jsx';
-
-import { getPosts } from "./actions/posts"; // Your existing action
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import AboutUs from "./components/AboutUs/AboutUs.jsx";
 import Auth from './components/Auth/Auth.jsx';
 import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx'; // Your existing PrivateRoute
+import PrivateRoute from './components/PrivateRoute.jsx';
 import Profile from './components/User/Profile.jsx';
 import UserDetails from './components/User/UserDetails.jsx';
 import TrendingStyles from './components/TrendingStyles/TrendingStyles.jsx';
@@ -29,21 +29,53 @@ import FeaturedDesigners from './components/FeaturedDesigners.jsx';
 import UserPostsPage from './components/User/UserPostsPage.jsx';
 import UserProductsPage from './components/User/UserProductsPage.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx'; // The role-based protected route component
-import AdminDashboard from './components/Admin/AdminDashboard.jsx'; // Admin Dashboard component
-import AdminUserManagement from './components/Admin/AdminUserManagement.jsx'; // Admin User Management
-import AdminProductManagement from './components/Admin/AdminProductManagement.jsx'; // Admin Product Management
-import AdminPostManagement from './components/Admin/AdminPostManagement.jsx'; // Admin Post Management
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import AdminDashboard from './components/Admin/AdminDashboard.jsx';
+import AdminUserManagement from './components/Admin/AdminUserManagement.jsx';
+import AdminProductManagement from './components/Admin/AdminProductManagement.jsx';
+import AdminPostManagement from './components/Admin/AdminPostManagement.jsx';
 import ImageSearchForm from './components/ImageSearch.jsx';
+
+// Import cart actions
+import { getCart, mergeLocalCart, clearCart } from './actions/cart'; // Keep clearCart import
 
 function App() {
   const dispatch = useDispatch();
-  const user = JSON.parse(localStorage.getItem('profile')); // Keep this for the Auth redirect logic
+  const auth = useSelector(state => state.auth);
+  const isLoggedIn = !!auth.authData?.token;
 
+  const mergeAttemptedRef = useRef(false);
+
+  // useEffect for initial cart loading and merging
   useEffect(() => {
-    // Dispatch an action to fetch posts or any other initial data
-    dispatch(getPosts());
-  }, [dispatch]);
+    const localCartData = localStorage.getItem('cart');
+    const localCart = localCartData ? JSON.parse(localCartData) : { items: [] };
+
+    if (isLoggedIn) {
+      if (localCart.items.length > 0 && !mergeAttemptedRef.current) {
+        console.log("Logged in: Local cart found. Attempting to merge with server cart.");
+        dispatch(mergeLocalCart(localCart.items));
+        mergeAttemptedRef.current = true;
+      } else {
+        console.log("Logged in: Fetching cart from server.");
+        dispatch(getCart(auth.authData?.result?._id));
+      }
+    } else {
+      console.log("Guest user: Loading cart from local storage.");
+      dispatch(getCart());
+      mergeAttemptedRef.current = false;
+    }
+  }, [isLoggedIn, auth.authData?.result?._id, dispatch]);
+
+  // Separate useEffect to ensure local storage is cleared on logout
+  useEffect(() => {
+    if (!isLoggedIn) {
+      mergeAttemptedRef.current = false;
+      localStorage.removeItem('cart');
+      // ✅ FIX: Call the clearCart action creator function
+      dispatch(clearCart());
+    }
+  }, [isLoggedIn, dispatch]);
 
   return (
     <>
@@ -52,7 +84,6 @@ function App() {
         <Header />
         <NavBar />
         <Routes>
-          {/* Public Routes */}
           <Route
             path="/"
             element={
@@ -69,45 +100,34 @@ function App() {
             }
           />
 
-          {/* Authentication Route: Redirects if user is already logged in */}
-          <Route path="/auth" element={!user ? <Auth /> : <Navigate to='/' replace />} />
+          <Route path="/auth" element={!isLoggedIn ? <Auth /> : <Navigate to='/' replace />} />
 
-          {/* Style Diaries Routes */}
           <Route path="/style-diaries" element={<StyleDiaries />} />
-          <Route path="/style-diaries/search" element={<StyleDiaries />} /> {/* Consider if this should be a separate component */}
+          <Route path="/style-diaries/search" element={<StyleDiaries />} />
           <Route path="/style-diaries/:id" element={<PostDetails />} />
 
-          {/* About Us Route */}
           <Route path="/aboutus" element={<AboutUs />} />
 
-          {/* User Profile & Details Routes */}
           <Route path="/user/:id" element={<UserDetails />} />
-          <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} /> {/* Your existing PrivateRoute */}
+          <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/user/:id/posts" element={<UserPostsPage />} />
           <Route path="/user/:id/products" element={<UserProductsPage />} />
 
-          {/* Product Routes */}
           <Route path="/products/trending" element={<TrendingStyles />} />
-          <Route path="/products/:id" element={<ProductDetails />} /> {/* Single route for product details */}
+          <Route path="/products/:id" element={<ProductDetails />} />
           <Route path="/products/search" element={<SearchPage />} />
 
-          {/* Cart Route */}
           <Route path="/cart" element={<CartPage />} />
 
-          {/* Featured Designers Route */}
           <Route path="/users/featured-designers" element={<FeaturedDesigners />} />
 
-          {/* --- NEW ADMIN PANEL ROUTES --- */}
-          {/* These routes are protected by the ProtectedRoute component, allowing only 'admin' role */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUserManagement />} />
             <Route path="/admin/products" element={<AdminProductManagement />} />
             <Route path="/admin/posts" element={<AdminPostManagement />} />
-            {/* Add more specific admin routes here as you build them */}
           </Route>
 
-          {/* Unauthorized Access Page */}
           <Route path="/unauthorized" element={
             <div style={{ textAlign: 'center', padding: '50px', color: '#dc2626' }}>
               <h1>403 - Forbidden</h1>
@@ -116,7 +136,6 @@ function App() {
             </div>
           } />
 
-          {/* Catch-all for undefined routes (404 Page) */}
           <Route path="*" element={
             <div style={{ textAlign: 'center', padding: '50px', color: '#78716c' }}>
               <h1>404 - Page Not Found</h1>

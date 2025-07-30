@@ -1,13 +1,12 @@
 // src/pages/CartPage.jsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'; // Keep useEffect if needed for other component-specific logic
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   updateCartItemQuantity,
   removeCartItem,
-  getCart, // Import the getCart action
-  mergeLocalCart, // Import the mergeLocalCart action
+  // Removed getCart and mergeLocalCart imports from here as they are no longer dispatched by this component
 } from '../actions/cart';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
@@ -16,44 +15,6 @@ export default function CartPage() {
   const navigate = useNavigate();
 
   const { cart, loading, error } = useSelector((state) => state.cart);
-  const { authData } = useSelector((state) => state.auth); // Assuming authData contains user info for login check
-
-  // Helper to load cart from local storage for merging
-  const loadCartFromStorage = () => {
-    try {
-      const serializedCart = localStorage.getItem('cart');
-      if (serializedCart === null) {
-        return { items: [] };
-      }
-      const parsedCart = JSON.parse(serializedCart);
-      return { items: parsedCart.items || [] };
-    } catch (e) {
-      console.error("Error loading cart from storage for merge:", e);
-      return { items: [] };
-    }
-  };
-
-  useEffect(() => {
-    // This effect runs on component mount and when authData changes
-    // It's crucial for fetching the logged-in user's cart or merging
-    if (authData?.token) { // User is logged in
-      const localCart = loadCartFromStorage();
-      if (localCart.items.length > 0) {
-        // If there are items in local storage, merge them
-        dispatch(mergeLocalCart(localCart.items));
-      } else {
-        // Otherwise, just fetch the user's cart from the DB
-        dispatch(getCart(authData?.result?._id)); // Pass userId if your getCart action expects it
-      }
-    } else {
-      // User is a guest or logged out, ensure local cart is loaded
-      // The reducer's initial state already handles this by loading from localStorage,
-      // but an explicit dispatch ensures the state is up-to-date if any prior DB op failed
-      dispatch(getCart(null)); // Call getCart without a userId to trigger local load
-    }
-  }, [dispatch, authData?.token, authData?.result?._id]); // Depend on dispatch and auth status
-
-  // --- Display Loading/Error States ---
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -80,7 +41,6 @@ export default function CartPage() {
   }
 
   // --- Empty Cart State ---
-  // This check should happen AFTER loading and error states are handled
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -103,7 +63,6 @@ export default function CartPage() {
   );
 
   const handleQuantityChange = (productId, newQuantity) => {
-    // Actions already have internal validation for quantity >= 1
     dispatch(updateCartItemQuantity(productId, newQuantity));
   };
 
@@ -119,7 +78,8 @@ export default function CartPage() {
           {cart.items.map((item) => (
             <div key={item.product._id} className="flex items-center justify-between border-b py-4">
               <div className="flex items-center space-x-4">
-                <img src={item.product.image} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
+                {/* Ensure product.image exists or provide a fallback */}
+                <img src={item.product.image || 'https://via.placeholder.com/80'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
                 <div>
                   <h3 className="font-semibold text-lg">{item.product.name}</h3>
                   <p className="text-gray-600">₹{item.product.price.toFixed(2)}</p>
@@ -127,7 +87,11 @@ export default function CartPage() {
               </div>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center border rounded">
-                  <button onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)} className="px-3 py-1">-</button>
+                  <button
+                    onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
+                    className="px-3 py-1"
+                    disabled={item.quantity <= 1} // Disable decrement if quantity is 1
+                  >-</button>
                   <span className="px-3">{item.quantity}</span>
                   <button onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)} className="px-3 py-1">+</button>
                 </div>
