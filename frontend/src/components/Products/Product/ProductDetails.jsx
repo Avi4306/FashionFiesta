@@ -6,6 +6,7 @@ import { addToCart } from "../../../actions/cart";
 import AddReviewSection from "./AddReviewSection";
 import ProductCarousel from "../../TrendingStyles/Categories/ProductCarousel";
 import { FaTrash, FaShareAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 // --- Sub-components ---
 
@@ -48,11 +49,13 @@ const ProductHeader = ({ title, brand, category, user, creator, onShare, onDelet
         {/* --- NEW: Display Creator Info --- */}
         {creator && ( // Ensure creator object exists and is populated
           <div className="mt-2 flex items-center gap-2 text-sm text-[#857262]">
+            <Link to = {`/user/${creator._id}`}>
               <img
                 src={creator.profilePhoto || `https://placehold.co/40x40/F0E4D3/44403c?text=${user?.result?.name?.charAt(0) || "A"}`}
                 alt={creator.name || 'Creator'}
                 className="h-8 w-8 rounded-full object-cover"
               />
+              </Link>
               <span className="font-semibold text-[#5a4e46] ml-1">
                 {creator.name || 'Unknown Creator'}
               </span>
