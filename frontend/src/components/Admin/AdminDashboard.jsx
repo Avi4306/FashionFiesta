@@ -1,21 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Typography, Box, Paper, Grid } from '@mui/material';
+// 🆕 Import Material-UI Icons
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt'; // For User Management
+import Inventory2Icon from '@mui/icons-material/Inventory2'; // For Product Management
+import ArticleIcon from '@mui/icons-material/Article'; // For Post Management
+import DashboardIcon from '@mui/icons-material/Dashboard'; // Optional: for the dashboard title itself
 
 export default function AdminDashboard() {
   return (
     <Box sx={{ maxWidth: '1200px', mx: 'auto', px: 2, py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, color: '#44403c' }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, color: '#44403c', display: 'flex', alignItems: 'center' }}>
+        {/* 🆕 Optional: Icon for the dashboard title */}
+        <DashboardIcon sx={{ mr: 1, fontSize: 'inherit' }} />
         Admin Dashboard
       </Typography>
 
       <Grid container spacing={3}>
+        {/* User Management Card */}
         <Grid item xs={12} sm={6} md={4}>
           <Paper elevation={3} sx={{ p: 3, borderRadius: '12px', transition: 'all 0.3s', '&:hover': { boxShadow: 6 } }}>
             <Link to="/admin/users" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Typography variant="h6" component="h2" sx={{ color: '#aa5a44', mb: 1 }}>
-                User Management
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                {/* 🆕 User Management Icon */}
+                <PeopleAltIcon sx={{ fontSize: 30, color: '#aa5a44', mr: 1.5 }} />
+                <Typography variant="h6" component="h2" sx={{ color: '#aa5a44' }}>
+                  User Management
+                </Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary">
                 View, create, edit roles/passwords, and delete users.
               </Typography>
@@ -23,12 +35,17 @@ export default function AdminDashboard() {
           </Paper>
         </Grid>
 
+        {/* Product Management Card */}
         <Grid item xs={12} sm={6} md={4}>
           <Paper elevation={3} sx={{ p: 3, borderRadius: '12px', transition: 'all 0.3s', '&:hover': { boxShadow: 6 } }}>
             <Link to="/admin/products" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Typography variant="h6" component="h2" sx={{ color: '#aa5a44', mb: 1 }}>
-                Product Management
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                {/* 🆕 Product Management Icon */}
+                <Inventory2Icon sx={{ fontSize: 30, color: '#aa5a44', mr: 1.5 }} />
+                <Typography variant="h6" component="h2" sx={{ color: '#aa5a44' }}>
+                  Product Management
+                </Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary">
                 Manage all products in the system.
               </Typography>
@@ -36,12 +53,17 @@ export default function AdminDashboard() {
           </Paper>
         </Grid>
 
+        {/* Post Management Card */}
         <Grid item xs={12} sm={6} md={4}>
           <Paper elevation={3} sx={{ p: 3, borderRadius: '12px', transition: 'all 0.3s', '&:hover': { boxShadow: 6 } }}>
             <Link to="/admin/posts" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Typography variant="h6" component="h2" sx={{ color: '#aa5a44', mb: 1 }}>
-                Post Management
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                {/* 🆕 Post Management Icon */}
+                <ArticleIcon sx={{ fontSize: 30, color: '#aa5a44', mr: 1.5 }} />
+                <Typography variant="h6" component="h2" sx={{ color: '#aa5a44' }}>
+                  Post Management
+                </Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary">
                 Oversee style diaries posts.
               </Typography>
