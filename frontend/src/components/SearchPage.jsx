@@ -1,13 +1,34 @@
-import React, { useEffect, useState } from 'react'; // 🆕 Import useState
-import { useLocation, useNavigate } from 'react-router-dom'; // 🆕 Import useNavigate for URL updates
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProductsBySearch } from '../actions/products.js';
 import ProductCard from './Products/Product/Product.jsx';
-import { Typography, CircularProgress, Container } from '@mui/material';
-import Pagination from '@mui/material/Pagination'; // 🆕 Import Pagination
-import Stack from '@mui/material/Stack'; // 🆕 Import Stack for pagination layout
+import { Typography, Container } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 
-// A simple hook to get URL search parameters
+// --- Helper Components for Styling ---
+
+const SkeletonCard = () => (
+    <div className="bg-[#faf7f3] rounded-lg p-4 border border-[#f0e4d3] animate-pulse">
+        <div className="bg-stone-300 rounded-md h-64 w-full"></div>
+        <div className="mt-4">
+            <div className="h-5 w-3/4 bg-stone-300 rounded"></div>
+            <div className="h-4 w-1/2 bg-stone-200 rounded mt-2"></div>
+        </div>
+    </div>
+);
+
+const SkeletonLoader = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonCard key={index} />
+        ))}
+    </div>
+);
+
+// --- Main Component (Styling Applied) ---
+
 function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
@@ -15,109 +36,118 @@ function useQuery() {
 const SearchPage = () => {
     const query = useQuery();
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // 🆕 Initialize useNavigate
+    const navigate = useNavigate();
 
-    // Get search query from URL, default to empty string if not present
     const searchQueryFromURL = query.get('searchQuery') || '';
-    // Get page from URL, default to 1
     const pageFromURL = parseInt(query.get('page') || '1', 10);
-
-    // 🆕 State for current page, initialized from URL
     const [currentPage, setCurrentPage] = useState(pageFromURL);
 
-    // Destructure search products and pagination data from Redux store
     const {
         searchProducts,
         isLoading,
-        searchCurrentPage, // The current page returned by the backend
-        searchTotalPages,  // The total pages returned by the backend
-        searchTotalProducts // The total products returned by the backend
+        searchCurrentPage,
+        searchTotalPages,
+        searchTotalProducts
     } = useSelector((state) => state.productsData);
-    console.log(searchProducts)
 
-    // The actual list of products for the current page
-    const productList = searchProducts || []; // Now searchProducts directly holds the array
+    const productList = searchProducts || [];
 
-    // Dispatch the search action whenever the searchQuery or currentPage changes
     useEffect(() => {
-        // Only dispatch if there's a valid search query
         if (searchQueryFromURL) {
             dispatch(getProductsBySearch({
                 search: searchQueryFromURL,
                 page: currentPage,
-                limit: 9 // Make sure this matches your backend's default or chosen limit
+                limit: 24
             }));
-            // Update the URL to reflect the current page
             navigate(`/products/search?searchQuery=${searchQueryFromURL}&page=${currentPage}&limit=9`);
-        } else {
-            // If searchQuery is cleared (e.g., from NavBar) and you land on this page,
-            // you might want to clear previous results or show a default message.
-            // You could dispatch an action to clear searchProducts state here if needed.
         }
-    }, [dispatch, searchQueryFromURL, currentPage, navigate]); // Added navigate to dependency array
+    }, [dispatch, searchQueryFromURL, currentPage, navigate]);
 
-    // Handler for page change
     const handlePageChange = (event, value) => {
-        setCurrentPage(value); // Update local state, which triggers useEffect
-        // useEffect will then handle dispatching the action and updating the URL
+        setCurrentPage(value);
     };
 
-    // Handle the case where there is no search query initially
     if (!searchQueryFromURL && !productList.length && !isLoading) {
         return (
-            <div className="text-center p-10">
-                <h2 className="text-xl font-semibold text-text-primary">Search for a product</h2>
-                <p className="text-text-secondary">Type something into the search bar to find products.</p>
+            <div className="bg-white min-h-[60vh] flex items-center justify-center">
+                <div className="text-center bg-[#faf7f3] border-2 border-dashed border-[#f0e4d3] rounded-lg p-12 max-w-lg mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="mx-auto h-12 w-12 text-[#d6d3d1]">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                    <h2 className="mt-4 text-xl font-bold text-[#44403c]">Find Your Next Favorite Piece</h2>
+                    <p className="mt-2 text-sm text-[#78716c]">Use the search bar above to discover products from our talented designers.</p>
+                </div>
             </div>
         );
     }
 
-    // Handle case while loading
-    if (isLoading && productList.length === 0) { // Only show loader if no products are currently loaded
-        return (
-            <div className="flex justify-center items-center h-48">
-                <CircularProgress color="primary" />
-            </div>
-        );
-    }
-
-    // Handle case where no products are found after a search
     if (!isLoading && productList.length === 0 && searchQueryFromURL) {
         return (
-            <div className="text-center p-10">
-                <h2 className="text-xl font-semibold text-text-primary">No products found for "{searchQueryFromURL}"</h2>
-                <p className="text-text-secondary">Try searching for something else.</p>
+            <div className="bg-white min-h-[60vh] flex items-center justify-center">
+                <div className="text-center bg-[#faf7f3] border-2 border-dashed border-[#f0e4d3] rounded-lg p-12 max-w-lg mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="mx-auto h-12 w-12 text-[#d6d3d1]">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    <h2 className="mt-4 text-xl font-bold text-[#44403c]">No Products Found</h2>
+                    <p className="mt-2 text-sm text-[#78716c]">
+                        Your search for "<span className="font-semibold text-[#44403c]">{searchQueryFromURL}</span>" did not match any products. Please try a different term.
+                    </p>
+                </div>
             </div>
         );
     }
 
     return (
-        <Container maxWidth="xl" className="p-4 md:p-8">
-            <Typography variant="h5" className="font-bold text-text-primary mb-6">
-                Results for "{searchQueryFromURL}" ({searchTotalProducts} items)
-            </Typography>
+        <div className="bg-white min-h-screen">
+            <Container maxWidth="xl" className="py-10 px-4 sm:px-6 lg:px-8">
+                {searchQueryFromURL && (
+                    <Typography variant="h5" component="h1" className="font-bold text-[#44403c] mb-8">
+                        Results for "{searchQueryFromURL}"
+                        <span className="font-normal text-base text-[#78716c] ml-2">({searchTotalProducts} items)</span>
+                    </Typography>
+                )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
-                {productList.map((product) => (
-                    <ProductCard key={product._id} product={product} />
-                ))}
-            </div>
+                {isLoading ? (
+                    <SkeletonLoader />
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {productList.map((product) => (
+                            <ProductCard key={product._id} product={product} />
+                        ))}
+                    </div>
+                )}
 
-            {/* Pagination Controls */}
-            {searchTotalPages > 1 && ( // Only show pagination if there's more than one page
-                <Stack spacing={2} className="mt-8 flex justify-center">
-                    <Pagination
-                        count={searchTotalPages}
-                        page={searchCurrentPage} // Use the current page from Redux state
-                        onChange={handlePageChange}
-                        variant="outlined"
-                        shape="rounded"
-                        color="primary"
-                        size="large"
-                    />
-                </Stack>
-            )}
-        </Container>
+                {searchTotalPages > 1 && (
+                    <Stack spacing={2} className="mt-12 flex items-center justify-center">
+                        <Pagination
+                            count={searchTotalPages}
+                            page={searchCurrentPage}
+                            onChange={handlePageChange}
+                            variant="outlined"
+                            shape="rounded"
+                            size="large"
+                            sx={{
+                                '& .MuiPaginationItem-root': {
+                                    color: '#44403c',
+                                    borderColor: '#f0e4d3',
+                                },
+                                '& .MuiPaginationItem-root:hover': {
+                                    backgroundColor: '#faf7f3',
+                                },
+                                '& .Mui-selected': {
+                                    backgroundColor: '#aa5a44 !important',
+                                    color: '#ffffff',
+                                    borderColor: '#aa5a44 !important',
+                                },
+                                '& .Mui-selected:hover': {
+                                    backgroundColor: '#9a4f3d !important',
+                                }
+                            }}
+                        />
+                    </Stack>
+                )}
+            </Container>
+        </div>
     );
 };
 
