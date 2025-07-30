@@ -54,7 +54,7 @@ const ProductCarousel = ({ category, products }) => {
               <Link to={`/products/${product._id}`} className="block">
                 <div className="relative overflow-hidden rounded-lg">
                   <img
-                    src={product.images[0]}
+                    src={product.images?.[0] || "/placeholder.png"} // Added fallback for image
                     alt={product.title}
                     className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                   />
@@ -73,6 +73,29 @@ const ProductCarousel = ({ category, products }) => {
                     </h3>
                 </Link>
 
+                {/* --- 🆕 ADDED CREATOR DETAILS --- */}
+                {product.creator && (
+                    <div className="mt-2 flex items-center gap-2 text-sm text-[#857262]">
+                        <Link to={`/user/${product.creator._id}`} className="flex items-center">
+                            <img
+                                src={product.creator.profilePhoto || `https://placehold.co/24x24/F0E4D3/44403c?text=${product.creator?.name?.charAt(0) || "A"}`}
+                                alt={product.creator.name || 'Creator'}
+                                className="h-6 w-6 rounded-full object-cover"
+                            />
+                            <span className="font-semibold text-[#5a4e46] ml-2 truncate">
+                                {product.creator.name || 'Unknown Creator'}
+                            </span>
+                        </Link>
+                        {/* Show role only if it's not 'customer' */}
+                        {product.creator.role && product.creator.role.toLowerCase() !== 'customer' && (
+                            <span className="ml-2 rounded-full bg-[#dfd0b8] px-2 py-0.5 text-xs font-medium text-[#5a4e46] capitalize">
+                                {product.creator.role}
+                            </span>
+                        )}
+                    </div>
+                )}
+                {/* --- END CREATOR DETAILS --- */}
+
                 <div className="flex items-center mt-1">
                   {renderStars(product.rating)}
                   {product.reviewCount > 0 && (
@@ -82,11 +105,11 @@ const ProductCarousel = ({ category, products }) => {
 
                 <div className="mt-2 flex items-baseline gap-2">
                   <p className="text-2xl font-extrabold text-[#3d3327]">
-                    ₹{product.price}
+                    ₹{product.price.toFixed(2)} {/* Ensure consistent formatting */}
                   </p>
                   {product.originalPrice > product.price && (
                     <p className="text-md font-medium text-[#ac9887] line-through">
-                        ₹{product.originalPrice}
+                        ₹{product.originalPrice.toFixed(2)} {/* Ensure consistent formatting */}
                     </p>
                   )}
                 </div>
