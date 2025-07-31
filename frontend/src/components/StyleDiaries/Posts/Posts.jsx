@@ -2,11 +2,11 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getPosts } from "../../../actions/posts.js"; // assumes pagination support
 import Post from "./Post/Post.jsx";
+import PostSkeleton from "./Post/PostSkeleton.jsx";
 
 const Posts = () => {
   const dispatch = useDispatch();
   const { posts, isLoading, hasMore } = useSelector((state) => state.posts);
-  console.log(posts)
   const postList = posts?.data || [];
   
   const [page, setPage] = useState(1);
@@ -46,14 +46,22 @@ const Posts = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-visible">
         {postList.map((post, index) =>
-      postList.length === index + 1 ? (
-        <div ref={lastPostRef} key={post._id}>
-          <Post post={post} />
-        </div>
-      ) : (
-        <Post key={post._id} post={post} />
-      )
-    )}
+          postList.length === index + 1 ? (
+            <div ref={lastPostRef} key={post._id}>
+              <Post post={post} />
+            </div>
+          ) : (
+            <Post key={post._id} post={post} />
+          )
+        )}
+
+        {/* Initial Load Skeletons */}
+        {isLoading && postList.length === 0 &&
+          Array.from({ length: 8 }).map((_, i) => <PostSkeleton key={i} />)}
+
+        {/* Optional: show 1–2 skeletons during infinite scroll */}
+        {isLoading && postList.length > 0 &&
+          Array.from({ length: 2 }).map((_, i) => <PostSkeleton key={`sk-${i}`} />)}
       </div>
 
       {isLoading && (

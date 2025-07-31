@@ -32,6 +32,7 @@ import {
   rejectDesignerApplication,
 } from '../../actions/admin';
 import { CLEAR_ADMIN_ERROR } from '../../constants/actionTypes';
+import AdminApplicationsSkeleton from './AdminDesignerApplicationsSkeleton';
 
 export default function AdminDesignerApplications() {
   const dispatch = useDispatch();
@@ -119,7 +120,7 @@ export default function AdminDesignerApplications() {
     setCurrentApplicationId(null);
     setRejectionReason('');
   };
-
+  
   return (
     <Box sx={{ maxWidth: '1200px', mx: 'auto', px: 2, py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4, color: '#44403c', display: 'flex', alignItems: 'center' }}>
@@ -128,9 +129,7 @@ export default function AdminDesignerApplications() {
       </Typography>
 
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
-          <CircularProgress sx={{ color: '#aa5a44' }} />
-        </Box>
+        <AdminApplicationsSkeleton/>
       ) : error ? (
         <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
       ) : applications.length === 0 ? (
