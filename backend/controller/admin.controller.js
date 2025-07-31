@@ -4,6 +4,7 @@ import Product from '../models/products.models.js'; // Assuming you have a Produ
 import Post from '../models/posts.models.js';     // Assuming you have a Post model
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs'; // Import bcrypt for password hashing
+import { sendEmail } from '../utils/sendEmail.js';
 
 // --- User Management ---
 export const getAllUsers = async (req, res) => {
@@ -352,5 +353,131 @@ export const updateAdminPost = async (req, res) => {
       return res.status(400).json({ message: messages.join(' ') });
     }
     res.status(500).json({ message: 'Failed to update post.' });
+  }
+};
+
+export const getDesignerApplications = async (req, res) => {
+  try {
+    // Find users with role 'pending_designer'
+    const applications = await User.find({ role: 'pending_designer' })
+      .select('name email designerApplication') // Select only necessary fields
+      .sort({ 'designerApplication.appliedAt': 1 }); // Sort by application date
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching designer applications:", error);
+    res.status(500).json({ message: "Something went wrong fetching applications." });
+  }
+};
+
+// Approve a designer application
+export const approveDesignerApplication = async (req, res) => {
+  const { id } = req.params; // Application user ID
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`No user with id: ${id}`);
+  }
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Ensure the user is currently a pending designer
+    if (user.role !== 'pending_designer') {
+      return res.status(400).json({ message: "User is not a pending designer." });
+    }
+
+    // Update user role to 'designer'
+    user.role = 'designer';
+
+    // Transfer relevant application details to designerDetails and set verified
+    user.designerDetails = {
+      brandName: user.designerApplication?.brandName || '', // Use application data if available
+      portfolioUrl: user.designerApplication?.portfolioLink || '', // Use application portfolio link
+      verified: true, // Mark as verified upon approval
+      salesCount: user.designerDetails?.salesCount || 0, // Keep existing sales count if any
+    };
+
+    // Clear designerApplication details after approval (optional, but keeps data clean)
+    user.designerApplication = undefined; // Or set to null, or an empty object if schema requires
+    
+    const updatedUser = await user.save();
+    await sendEmail({
+      to: user.email,
+      subject: "🎉 Your Designer Application Has Been Approved",
+      html: `
+        <p>Hi ${user.name},</p>
+        <p>Congratulations! Your application to become a designer on our platform has been approved.</p>
+        <p>You can now access your designer dashboard and start uploading your work.</p>
+        <p><a href="https://yourapp.com/designer/dashboard">Go to Dashboard</a></p>
+        <br/>
+        <p>— The Team</p>
+      `,
+    });
+    // Respond with the updated user (or just a success message)
+    res.status(200).json({ message: "Designer approved successfully.", user: updatedUser });
+
+  } catch (error) {
+    console.error("Error approving designer application:", error);
+    res.status(500).json({ message: "Something went wrong during approval." });
+  }
+};
+
+// Reject a designer application
+export const rejectDesignerApplication = async (req, res) => {
+  const { id } = req.params; // Application user ID
+  const { reason } = req.body; // Rejection reason from frontend
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`No user with id: ${id}`);
+  }
+
+  if (!reason || reason.trim() === '') {
+    return res.status(400).json({ message: "Rejection reason is required." });
+  }
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.role !== 'pending_designer') {
+      return res.status(400).json({ message: "User is not a pending designer." });
+    }
+
+    user.role = 'customer';
+
+    user.designerApplication = {
+      ...user.designerApplication, // Keep existing application data
+      status: 'rejected',
+      reviewedBy: req.userId, // ID of the admin who rejected (from auth middleware)
+      reviewedAt: new Date(),
+      rejectionReason: reason,
+    };
+
+    const updatedUser = await user.save();
+    await sendEmail({
+      to: user.email,
+      subject: "🛑 Your Designer Application Was Not Approved",
+      html: `
+        <p>Hi ${user.name},</p>
+        <p>Thank you for applying to become a designer on our platform.</p>
+        <p>Unfortunately, your application was not approved at this time.</p>
+        <p><strong>Reason:</strong> ${reason}</p>
+        <p>You're welcome to revise and apply again in the future.</p>
+        <br/>
+        <p>— The Team</p>
+      `,
+    });
+    res.status(200).json({ message: "Designer application rejected successfully.", user: updatedUser });
+
+  } catch (error) {
+    console.error("Error rejecting designer application:", error);
+    res.status(500).json({ message: "Something went wrong during rejection." });
   }
 };

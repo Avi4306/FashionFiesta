@@ -17,8 +17,12 @@ import {
   SET_ADMIN_ERROR,
   CLEAR_ADMIN_ERROR,
   AUTH,
-  START_ADMIN_LOADING, // Imported
-  END_ADMIN_LOADING,   // Imported
+  START_ADMIN_LOADING,
+  END_ADMIN_LOADING,
+  // New action types for designer applications
+  FETCH_DESIGNER_APPLICATIONS,
+  APPROVE_DESIGNER_APPLICATION,
+  REJECT_DESIGNER_APPLICATION,
 } from '../constants/actionTypes';
 
 // Helper to handle dispatching success/error messages
@@ -70,10 +74,11 @@ export const updateAdminUserRole = (id, role) => async (dispatch, getState) => {
     const currentState = getState();
     const currentUserAuthData = currentState.auth.authData;
 
+    // If the updated user is the currently logged-in user, update their role in Redux auth state
     if (currentUserAuthData && currentUserAuthData.result?._id === data._id) {
       const updatedAuthDataForCurrentUser = {
         ...currentUserAuthData,
-        result: data,
+        result: data, // 'data' here is the updated user object
       };
 
       dispatch({ type: AUTH, data: updatedAuthDataForCurrentUser });
@@ -183,5 +188,76 @@ export const deleteAdminPost = (id) => async (dispatch) => {
     return handleResponse(dispatch, DELETE_ADMIN_POST, id, 'Post deleted successfully.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to delete post.');
+  }
+};
+
+// --- Designer Application Management Actions ---
+
+/**
+ * Fetches all pending designer applications.
+ */
+export const getDesignerApplications = () => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    const { data } = await api.fetchDesignerApplications();
+    return handleResponse(dispatch, FETCH_DESIGNER_APPLICATIONS, data, 'Designer applications fetched successfully.');
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to fetch designer applications.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+/**
+ * Approves a specific designer application.
+ * @param {string} id - The user ID of the applicant to approve.
+ */
+export const approveDesignerApplication = (id) => async (dispatch, getState) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    const { data } = await api.approveDesignerApplication(id); // 'data' will contain the updated user object
+
+    // Dispatch action to remove the application from the list in the admin reducer
+    handleResponse(dispatch, APPROVE_DESIGNER_APPLICATION, id, 'Designer application approved successfully.');
+
+    const currentState = getState();
+    const currentUserAuthData = currentState.auth.authData;
+
+    // If the approved user is the currently logged-in admin, update their role in Redux auth state
+    if (currentUserAuthData && currentUserAuthData.result?._id === data.user._id) {
+      const updatedAuthDataForCurrentUser = {
+        ...currentUserAuthData,
+        result: data.user, // 'data.user' is the updated user object from the backend
+      };
+      dispatch({ type: AUTH, data: updatedAuthDataForCurrentUser });
+      console.log("Logged-in user's role updated to designer/admin in Redux auth state and localStorage.");
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to approve designer application.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+/**
+ * Rejects a specific designer application.
+ * @param {string} id - The user ID of the applicant to reject.
+ * @param {string} reason - The reason for rejection.
+ */
+export const rejectDesignerApplication = (id, reason) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    await api.rejectDesignerApplication(id, { reason });
+
+    // Dispatch action to remove the application from the list in the admin reducer
+    handleResponse(dispatch, REJECT_DESIGNER_APPLICATION, id, 'Designer application rejected successfully.');
+
+    return { success: true };
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to reject designer application.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
   }
 };

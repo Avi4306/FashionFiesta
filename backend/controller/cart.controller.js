@@ -13,7 +13,6 @@ const populateCartProducts = async (cart) => {
 export const addToCart = async (req, res) => {
     const { productId, quantity = 1 } = req.body;
     const userId = req.userId; // Assuming auth middleware adds userId to req
-    console.log('addToCart: userId =', userId); // 🆕 Debugging log
 
     // ... (rest of your addToCart function) ...
     // Input validation
@@ -61,7 +60,6 @@ export const addToCart = async (req, res) => {
 // --- Get User Cart ---
 export const getCart = async (req, res) => {
     const userId = req.userId;
-    console.log('getCart: userId =', userId); // 🆕 Debugging log
 
     try {
         const cart = await Cart.findOne({ user: userId });
@@ -82,7 +80,6 @@ export const getCart = async (req, res) => {
 export const mergeCarts = async (req, res) => {
     const { items: localCartItems } = req.body;
     const userId = req.userId;
-    console.log('mergeCarts: userId =', userId); // 🆕 Debugging log
 
     // ... (rest of your mergeCarts function) ...
     if (!Array.isArray(localCartItems)) {
@@ -136,7 +133,6 @@ export const updateCartItem = async (req, res) => {
     const { productId } = req.params;
     const { quantity } = req.body;
     const userId = req.userId;
-    console.log('updateCartItem: userId =', userId); // 🆕 Debugging log
 
     // ... (rest of your updateCartItem function) ...
     if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -229,7 +225,6 @@ export const removeCartItem = async (req, res) => {
 // --- Clear User Cart ---
 export const clearUserCart = async (req, res) => {
     const userId = req.userId;
-    console.log('clearUserCart: userId =', userId); // 🆕 Debugging log
 
     // ... (rest of your clearUserCart function) ...
     try {

@@ -324,3 +324,34 @@ export const getFeaturedDesigners = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const applyDesignerApplication = async (req, res) => {
+  const { id } = req.params;
+  // Destructure new fields from req.body
+  const { message, portfolioLink, yearsExperience, specializations, whyYou } = req.body;
+
+  // ... (existing checks)
+
+  try {
+    const user = await User.findById(id);
+    // ... (existing role check)
+
+    user.role = 'pending_designer';
+    user.designerApplication = {
+      message,
+      portfolioLink,
+      yearsExperience: yearsExperience ? parseInt(yearsExperience) : 0, // Convert to number
+      specializations,
+      whyYou,
+      appliedAt: new Date(),
+      status: 'pending'
+    };
+
+    const updatedUser = await user.save();
+    res.status(200).json({ result: updatedUser, message: "Designer application submitted successfully." });
+
+  } catch (error) {
+    console.error("Error submitting designer application:", error);
+    res.status(500).json({ message: "Something went wrong during application submission." });
+  }
+};

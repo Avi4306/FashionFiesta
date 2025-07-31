@@ -15,6 +15,9 @@ import {
   GlobeAltIcon,
   ChatBubbleLeftRightIcon,
   UserPlusIcon,
+  TagIcon, // New icon for role
+  AcademicCapIcon, // New icon for experience/specializations
+  SparklesIcon, // New icon for 'why you' - still imported but not used for display
 } from "@heroicons/react/24/solid";
 
 // --- Helper Components ---
@@ -32,8 +35,8 @@ const InfoItem = ({ icon, label, children }) => (
 
 const PreviewCard = ({ to, image, title, description, placeholderIcon, size = 'small' }) => {
   const sizeStyles = {
-    small: 'h-55', 
-    large: 'h-80', 
+    small: 'h-55',
+    large: 'h-80',
   };
 
   return (
@@ -123,7 +126,7 @@ const UserDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const loggedInProfile = useSelector((state) => state.auth.authData);
-  const { isLoading, user, posts, products } = useSelector((state) => state.user);
+  const { isLoading, user, posts, products, error } = useSelector((state) => state.user); // 🆕 Get error from user reducer
 
   useEffect(() => {
     if (loggedInProfile?.result?._id === id) {
@@ -133,26 +136,60 @@ const UserDetails = () => {
     }
   }, [dispatch, id, loggedInProfile, navigate]);
 
+  // Handle loading and error states
   if (isLoading || !user) {
     return <SkeletonLoader />;
   }
 
-  const { name, email, bio, profilePhoto, role, designerDetails, socialLinks, location } = user;
+  // If there's an error and no user data, display an error message
+  if (error && !user) {
+    return (
+      <div className="text-center py-10 text-red-600">
+        <h2 className="text-xl font-semibold">Error Loading Profile</h2>
+        <p>{error}</p>
+        <p className="mt-4 text-sm text-[#78716c]">Please try again later or check the user ID.</p>
+      </div>
+    );
+  }
+
+  const { name, email, bio, profilePhoto, role, designerDetails, socialLinks, location, designerApplication } = user; // 🆕 Destructure designerApplication
   const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=f0e4d3&color=44403c`;
   const postsToShow = posts?.slice(0, 4);
   const productsToShow = products?.slice(0, 4);
+
+  // Role badge mapping for display
+  const roleBadge = {
+    admin: "✔️ Admin",
+    designer: "🧵 Designer",
+    pending_designer: "⏳ Pending",
+    customer: "",
+  };
+
+  // Determine the display text and style for the role badge
+  const roleDisplayText = roleBadge[role] || "User"; // Default to "User" if role not found
+  const roleStyle = {
+    admin: "bg-blue-100 text-blue-800",
+    designer: "bg-green-100 text-green-800",
+    pending_designer: "bg-yellow-100 text-yellow-800",
+    customer: "bg-gray-100 text-gray-800", // Default style for customer
+  }[role] || "bg-gray-100 text-gray-800"; // Fallback style
 
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-          
+
           {/* --- Left Sticky Column --- */}
           <aside className="lg:col-span-4 lg:sticky lg:top-8 self-start">
             <div className="bg-[#faf7f3] rounded-xl shadow-sm p-6 border border-[#f0e4d3]">
               <div className="flex flex-col items-center text-center pb-6">
                 <img src={profilePhoto || avatarPlaceholder} alt={name} className="w-28 h-28 rounded-full object-cover ring-4 ring-white" />
-                <h1 className="text-2xl font-bold text-[#44403c] mt-4">{name}</h1>
+                <h1 className="text-2xl font-bold text-[#44403c] mt-4 flex items-center gap-2">
+                  {name}
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${roleStyle}`}>
+                    {roleDisplayText}
+                  </span>
+                </h1>
                 <p className="text-sm text-[#78716c]">{designerDetails?.brandName || email}</p>
                 {designerDetails?.verified && (
                   <div className="flex items-center gap-1.5 text-green-600 mt-2">
@@ -164,10 +201,49 @@ const UserDetails = () => {
 
               <div className="space-y-6 border-t border-[#f0e4d3] pt-6">
                 <InfoItem icon={<PencilSquareIcon />} label="Bio">{bio || "No bio provided."}</InfoItem>
-                {location && <InfoItem icon={<MapPinIcon />} label="Location">{[location.city, location.state, location.country].filter(Boolean).join(", ")}</InfoItem>}
+                {location && (location.city || location.state || location.country) && (
+                  <InfoItem icon={<MapPinIcon />} label="Location">
+                    {[location.city, location.state, location.country].filter(Boolean).join(", ")}
+                  </InfoItem>
+                )}
                 {designerDetails?.portfolioUrl && <InfoItem icon={<LinkIcon />} label="Portfolio"><a href={designerDetails.portfolioUrl} target="_blank" rel="noreferrer" className="text-[#aa5a44] hover:underline font-medium">View Portfolio</a></InfoItem>}
               </div>
-              
+
+              {/* 🆕 Designer Application Details (if applicable) */}
+              {(role === 'designer' || role === 'pending_designer') && designerApplication && (
+                <div className="mt-6 border-t border-[#f0e4d3] pt-6 space-y-4">
+                  <h3 className="text-lg font-bold text-[#44403c]">Designer Application Details</h3>
+                  <InfoItem icon={<ChatBubbleLeftRightIcon />} label="Application Message">
+                    {designerApplication.message || "N/A"}
+                  </InfoItem>
+                  {designerApplication.yearsExperience !== undefined && (
+                    <InfoItem icon={<AcademicCapIcon />} label="Years Experience">
+                      {designerApplication.yearsExperience} years
+                    </InfoItem>
+                  )}
+                  {designerApplication.specializations && (
+                    <InfoItem icon={<TagIcon />} label="Specializations">
+                      {designerApplication.specializations}
+                    </InfoItem>
+                  )}
+                  {/* Removed the 'Why You?' field */}
+                  {designerApplication.status && (
+                    <InfoItem icon={<GlobeAltIcon />} label="Application Status">
+                      <span className={`font-semibold ${
+                        designerApplication.status === 'approved' ? 'text-green-600' :
+                        designerApplication.status === 'pending' ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {designerApplication.status.charAt(0).toUpperCase() + designerApplication.status.slice(1)}
+                        {designerApplication.status === 'rejected' && designerApplication.rejectionReason && (
+                          <span className="text-sm text-[#78716c] block mt-1">Reason: {designerApplication.rejectionReason}</span>
+                        )}
+                      </span>
+                    </InfoItem>
+                  )}
+                </div>
+              )}
+
               {socialLinks && (
                 <div className="mt-6 border-t border-[#f0e4d3] pt-6 flex justify-center space-x-5">
                     {/* Social Icons would go here */}
@@ -202,7 +278,7 @@ const UserDetails = () => {
               </div>
               {productsToShow?.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 
+
                   {productsToShow.map((product) => <PreviewCard key={product._id} to={`/products/${product._id}`} image={product.images?.[0]} title={product.title} description={product.description || "No description"} placeholderIcon={<ShoppingBagIcon />} size="large" />)}
                 </div>
               ) : (

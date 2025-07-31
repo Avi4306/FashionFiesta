@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import CropperDialog from "../Auth/CropperDialog";
-import { Typography } from "@mui/material";
+import { Typography, Snackbar, Alert } from "@mui/material"; // 🆕 Import Snackbar and Alert
 import { updateProfile, getUserProfileData, deleteAccount } from "../../actions/user";
 import { CLEAR_ERROR } from '../../constants/actionTypes';
 import ConfirmDelete from "../ConfirmDelete";
@@ -14,12 +14,12 @@ export default function Profile() {
   const navigate = useNavigate();
   const authData = useSelector((state) => state.auth.authData);
   const { posts, products, isLoading: userPostsProductsLoading } = useSelector((state) => state.user);
-  const { error, isLoading: authLoading } = useSelector((state) => state.auth);
+  const { error, isLoading: authLoading } = useSelector((state) => state.auth); // Error and loading from auth reducer
   const userId = authData?.result?._id;
 
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", profilePhoto: "", bio: "", role: "", // Added role to form state
+    name: "", email: "", profilePhoto: "", bio: "", role: "",
     designerDetails: { brandName: "", portfolioUrl: "" },
     socialLinks: { instagram: "", facebook: "", twitter: "", website: "" },
     location: { city: "", state: "", country: "" },
@@ -30,12 +30,18 @@ export default function Profile() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
 
+  // 🆕 State for Snackbar notification
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success', 'error', 'info', 'warning'
+  const [submissionAttempted, setSubmissionAttempted] = useState(false); // To track if a save attempt was made
+
   useEffect(() => {
     if (authData?.result) {
       const { result } = authData;
       setForm({
         name: result.name || "", email: result.email || "", profilePhoto: result.profilePhoto || "", bio: result.bio || "",
-        role: result.role || "customer", // Initialize role from authData
+        role: result.role || "customer",
         designerDetails: {
           brandName: result.designerDetails?.brandName || "",
           portfolioUrl: result.designerDetails?.portfolioUrl || "",
@@ -66,6 +72,28 @@ export default function Profile() {
     dispatch({ type: CLEAR_ERROR });
   }, [editMode, dispatch]);
 
+  // 🆕 Effect to handle Snackbar messages based on Redux state after a submission attempt
+  useEffect(() => {
+    if (submissionAttempted && !authLoading) { // If a submission was attempted and loading has finished
+      if (error) {
+        setSnackbarMessage(error);
+        setSnackbarSeverity('error');
+      } else {
+        setSnackbarMessage("Profile updated successfully!");
+        setSnackbarSeverity('success');
+        setEditMode(false); // Only exit edit mode on successful save
+      }
+      setSnackbarOpen(true);
+      setSubmissionAttempted(false); // Reset the flag
+    }
+  }, [submissionAttempted, authLoading, error]); // Watch for changes in these states
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   if (authLoading || userPostsProductsLoading || !authData || !authData.result) {
     return <div className="text-center py-10 text-gray-500">Loading profile data...</div>;
@@ -109,15 +137,21 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmissionAttempted(true); // 🆕 Set flag before dispatching
     dispatch(updateProfile(authData.result._id, form));
-    setEditMode(false);
+    // The actual state update (editMode, snackbar) will happen in the useEffect
+    // after the Redux action has completed and updated `authLoading` and `error`.
+  };
+
+  const handleApplyAsDesigner = () => {
+    navigate("/apply-designer");
   };
 
   const roleBadge = {
     admin: "✔️ Admin",
     designer: "🧵 Designer",
     pending_designer: "⏳ Pending",
-    customer: "🛒 Customer", // Added customer for completeness
+    customer: "",
   };
 
   const locationParts = [form.location?.city, form.location?.state, form.location?.country].filter(Boolean);
@@ -169,6 +203,15 @@ export default function Profile() {
               >
                 Delete Account
               </button>
+              {/* Apply to be a Designer Button - only visible for customers */}
+              {role === "customer" && (
+                <button
+                  onClick={handleApplyAsDesigner}
+                  className="flex-1 bg-[#5cb85c] text-white py-2 px-4 rounded-lg hover:bg-[#4cae4c] transition-colors"
+                >
+                  Apply to be a Designer
+                </button>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -316,6 +359,7 @@ export default function Profile() {
               <button type="submit" className="flex-1 bg-[#aa5a44] text-white py-2 rounded-lg hover:bg-[#8e4738] transition-colors">Save</button>
               <button type="button" onClick={() => setEditMode(false)} className="flex-1 border border-[#aa5a44] text-[#aa5a44] py-2 rounded-lg hover:bg-[#f3e5dc] transition-colors">Cancel</button>
             </div>
+            {/* 🆕 Error message will now be handled by Snackbar, but keeping this for persistent display if needed */}
             {error && (
               <div className="text-red-600 text-sm mt-4 text-center">{error}</div>
             )}
@@ -410,6 +454,18 @@ export default function Profile() {
           <p className="text-sm text-[#78716c]">You have not created any products yet.</p>
         )}
       </div>
+
+      {/* 🆕 Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'; // Keep useState if you use it elsewhere
-import { useDispatch, useSelector } from 'react-redux'; // Import useSelector
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+
 import './App.css'; // Your main CSS file
 import Header from './components/Header/Header';
 import NavBar from './components/Header/NavBar';
@@ -13,7 +14,6 @@ import BlogSection from './components/Blog/Blog.jsx';
 import Designers from './components/Designer/Designers.jsx';
 import Footer from './components/Footer/Footer.jsx';
 
-import { getPosts } from "./actions/posts"; // Your existing action
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import AboutUs from "./components/AboutUs/AboutUs.jsx";
 import Auth from './components/Auth/Auth.jsx';
@@ -34,18 +34,23 @@ import AdminDashboard from './components/Admin/AdminDashboard.jsx'; // Admin Das
 import AdminUserManagement from './components/Admin/AdminUserManagement.jsx'; // Admin User Management
 import AdminProductManagement from './components/Admin/AdminProductManagement.jsx'; // Admin Product Management
 import AdminPostManagement from './components/Admin/AdminPostManagement.jsx'; // Admin Post Management
+import AdminDesignerApplications from './components/Admin/AdminDesignerApplications.jsx'; // 🆕 Import the new component
 import ImageSearchForm from './components/ImageSearch.jsx';
 import { getCart } from './actions/cart';
+import ApplyDesignerForm from './components/User/ApplyDesignForm';
 
 function App() {
-  const user = JSON.parse(localStorage.getItem('profile')); // Keep this for the Auth redirect logic
+  // Using useSelector to get authData for consistent role checking
+  const authData = useSelector((state) => state.auth.authData);
   const dispatch = useDispatch();
 
-useEffect(() => {
-  if (user?.token) {
-    dispatch(getCart(user?.result?._id));
-  }
-}, [dispatch, user?.token]);
+  useEffect(() => {
+    // Fetch cart data if user is logged in
+    if (authData?.token) {
+      dispatch(getCart(authData?.result?._id));
+    }
+  }, [dispatch, authData?.token, authData?.result?._id]); // Depend on authData for re-fetch
+
   return (
     <>
       <Router>
@@ -71,25 +76,25 @@ useEffect(() => {
           />
 
           {/* Authentication Route: Redirects if user is already logged in */}
-          <Route path="/auth" element={!user ? <Auth /> : <Navigate to='/' replace />} />
+          <Route path="/auth" element={!authData ? <Auth /> : <Navigate to='/' replace />} />
 
           {/* Style Diaries Routes */}
           <Route path="/style-diaries" element={<StyleDiaries />} />
-          <Route path="/style-diaries/search" element={<StyleDiaries />} /> {/* Consider if this should be a separate component */}
+          <Route path="/style-diaries/search" element={<StyleDiaries />} />
           <Route path="/style-diaries/:id" element={<PostDetails />} />
 
           {/* About Us Route */}
           <Route path="/aboutus" element={<AboutUs />} />
 
           {/* User Profile & Details Routes */}
-          <Route path="/user/:id" element={<UserDetails />} />
-          <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} /> {/* Your existing PrivateRoute */}
+          <Route path="/user/profile" element={<PrivateRoute ><Profile /></PrivateRoute>} />
+          <Route path="/user/:id" element={<UserDetails />} /> {/* Publicly viewable user details */}
           <Route path="/user/:id/posts" element={<UserPostsPage />} />
           <Route path="/user/:id/products" element={<UserProductsPage />} />
 
           {/* Product Routes */}
           <Route path="/products/trending" element={<TrendingStyles />} />
-          <Route path="/products/:id" element={<ProductDetails />} /> {/* Single route for product details */}
+          <Route path="/products/:id" element={<ProductDetails />} />
           <Route path="/products/search" element={<SearchPage />} />
 
           {/* Cart Route */}
@@ -98,14 +103,23 @@ useEffect(() => {
           {/* Featured Designers Route */}
           <Route path="/users/featured-designers" element={<FeaturedDesigners />} />
 
-          {/* --- NEW ADMIN PANEL ROUTES --- */}
-          {/* These routes are protected by the ProtectedRoute component, allowing only 'admin' role */}
+          {/* Image Search Route */}
+          <Route path='/search' element={<ImageSearchForm />} />
+
+          {/* --- PROTECTED ROUTES WITH ROLE-BASED ACCESS --- */}
+
+          {/* Apply Designer Page - ONLY accessible to 'customer' role */}
+          <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
+            <Route path="/apply-designer" element={<ApplyDesignerForm />} />
+          </Route>
+
+          {/* Admin Panel Routes - ONLY accessible to 'admin' role */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUserManagement />} />
             <Route path="/admin/products" element={<AdminProductManagement />} />
             <Route path="/admin/posts" element={<AdminPostManagement />} />
-            {/* Add more specific admin routes here as you build them */}
+            <Route path="/admin/designer-applications" element={<AdminDesignerApplications />} /> {/* 🆕 New route for designer applications */}
           </Route>
 
           {/* Unauthorized Access Page */}
@@ -125,7 +139,6 @@ useEffect(() => {
               <p><Link to="/" style={{ color: '#44403c', textDecoration: 'underline' }}>Go to Home</Link></p>
             </div>
           } />
-          <Route path='/search' element = {<ImageSearchForm/>}/>
         </Routes>
         <Footer />
       </Router>
