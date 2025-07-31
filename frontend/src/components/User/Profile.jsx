@@ -176,9 +176,11 @@ export default function Profile() {
               <div>
                 <h2 className="text-xl font-semibold text-[#44403c] flex items-center gap-2">
                   {form.name}
+                  {role !== 'customer' &&
                   <span className="text-sm bg-[#f0e4d3] text-[#aa5a44] px-2 py-1 rounded-full">
                     {roleBadge[role]}
                   </span>
+                  }
                 </h2>
                 <p className="text-sm text-[#78716c]">{form.email}</p>
               </div>

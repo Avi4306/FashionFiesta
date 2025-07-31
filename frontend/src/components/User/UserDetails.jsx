@@ -166,7 +166,7 @@ const UserDetails = () => {
   };
 
   // Determine the display text and style for the role badge
-  const roleDisplayText = roleBadge[role] || "User"; // Default to "User" if role not found
+  const roleDisplayText = roleBadge[role] || ""; // Default to "User" if role not found
   const roleStyle = {
     admin: "bg-blue-100 text-blue-800",
     designer: "bg-green-100 text-green-800",
@@ -186,9 +186,11 @@ const UserDetails = () => {
                 <img src={profilePhoto || avatarPlaceholder} alt={name} className="w-28 h-28 rounded-full object-cover ring-4 ring-white" />
                 <h1 className="text-2xl font-bold text-[#44403c] mt-4 flex items-center gap-2">
                   {name}
+                  {role !== 'customer' &&
                   <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${roleStyle}`}>
                     {roleDisplayText}
                   </span>
+                  }
                 </h1>
                 <p className="text-sm text-[#78716c]">{designerDetails?.brandName || email}</p>
                 {designerDetails?.verified && (

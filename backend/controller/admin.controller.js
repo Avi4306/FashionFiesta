@@ -409,12 +409,13 @@ export const approveDesignerApplication = async (req, res) => {
       to: user.email,
       subject: "🎉 Your Designer Application Has Been Approved",
       html: `
-        <p>Hi ${user.name},</p>
-        <p>Congratulations! Your application to become a designer on our platform has been approved.</p>
-        <p>You can now access your designer dashboard and start uploading your work.</p>
-        <p><a href="https://yourapp.com/designer/dashboard">Go to Dashboard</a></p>
+        <p>Hi ${updatedUser.name},</p>
+        <p>Congratulations! We are thrilled to inform you that your application to become a <strong>designer</strong> on our platform has been <strong>approved</strong>!</p>
+        <p>Your role has been updated. You can now log in and start exploring your opportunities.</p>
+        <p>Explore the <a href="${process.env.FRONTEND_URL}/">home page</a> to begin your journey with Fashion Fiesta.</p>
         <br/>
-        <p>— The Team</p>
+        <p>Best regards,</p>
+        <p>The Fashion Fiesta Team</p>
       `,
     });
     // Respond with the updated user (or just a success message)
@@ -465,13 +466,13 @@ export const rejectDesignerApplication = async (req, res) => {
       to: user.email,
       subject: "🛑 Your Designer Application Was Not Approved",
       html: `
-        <p>Hi ${user.name},</p>
-        <p>Thank you for applying to become a designer on our platform.</p>
-        <p>Unfortunately, your application was not approved at this time.</p>
-        <p><strong>Reason:</strong> ${reason}</p>
-        <p>You're welcome to revise and apply again in the future.</p>
-        <br/>
-        <p>— The Team</p>
+        <p>Dear ${updatedUser.name},</p>
+        <p>Thank you for your interest in becoming a designer on our platform.</p>
+        <p>After careful consideration, we regret to inform you that your application has been <strong>rejected</strong> at this time.</p>
+        ${reason ? `<p><strong>Reason for rejection:</strong> ${reason}</p>` : ''}
+        <p>We appreciate you taking the time to apply.</p>
+        <p>Best regards,</p>
+        <p>The Fashion Fiesta Team</p>
       `,
     });
     res.status(200).json({ message: "Designer application rejected successfully.", user: updatedUser });
