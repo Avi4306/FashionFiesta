@@ -168,6 +168,7 @@ const UserDetails = () => {
                   key={post._id}
                   className="group border rounded-lg bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
                 >
+                  <Link to = {`/style-diaries/${post._id}`}>
                   <img
                     src={post.selectedFiles?.[0]}
                     alt={post.title}
@@ -181,6 +182,7 @@ const UserDetails = () => {
                       {post.content || "No content"}
                     </p>
                   </div>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -212,6 +214,7 @@ const UserDetails = () => {
                   key={product._id}
                   className="group border rounded-lg bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
                 >
+                  <Link to = {`/products/${product._id}`}>
                   <img
                     src={product.images?.[0]}
                     alt={product.title}
@@ -225,6 +228,7 @@ const UserDetails = () => {
                       {product.description || "No description"}
                     </p>
                   </div>
+                  </Link>
                 </div>
               ))}
             </div>
