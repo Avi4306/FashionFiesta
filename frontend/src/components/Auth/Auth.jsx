@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 import { login, googleLogin, sendSignupOtp, verifySignupOtp } from '../../actions/auth';
 import { CLEAR_ERROR } from '../../constants/actionTypes';
 import { jwtDecode } from 'jwt-decode';
@@ -17,6 +18,20 @@ const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?!.*\s).{
 
 // Input component with error display
 const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword, onBlur, error }) => (
+=======
+import { login, signup } from '../../actions/auth';
+import CropperDialog from './CropperDialog';
+import { Typography, Button } from '@mui/material';
+import {jwtDecode} from 'jwt-decode'
+import { googleLogin } from '../../actions/auth';
+
+// Icons
+const UserIcon = () => <svg className="h-5 w-5 text-gray-500"  />;
+const MailIcon = () => <svg className="h-5 w-5 text-gray-500"  />;
+const LockIcon = () => <svg className="h-5 w-5 text-gray-500"  />;
+
+const Input = ({ name, type = 'text', placeholder, icon, value, handleChange }) => (
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   <div className="relative w-full mb-4">
     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">{icon}</div>
     <input
@@ -25,15 +40,23 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, ha
       placeholder={placeholder}
       value={value}
       onChange={handleChange}
+<<<<<<< HEAD
       onBlur={onBlur} // Added onBlur event handler
       className={`w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2 ${error ? 'border-red-500 focus:ring-red-200' : 'border-[#D5D0B8] focus:ring-[#DCC5B2]'}`}
       style={{
         backgroundColor: '#F0E4D3',
+=======
+      className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+      style={{
+        backgroundColor: '#F0E4D3',
+        borderColor: '#D5D0B8',
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
         color: '#000000',
         accentColor: '#DCC5B2',
       }}
       required
     />
+<<<<<<< HEAD
     {(name === 'password' || name === 'confirmPassword') && (
       <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
         <IconButton onClick={handleShowPassword} edge="end" size="small">
@@ -57,17 +80,39 @@ export default function Auth() {
     otp: ''
   };
 
+=======
+  </div>
+);
+
+export default function Auth() {
+  const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   const [formData, setFormData] = useState(initialState);
   const [isSignUp, setIsSignUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
   const [cropSrc, setCropSrc] = useState(null);
   const [openCropper, setOpenCropper] = useState(false);
+<<<<<<< HEAD
   const [otpStep, setOtpStep] = useState(false);
+=======
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setCropSrc(reader.result);
+    setOpenCropper(true);
+  };
+  reader.readAsDataURL(file);
+};
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { error } = useSelector((state) => state.auth);
 
+<<<<<<< HEAD
   const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
@@ -134,10 +179,18 @@ export default function Auth() {
   const handleBlur = (e) => {
     const { name, value } = e.target;
     validateField(name, value);
+=======
+  useEffect(() => () => dispatch({ type: 'CLEAR_ERROR' }), [dispatch]);
+
+  const handleChange = (e) => {
+    dispatch({ type: 'CLEAR_ERROR' });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   };
 
   const handleShowPassword = () => setShowPassword((prev) => !prev);
 
+<<<<<<< HEAD
   const handleSendOtp = async (e) => {
     e.preventDefault();
     dispatch({ type: CLEAR_ERROR });
@@ -197,6 +250,34 @@ export default function Auth() {
       console.error("Google Login Failed:", error);
     }
   };
+=======
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    isSignUp ? dispatch(signup(formData, navigate)) : dispatch(login(formData, navigate));
+  };
+
+  const switchMode = () => {
+    dispatch({ type: 'CLEAR_ERROR' });
+    setIsSignUp((prev) => !prev);
+    setShowPassword(false);
+    setFormData(initialState);
+  };
+
+  const googleSuccess = async (res) => {
+  const token = res?.credential;
+  if (!token) return;
+
+  const decoded = jwtDecode(token);
+  const { name, email} = decoded;
+
+  try {
+    // send this to backend via redux action
+    dispatch(googleLogin({ name, email}, navigate));
+  } catch (error) {
+    console.error("Google Login Failed:", error);
+  }
+};
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
   const googleFailure = (err) => {
     console.error("Google Sign In failed:", err);
@@ -207,6 +288,11 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center font-sans p-4 bg-[#FAF7F3]">
       <div className="relative w-full max-w-4xl min-h-[600px] rounded-2xl shadow-2xl overflow-hidden flex bg-[#FAF7F3]">
+<<<<<<< HEAD
+=======
+
+        {/* --- Sign Up Form --- */}
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
         <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
           <AnimatePresence>
             {isSignUp && (
@@ -220,6 +306,7 @@ export default function Auth() {
               >
                 <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
                 <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
+<<<<<<< HEAD
                 <form onSubmit={otpStep ? handleSubmit : handleSendOtp}>
                   {openCropper && (
                     <CropperDialog
@@ -288,18 +375,106 @@ export default function Auth() {
                         SIGN UP
                       </button>
                     )}
+=======
+                <form onSubmit={handleSubmit}>
+                  {openCropper && (
+                  <CropperDialog
+                      imageSrc={cropSrc}
+                      onClose={() => setOpenCropper(false)}
+                      onCropDone={(croppedImage) => {
+                      setFormData({ ...formData, profilePhoto: croppedImage });
+                      setImagePreview(croppedImage);
+                      setOpenCropper(false);
+                      }}
+                  />
+                  )}
+                  {isSignUp && (
+                  <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                      <input
+                      accept="image/*"
+                      type="file"
+                      onChange={handleImageChange}
+                      style={{ display: 'none' }}
+                      id="profile-upload"
+                      />
+                      <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
+                      {imagePreview ? (
+                          <img
+                          src={imagePreview}
+                          alt="Preview"
+                          style={{ width: 80, height: 80, borderRadius: '50%' }}
+                          />
+                      ) : (
+                          <div
+                          style={{
+                              width: 80,
+                              height: 80,
+                              borderRadius: '50%',
+                              backgroundColor: '#ccc',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '24px',
+                              margin: '0 auto',
+                              color: '#fff',
+                              textTransform: 'uppercase',
+                          }}
+                          >
+                          {formData.firstName ? formData.firstName.charAt(0) : 'U'}
+                          </div>
+                      )}
+                      <Typography variant="body2" color="primary">
+                          {imagePreview ? 'Change Photo' : 'Upload Profile Photo'}
+                      </Typography>
+                      </label>
+
+                      {/* ✅ Remove Button (Only if preview is set) */}
+                      {imagePreview && (
+                      <Button
+                          size="small"
+                          color="secondary"
+                          onClick={() => {
+                          setImagePreview('');
+                          setFormData({ ...formData, profilePhoto: '' });
+                          }}
+                          style={{ marginTop: '0.5rem' }}
+                      >
+                          Remove Photo
+                      </Button>
+                      )}
+                  </div>
+                  )}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Input name="firstName" placeholder="First Name" icon={<UserIcon />} value={formData.firstName} handleChange={handleChange} />
+                    <Input name="lastName" placeholder="Last Name" icon={<UserIcon />} value={formData.lastName} handleChange={handleChange} />
+                  </div>
+                  <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} />
+                  <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockIcon />} value={formData.confirmPassword} handleChange={handleChange} />
+                  <div className="text-center">
+                    <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
+                      SIGN UP
+                    </button>
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
                   </div>
                   <div className="mt-4 flex justify-center">
                     <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
                   </div>
                 </form>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
+<<<<<<< HEAD
         {/* Sign In Form */}
+=======
+        {/* --- Sign In Form --- */}
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
         <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
           <AnimatePresence>
             {!isSignUp && (
@@ -314,9 +489,14 @@ export default function Auth() {
                 <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
                 <p className="text-black mb-6 text-sm text-center">or use your account</p>
                 <form onSubmit={handleSubmit}>
+<<<<<<< HEAD
                   <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
                   <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
                   {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
+=======
+                  <Input name="email" type="email" placeholder="Email" icon={<MailIcon />} value={formData.email} handleChange={handleChange} />
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockIcon />} value={formData.password} handleChange={handleChange} />
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
                   <div className="text-center">
                     <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
                       SIGN IN
@@ -331,6 +511,7 @@ export default function Auth() {
           </AnimatePresence>
         </div>
 
+<<<<<<< HEAD
         {/* Overlay */}
         <motion.div
           className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
@@ -338,6 +519,13 @@ export default function Auth() {
           animate={{ x: isSignUp ? '100%' : '0%' }}
           transition={spring}
         >
+=======
+        {/* --- Overlay --- */}
+        <motion.div className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
+          style={{ backgroundColor: '#DCC5B2' }}
+          animate={{ x: isSignUp ? '100%' : '0%' }}
+          transition={spring}>
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
           <AnimatePresence mode="wait">
             {isSignUp ? (
               <motion.div key="overlay-signup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
@@ -361,4 +549,8 @@ export default function Auth() {
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

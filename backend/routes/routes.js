@@ -1,13 +1,22 @@
 import express from 'express';
+<<<<<<< HEAD
+=======
+// import { createUser, getUser, updateUser, deleteUser } from '../controller/user.controller.js';
+import { createProduct, getProduct, updateProduct, deleteProduct} from '../controller/product.controller.js';
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
 import FormData from 'form-data';
+<<<<<<< HEAD
 import { uploadImageToCloudinary } from '../controller/upload.js';
 import { getFeaturedDesigners } from '../controller/user.controller.js';
 // import {genotp , sendotp} from '../controller/auth.controller'
+=======
+
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -15,8 +24,12 @@ const router = express.Router();
 
 const upload = multer({ dest: 'temp_uploads/' });
 
+<<<<<<< HEAD
 router.post('/upload', uploadImageToCloudinary);
 router.get('/users/featured-designers', getFeaturedDesigners)
+=======
+
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
 router.get("/", (req, res) => {
   res.send("🔥 Server is alive");
@@ -28,14 +41,33 @@ router.get("/user",(req,res)=>
 })
 
 
+<<<<<<< HEAD
 router.post('/recommend/:id',async (req,res)=>{
 
     const {id} = req.params
     console.log("Received ID from frontend:", id);
+=======
+// router.delete('/user/:id',deleteUser);
+// router.put('/user/:id',updateUser);
+// router.get('/user/:name',getUser);
+
+
+router.post('/product',createProduct);
+
+router.delete('/product/:id',deleteProduct);
+router.put('/product/:id',updateProduct);
+router.get('/product/:name',getProduct);
+
+router.post('/recommend/:id',async (req,res)=>{
+
+    const {id} = req.body
+
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
      try {
     const response = await axios.post('http://localhost:5000/recommend', { id });
     res.json(response.data);
   } catch (error) {
+<<<<<<< HEAD
     console.error('Error calling Flask server:');
     if (error.response) {
         // The request was made and the server responded with a status code
@@ -51,6 +83,11 @@ router.post('/recommend/:id',async (req,res)=>{
     }
     res.status(500).json({ error: 'Recommendation failed' });
 }
+=======
+    console.error('Flask error:', error.message);
+    res.status(500).json({ error: 'Recommendation failed' });
+  }
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 });
 
 router.get('/search', (req, res) => {
@@ -90,6 +127,7 @@ router.post('/search', upload.single('image'), async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // const otpcache = {};
 
 // router.post('/signup', async (req, res) => {
@@ -112,6 +150,8 @@ router.post('/search', upload.single('image'), async (req, res) => {
 //   res.status(201).json({ result: user });
 // });
 
+=======
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
 
 

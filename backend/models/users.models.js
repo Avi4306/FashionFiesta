@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const designerDetailsSchema = new mongoose.Schema({
   brandName: { type: String },
+<<<<<<< HEAD
   portfolioUrl: {
     type: String,
     // Regex for URL validation
@@ -101,4 +102,48 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("User", userSchema);
+=======
+  portfolioUrl: { type: String },
+  verified: { type: Boolean, default: false },
+  appliedAt: { type: Date },
+}, { _id: false });
+
+const userSchema = new mongoose.Schema({
+    name : {
+        type :String,
+        required : true,
+        trim: true
+    },
+    email :
+    {
+        type :String,
+        unique: true,
+        required : true,
+    },
+    password :
+    {
+        type:String,
+        required:true,
+    },
+    profilePhoto:
+    {
+        type:String,
+        required:false,
+        default : ''
+    },
+    role:
+    {
+        type: String,
+        enum: ['customer', 'pending_designer', 'designer', 'admin'],
+        default : "customer"
+    },
+    designerDetails: designerDetailsSchema,
+    bio: { type: String, default: '' },
+},
+{
+    timestamps: true,
+});
+
+const User = mongoose.model("Users",userSchema);
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 export default User;

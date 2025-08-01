@@ -9,7 +9,11 @@ API.interceptors.request.use((req) => {
     return req;
 });
 
+<<<<<<< HEAD
 export const fetchPosts = (currentPage) => API.get(`/style-diaries?page=${currentPage}`);
+=======
+export const fetchPosts = () => API.get('/style-diaries');
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
 export const fetchPost = (id) => API.get(`/style-diaries/${id}`);
 
@@ -25,6 +29,7 @@ export const comment = (value, id) => API.post(`/style-diaries/${id}/comment`, {
 
 export const login = (formData) => API.post('/user/login', formData);
 export const googleLogin = (formData) => API.post("/user/google", formData);
+<<<<<<< HEAD
 export const sendOtp = (email) => API.post('/auth/signup/send-otp', { email });
 export const verifyOtpSignup = (formData) => API.post('/auth/signup/verify', formData);
 
@@ -67,3 +72,9 @@ export const uploadImage = (fileData, folderName) =>
   API.post("/upload", { fileData, folderName });
 
 export const recommendProduct = (id) => API.post(`/recommend/${ id }`);
+=======
+export const signUp = (formData) => API.post('/user/signup', formData);
+
+
+export const updateUser = (id, formData) => API.put(`/user/profile/${id}`, formData);
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

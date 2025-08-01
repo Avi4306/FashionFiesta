@@ -2,6 +2,7 @@
 import mongoose from 'mongoose'
 import Product from '../models/products.models.js'
 
+<<<<<<< HEAD
 const createProduct = async (req, res) => {
   try {
     const {
@@ -147,6 +148,64 @@ const getCategories = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+=======
+const createProduct =( async(req, res) => {
+  const product = req.body;
+  
+  if(!product.title || !product.price || !product.category || !product.stock || !product.images) {
+    return res.status(400).json({ success: false ,message: 'Name and price are required' });
+  }
+  const newProduct = new Product(product);
+  try {
+    await newProduct.save();
+    res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+});
+
+const deleteProduct = ( async(req,res) =>
+{
+     const {id} = req.params;
+     if (!mongoose.Types.ObjectId.isValid(id)) {
+       return res.status(404).json({ success: false, message: 'Invalid Product ID' });
+     }
+     try{
+       await Product.findByIdAndDelete(id);
+       
+       res.status(200).json({ success: true,message:"Product deleted"});
+
+     }
+     catch(err)
+     {
+       console.error(err)
+       res.status(404).json({ success: false, message: 'Product not found!' })
+     }
+});
+
+const getProduct = async (req, res) => {
+  const { title } = req.params;
+
+  try {
+    if (!title || title.trim().length === 0) {
+      return res.status(400).json({ message: 'Invalid product name' });
+    }
+
+    const product = await Product.find({ title });
+
+    if (product.length === 0) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({ success: true, data: product });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
 const updateProduct = ( async(req,res) =>
 {
@@ -167,6 +226,7 @@ const updateProduct = ( async(req,res) =>
     }
 })
 
+<<<<<<< HEAD
 const addReview = async (req, res) => {
     const { id } = req.params;
     const { comment, rating } = req.body;
@@ -221,3 +281,6 @@ const addReview = async (req, res) => {
 };
 
 export {createProduct,getProductById, getProducts, getProductsBySearch,updateProduct,deleteProduct, getProductsByCategory, getCategories, addReview} 
+=======
+export {createProduct,getProduct,updateProduct,deleteProduct} 
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

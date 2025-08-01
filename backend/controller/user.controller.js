@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -25,14 +26,46 @@ export const loginUser = async (req, res) => {
     if (!isPasswordCorrect) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = generateToken(existingUser);
+=======
+import mongoose from 'mongoose'
+import User from '../models/users.models.js'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+
+    if(!existingUser) return res.status(404).json({ message: 'User does not exist' });
+    if (!existingUser.password) {
+      return res.status(403).json({ message: "Use Google login for this account" });
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
+
+    if(!isPasswordCorrect) return res.status(400).json({ message: 'Invalid credentials' });
+    const token = jwt.sign({ 
+      id: existingUser._id,
+      email: existingUser.email,
+      role: existingUser.role,
+    }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    console.log(token)
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     res.status(200).json({ result: existingUser, token });
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong' });
   }
+<<<<<<< HEAD
 };
 
 export const googleAuth = async (req, res) => {
   const { name, email, profilePhoto } = req.body;
+=======
+}
+
+export const googleAuth = async (req, res) => {
+  const { name, email} = req.body;
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
   try {
     let user = await User.findOne({ email });
@@ -41,12 +74,17 @@ export const googleAuth = async (req, res) => {
       user = await User.create({
         name,
         email,
+<<<<<<< HEAD
         profilePhoto: profilePhoto || '',
         authProvider: 'google',
+=======
+        profilePhoto : '',
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
         password: null,
         role: 'customer',
         bio: '',
         designerDetails: null,
+<<<<<<< HEAD
         socialLinks: {
           instagram: '',
           facebook: '',
@@ -64,6 +102,16 @@ export const googleAuth = async (req, res) => {
     const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     });
+=======
+      });
+    }
+
+    const token = jwt.sign({ 
+      id: user._id,
+      email: user.email,
+      role: user.role
+      }, process.env.JWT_SECRET, { expiresIn: '1d' });
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
     res.status(200).json({ result: user, token });
   } catch (err) {
@@ -71,6 +119,7 @@ export const googleAuth = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 export const requestOtpSignup = async (req, res) => {
   const { email } = req.body;
   try {
@@ -166,6 +215,67 @@ export const getUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
+=======
+const signupUser =( async(req, res) => {
+  const {email, password, confirmPassword, firstName, lastName} = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    if(existingUser) return res.status(400).json({ message: 'User already exists' });
+    
+    if(password !== confirmPassword) return res.status(400).json({ message: 'Passwords do not match' });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const result = await User.create({ email, password: hashedPassword, name: `${firstName} ${lastName}` });
+    const token = jwt.sign({ 
+      id: existingUser._id,
+      email: existingUser.email,
+      role: existingUser.role,
+    }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.status(200).json({ result, token });
+  } catch (error) {
+    console.error('Signup error',error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+});
+
+const deleteUser = ( async(req,res) =>
+{
+     const {id} = req.params;
+     if (!mongoose.Types.ObjectId.isValid(id)) {
+       return res.status(404).json({ success: false, message: 'Invalid User ID' });
+     }
+     try{
+       await User.findByIdAndDelete(id);
+       res.status(200).json({ success: true,message:"User deleted"});
+
+     }
+     catch(err)
+     {
+       console.error(err)
+       res.status(404).json({ success: false, message: 'User not found!' })
+     }
+});
+
+const getUser = ( async(req,res)=>
+{
+   const {id} = req.params;
+
+   try{
+      
+      const user = await User.findById({id}).select(-password);
+      console.log(user)
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      res.json(user);
+   }
+   catch(err)
+   {
+      console.error(err)
+      res.status(500).json({ message: 'Server error' });
+   }
+});
+
+
+const updateUser = async (req, res) => {
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   const { id } = req.params;
   const updateData = req.body;
 
@@ -177,6 +287,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 export const getUserPosts = async (req, res) => {
   const { id } = req.params;
   try {
@@ -258,3 +369,6 @@ export const getFeaturedDesigners = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+=======
+export {loginUser, signupUser,getUser,updateUser,deleteUser} 
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

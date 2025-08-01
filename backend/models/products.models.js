@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import mongoose from "mongoose";
+=======
+import mongoose  from "mongoose";
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
 const productSchema = new mongoose.Schema({
     title: {
@@ -8,12 +12,17 @@ const productSchema = new mongoose.Schema({
     },
     description: {
         type: String,
+<<<<<<< HEAD
+=======
+        required: false,
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     },
     price: {
         type: Number,
         required: true,
         min: 0
     },
+<<<<<<< HEAD
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -88,6 +97,39 @@ const productSchema = new mongoose.Schema({
             }
         }
     ],
+=======
+    discount:{
+        type: Number,
+        default: 0
+    },
+    category: {
+        type: String,
+        required: false
+    },
+    brand: {
+        type: String
+    },
+    stock: {
+        type: Number,
+        required: false,
+        min: 0
+    },
+    images: [String],
+    rating: {
+        type: Number,
+        default: 0
+    },
+    // reviews: [
+    //     {
+    //         user: {
+    //             type: mongoose.Schema.Types.ObjectId,
+    //             ref: 'User'
+    //         },
+    //         comment: String,
+    //         rating: Number
+    //     }
+    // ],
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     createdAt: {
         type: Date,
         default: Date.now
@@ -95,4 +137,8 @@ const productSchema = new mongoose.Schema({
 });
 
 const Product = mongoose.model('Product', productSchema);
+<<<<<<< HEAD
 export default Product;
+=======
+export default Product;
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

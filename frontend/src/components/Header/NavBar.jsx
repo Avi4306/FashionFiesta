@@ -10,13 +10,17 @@ export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchActive, setSearchActive] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+<<<<<<< HEAD
   const [searchQuery, setSearchQuery] = useState(""); // <-- New: State for search query
+=======
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
   const user = useSelector((state) => state.auth.authData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
+<<<<<<< HEAD
   const searchInputRef = useRef(null); // <-- New: Ref for search input
 
   // Sync localStorage with Redux on load
@@ -47,6 +51,15 @@ export default function NavBar() {
   }, [location, user]);
 
   // Close profile dropdown on outside click
+=======
+useEffect(() => {
+    const profile = JSON.parse(localStorage.getItem("profile"));
+    if (profile) {
+      dispatch({ type: "AUTH", data: profile });
+    }
+  }, [dispatch]);
+  // Close profile dropdown if clicking outside
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -57,12 +70,25 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+<<<<<<< HEAD
   // <-- New: Auto-focus the search bar when it becomes active
   useEffect(() => {
     if (isSearchActive && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchActive]);
+=======
+  // Check token expiration on route change
+  useEffect(() => {
+    const token = user?.token;
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      if (decodedToken.exp * 1000 < new Date().getTime()) {
+        handleLogout();
+      }
+    }
+  }, [location, user]);
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" });
@@ -70,6 +96,7 @@ export default function NavBar() {
     setIsProfileOpen(false);
   };
 
+<<<<<<< HEAD
   // <-- New: Function to handle the search logic
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -79,6 +106,9 @@ export default function NavBar() {
     }
   };
 
+=======
+  // Placeholder for avatar
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
   const avatarPlaceholder = `https://placehold.co/40x40/F0E4D3/44403c?text=${
     user?.result?.name?.charAt(0) || "A"
   }`;
@@ -97,22 +127,35 @@ export default function NavBar() {
         {/* Desktop Nav Links */}
         <div className="hidden md:flex gap-6 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
+<<<<<<< HEAD
           <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
           <Link to="users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+=======
+          <Link to="/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
+          <Link to="/designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>
 
         {/* Right Icons */}
+<<<<<<< HEAD
         <div className="flex items-center gap-8">
           {/* Search */}
           <div
             className={`flex items-center border-b border-[#dcc5b2] h-9 px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
+=======
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div
+            className={`flex items-center border-b border-[#dcc5b2] px-3 py-1 rounded-md shadow-sm cursor-pointer transition-all ${
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
               isSearchActive ? "w-56" : "w-32"
             }`}
             onClick={() => setSearchActive(!isSearchActive)}
           >
             <CiSearch className="text-gray-700" />
             <input
+<<<<<<< HEAD
               ref={searchInputRef} // <-- New: Attach ref
               type="text"
               placeholder="Search...?"
@@ -120,17 +163,30 @@ export default function NavBar() {
               value={searchQuery} // <-- New: Connect to state
               onChange={(e) => setSearchQuery(e.target.value)} // <-- New: Update state on change
               onKeyDown={handleSearch} // <-- New: Handle search on Enter key
+=======
+              type="text"
+              placeholder="Search...?"
+              className="bg-transparent w-full outline-none text-sm placeholder-gray-500"
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
             />
           </div>
 
           {/* Icons */}
           <div className="flex items-center gap-4 text-xl text-gray-800">
+<<<<<<< HEAD
             <CiHome className="text-3xl mx-1" />
             <Link to = '/cart'>
             <PiShoppingCartThin className="text-3xl mx-1" />
             </Link>
             {/* Profile Dropdown */}
             <div className="relative pt-2" ref={profileRef}>
+=======
+            <CiHome />
+            <PiShoppingCartThin />
+
+            {/* Profile Dropdown */}
+            <div className="relative" ref={profileRef}>
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
               {user?.result ? (
                 <div>
                   <button onClick={() => setIsProfileOpen(!isProfileOpen)}>
@@ -194,11 +250,20 @@ export default function NavBar() {
       {isMenuOpen && (
         <div className="md:hidden mt-3 flex flex-col gap-3 text-base font-semibold font-montserrat">
           <Link to="/" className="hover:text-[#aa5a44]">Home</Link>
+<<<<<<< HEAD
           <Link to="/products/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
           <Link to="/users/featured-designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+=======
+          <Link to="/trending" className="hover:text-[#aa5a44]">Trending Styles</Link>
+          <Link to="/designers" className="hover:text-[#aa5a44]">Featured Designers</Link>
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
           <Link to="/style-diaries" className="hover:text-[#aa5a44]">Style Diaries</Link>
         </div>
       )}
     </nav>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

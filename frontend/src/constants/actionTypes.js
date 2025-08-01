@@ -1,6 +1,10 @@
 export const CREATE_POST = 'CREATE_POST';
 export const DELETE_POST = 'DELETE_POST';
+<<<<<<< HEAD
 export const FETCH_POSTS = 'FETCH_POSTS';
+=======
+export const FETCH_ALL = 'FETCH_ALL';
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 export const FETCH_POST = 'FETCH_POST';
 export const FETCH_BY_SEARCH = 'FETCH_BY_SEARCH';
 export const LIKE_POST = 'LIKE_POST';
@@ -12,6 +16,7 @@ export const END_LOADING = 'END_LOADING';
 export const COMMENT_POST = 'COMMENT_POST';
 
 export const FETCH_USER = 'FETCH_USER'
+<<<<<<< HEAD
 export const UPDATE_PROFILE = 'UPDATE_PROFILE'
 export const CLEAR_ERROR = 'CLEAR_ERROR'
 
@@ -41,3 +46,6 @@ export const UPDATE_CART_ITEM_QUANTITY = 'UPDATE_CART_ITEM_QUANTITY';
 export const REMOVE_CART_ITEM = 'REMOVE_CART_ITEM';
 
 export const FETCH_DESIGNERS = 'FETCH_DESIGNERS'
+=======
+export const UPDATE_PROFILE = 'UPDATE_PROFILE'
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf

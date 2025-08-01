@@ -2,6 +2,7 @@ import Post from '../models/posts.models.js';
 import mongoose from 'mongoose';
 
 export const getPosts = async (req, res) => {
+<<<<<<< HEAD
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -29,6 +30,15 @@ export const getPosts = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+=======
+    try {
+        const posts = await Post.find();
+        res.status(200).json(posts);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 export const getPost = async (req, res) => {
     try {
         const { id } = req.params;
@@ -117,7 +127,11 @@ export const likePost = async (req, res) => {
 export const commentPost = async (req, res) => {
     const { id } = req.params;
     const { value } = req.body;
+<<<<<<< HEAD
     const {name, comment, profilePhoto, userId} = value
+=======
+    const {name, comment, profilePhoto} = value
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json({ message: 'Post not found' });
     }
@@ -127,9 +141,15 @@ export const commentPost = async (req, res) => {
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
+<<<<<<< HEAD
         post.comments.push({name, comment, profilePhoto, userId, createdAt: new Date().toISOString() });
         await post.save()
         res.status(200).json(post);
+=======
+        post.comments.push({name, comment, profilePhoto, createdAt: new Date().toISOString() });
+        const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+        res.status(200).json(updatedPost);
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     } catch (error) {
         console.error('Error adding comment:', error.message)
         res.status(500).json({ message: 'Error adding comment', error });

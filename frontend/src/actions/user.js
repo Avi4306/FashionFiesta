@@ -1,4 +1,5 @@
 import * as api from '../api';
+<<<<<<< HEAD
 import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING, AUTH_ERROR, FETCH_DESIGNERS } from '../constants/actionTypes';
 
 export const getUserProfileData = (id) => async (dispatch) => {
@@ -16,6 +17,19 @@ export const getUserProfileData = (id) => async (dispatch) => {
       console.error(error);        
     } finally{
       dispatch({ type: END_LOADING });
+=======
+import { FETCH_USER, UPDATE_PROFILE,START_LOADING, END_LOADING } from '../constants/actionTypes';
+
+export const getUser = (id) => async (dispatch) => {
+    try {
+        dispatch({ type: START_LOADING });
+        const { data } = await api.fetchUser(id); //There is data object in response
+        // dispatch({type: FETCH_USER, payload: data });
+        console.log(data)
+        dispatch({ type: END_LOADING });
+    } catch (error) {
+        console.error(error);        
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     }
 }
 export const updateProfile = (id, formData) => async (dispatch) => {
@@ -32,6 +46,7 @@ export const updateProfile = (id, formData) => async (dispatch) => {
   } catch (error) {
     console.error("Profile update failed:", error?.response?.data || error.message);
   }
+<<<<<<< HEAD
 };
 
 export const deleteAccount = (userId, password, navigate) => async (dispatch) => {
@@ -85,4 +100,6 @@ export const fetchUserProducts = (id) => async (dispatch) => {
   } catch (error) {
     console.log(error);
   }
+=======
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 };

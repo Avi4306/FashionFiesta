@@ -20,6 +20,7 @@ import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails
 import { Navigate } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute.jsx'
 import Profile from './components/User/Profile.jsx'
+<<<<<<< HEAD
 import UserDetails from './components/User/UserDetails.jsx'
 import TrendingStyles from './components/TrendingStyles/TrendingStyles.jsx'
 import ProductDetails from './components/Products/Product/ProductDetails.jsx'
@@ -54,6 +55,17 @@ function App() {
           <CircleAnimations />
         </div>
     ) : (
+=======
+
+function App() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    // Dispatch an action to fetch posts or any other initial data
+    dispatch(getPosts());
+  }, [dispatch]);
+  const user = JSON.parse(localStorage.getItem('profile'));
+  return (<>
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
     <Router>
     <Header />
     <NavBar />
@@ -69,14 +81,20 @@ function App() {
               <Designers />
               <Quotes />
             </>
+<<<<<<< HEAD
       }
       />
+=======
+       }
+       />
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
       <Route path="/auth" element={!user ? <Auth/> : <Navigate to='/' replace />} />
       <Route path="/style-diaries" element={<StyleDiaries/>} />
       <Route path="/style-diaries/search" element={<StyleDiaries/>} />
       <Route path="/style-diaries/:id" element={<PostDetails/>} />
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/auth" element={<Auth />} />
+<<<<<<< HEAD
       <Route path="/user/:id" element={<UserDetails />} />
       <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/products/trending" element={<TrendingStyles/>} />
@@ -92,6 +110,14 @@ function App() {
     </Router>
     )}
   </>);
+=======
+      {/* <Route path="/user" element={<UserDetails />} /> */}
+      <Route path="/user/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+    </Routes>
+    <Footer/>
+    </Router>
+  </>)
+>>>>>>> 64722959962531026d09982e49c0503bfb053ecf
 }
 
 export default App;
