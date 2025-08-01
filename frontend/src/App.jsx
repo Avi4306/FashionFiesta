@@ -28,14 +28,32 @@ import SearchPage from './components/SearchPage.jsx'
 import FeaturedDesigners from './components/FeaturedDesigners.jsx'
 import UserPostsPage from './components/User/UserPostsPage.jsx'
 import UserProductsPage from './components/User/UserProductsPage.jsx'
+import CircleAnimations from './components/Animations/circleanimation.jsx';
+
 function App() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     // Dispatch an action to fetch posts or any other initial data
     dispatch(getPosts());
+
+    // Set a delay before showing main content
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // show animation for 3 sec
+
+    return () => clearTimeout(timer);
   }, [dispatch]);
+
   const user = JSON.parse(localStorage.getItem('profile'));
+
   return (<>
+    {loading ? (
+        <div className = "h-screen w-full flex items-center justify-center">
+          <CircleAnimations />
+        </div>
+    ) : (
     <Router>
     <Header />
     <NavBar />
@@ -51,8 +69,8 @@ function App() {
               <Designers />
               <Quotes />
             </>
-       }
-       />
+      }
+      />
       <Route path="/auth" element={!user ? <Auth/> : <Navigate to='/' replace />} />
       <Route path="/style-diaries" element={<StyleDiaries/>} />
       <Route path="/style-diaries/search" element={<StyleDiaries/>} />
@@ -72,7 +90,8 @@ function App() {
     </Routes>
     <Footer/>
     </Router>
-  </>)
+    )}
+  </>);
 }
 
 export default App;
