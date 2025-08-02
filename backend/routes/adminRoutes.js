@@ -14,7 +14,10 @@ import {
   createAdminPost,
   updateAdminPost,
   createAdminProduct,
-  updateAdminProduct
+  updateAdminProduct,
+  getDesignerApplications,
+  approveDesignerApplication,
+  rejectDesignerApplication
 } from '../controller/admin.controller.js';
 
 const adminRouter = express.Router();
@@ -41,5 +44,9 @@ adminRouter.get('/posts', getAllPostsAdmin);
 adminRouter.delete('/posts/:id', deletePostAdmin);
 adminRouter.post('/posts', createAdminPost);
 adminRouter.patch('/posts/:id', updateAdminPost);
+
+adminRouter.get('/designer-applications', getDesignerApplications);
+adminRouter.post('/designer-applications/:id/approve', approveDesignerApplication);
+adminRouter.post('/designer-applications/:id/reject', rejectDesignerApplication);
 
 export default adminRouter;

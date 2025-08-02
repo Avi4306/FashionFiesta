@@ -106,3 +106,9 @@ export const adminUpdatePost = (id, postData) => API.patch(`/admin/posts/${id}`,
 export const adminDeletePost = (id) => API.delete(`/admin/posts/${id}`);
 
 export const fetchSearchSuggestions = (query) => API.get(`/suggestions?q=${query}`);
+
+export const applyForDesignerRole = (id, formData) => API.post(`/user/apply-designer/${id}`, formData);
+
+export const fetchDesignerApplications = () => API.get('/admin/designer-applications');
+export const approveDesignerApplication = (id) => API.post(`/admin/designer-applications/${id}/approve`);
+export const rejectDesignerApplication = (id, data) => API.post(`/admin/designer-applications/${id}/reject`, data);

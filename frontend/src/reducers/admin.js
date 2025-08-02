@@ -16,14 +16,18 @@ import {
   SET_ADMIN_ERROR,
   CLEAR_ADMIN_ERROR,
   START_ADMIN_LOADING,
-  END_ADMIN_LOADING
-  // You might want to add START_LOADING, END_LOADING here if you want a global admin loading state
+  END_ADMIN_LOADING,
+  // New action types for designer applications
+  FETCH_DESIGNER_APPLICATIONS,
+  APPROVE_DESIGNER_APPLICATION,
+  REJECT_DESIGNER_APPLICATION,
 } from '../constants/actionTypes';
 
 const initialState = {
   users: [],
   products: [],
   posts: [],
+  applications: [], // 🆕 Added for designer applications
   // Pagination specific states for each resource
   usersPagination: {
     currentPage: 1,
@@ -41,17 +45,37 @@ const initialState = {
     totalItems: 0,
   },
   error: null,
-  isLoading: false, // Optional: Add loading state for UI feedback
+  isLoading: false,
 };
 
 const admin = (state = initialState, action) => {
   switch (action.type) {
+    // --- Global Loading and Error States ---
+    case START_ADMIN_LOADING:
+      return {
+        ...state,
+        isLoading: true,
+        // Optionally clear data when loading starts for a fresh fetch
+        // applications: [], // Uncomment if you want to clear applications on start loading
+        // users: [],
+        // products: [],
+        // posts: [],
+        error: null
+      };
+    case END_ADMIN_LOADING:
+      return { ...state, isLoading: false };
+
+    case SET_ADMIN_ERROR:
+      return { ...state, error: action.payload, isLoading: false }; // Ensure loading is false on error
+    case CLEAR_ADMIN_ERROR:
+      return { ...state, error: null };
+
     // --- User Management Cases ---
     case FETCH_ADMIN_USERS:
       return {
         ...state,
-        users: action.payload.users, // Store only the users array
-        usersPagination: {          // Store pagination info
+        users: action.payload.users,
+        usersPagination: {
           currentPage: action.payload.currentPage,
           totalPages: action.payload.totalPages,
           totalItems: action.payload.totalItems,
@@ -59,10 +83,6 @@ const admin = (state = initialState, action) => {
         error: null,
       };
     case CREATE_ADMIN_USER:
-      // When a new user is created, it's typically added to the start/end of the current view
-      // You might also want to re-fetch the first page to ensure correct pagination counts
-      // For simplicity, here we just add it to the existing array.
-      // If you are relying heavily on `totalItems`, consider re-fetching for accuracy.
       return { ...state, users: [...state.users, action.payload], error: null };
     case UPDATE_ADMIN_USER_ROLE:
     case UPDATE_ADMIN_USER_PASSWORD:
@@ -74,10 +94,6 @@ const admin = (state = initialState, action) => {
         error: null,
       };
     case DELETE_ADMIN_USER:
-      // When a user is deleted, you might want to re-fetch the current page
-      // to ensure the list remains full if possible, and update pagination info.
-      // For simplicity, here we just filter it out.
-      // If you are relying heavily on `totalItems`, consider re-fetching for accuracy.
       return {
         ...state,
         users: state.users.filter((user) => user._id !== action.payload),
@@ -88,8 +104,8 @@ const admin = (state = initialState, action) => {
     case FETCH_ADMIN_PRODUCTS:
       return {
         ...state,
-        products: action.payload.products, // Store only the products array
-        productsPagination: {             // Store pagination info
+        products: action.payload.products,
+        productsPagination: {
           currentPage: action.payload.currentPage,
           totalPages: action.payload.totalPages,
           totalItems: action.payload.totalItems,
@@ -117,8 +133,8 @@ const admin = (state = initialState, action) => {
     case FETCH_ADMIN_POSTS:
       return {
         ...state,
-        posts: action.payload.posts, // Store only the posts array
-        postsPagination: {          // Store pagination info
+        posts: action.payload.posts,
+        postsPagination: {
           currentPage: action.payload.currentPage,
           totalPages: action.payload.totalPages,
           totalItems: action.payload.totalItems,
@@ -142,29 +158,24 @@ const admin = (state = initialState, action) => {
         error: null,
       };
 
-    // --- Error Handling Cases ---
-    case SET_ADMIN_ERROR:
-      return { ...state, error: action.payload };
-    case CLEAR_ADMIN_ERROR:
-      return { ...state, error: null };
-
-    // --- Optional Loading States ---
-    case START_ADMIN_LOADING:
-      return { 
-        ...state, 
-        isLoading: true,
-        users: [],
-        products: [],
-        posts: [],
-        error: null 
+    // --- Designer Application Management Cases ---
+    case FETCH_DESIGNER_APPLICATIONS:
+      return {
+        ...state,
+        applications: action.payload, // 🆕 Store the fetched applications
+        error: null,
       };
-    case END_ADMIN_LOADING:
-      return { ...state, isLoading: false };
-      
-    case SET_ADMIN_ERROR:
-      return { ...state, error: action.payload };
-    case CLEAR_ADMIN_ERROR:
-      return { ...state, error: null };
+    case APPROVE_DESIGNER_APPLICATION:
+    case REJECT_DESIGNER_APPLICATION:
+      return {
+        ...state,
+        // 🆕 Filter out the approved/rejected application from the list
+        applications: state.applications.filter(
+          (app) => app._id !== action.payload
+        ),
+        error: null,
+      };
+
     default:
       return state;
   }

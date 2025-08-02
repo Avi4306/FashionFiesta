@@ -1,5 +1,13 @@
 import * as api from '../api';
-import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING, AUTH_ERROR, FETCH_DESIGNERS } from '../constants/actionTypes';
+import { FETCH_USER, FETCH_USER_POSTS, FETCH_USER_PRODUCTS, UPDATE_PROFILE, DELETE_ACCOUNT, LOGOUT, START_LOADING, END_LOADING, AUTH_ERROR, FETCH_DESIGNERS, SET_ERROR, AUTH, CLEAR_ERROR } from '../constants/actionTypes';
+
+const handleError = (dispatch, error, defaultMessage) => {
+  console.error("API Error:", error);
+  const errorMessage = error.response?.data?.message || defaultMessage;
+  dispatch({ type: SET_ERROR, payload: errorMessage });
+  dispatch({ type: END_LOADING }); // Ensure loading state ends on error
+  return { success: false, message: errorMessage }; // Return failure indicator
+};
 
 export const getUserProfileData = (id) => async (dispatch) => {
     try {
@@ -27,7 +35,7 @@ export const updateProfile = (id, formData) => async (dispatch) => {
       token: JSON.parse(localStorage.getItem("profile"))?.token,
     };
 
-    dispatch({ type: UPDATE_PROFILE, data: updatedUser });
+    dispatch({ type: UPDATE_PROFILE, payload: updatedUser });
     localStorage.setItem("profile", JSON.stringify(updatedUser));
   } catch (error) {
     console.error("Profile update failed:", error?.response?.data || error.message);
@@ -84,5 +92,22 @@ export const fetchUserProducts = (id) => async (dispatch) => {
     dispatch({ type: FETCH_USER_PRODUCTS, payload: data });
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const applyForDesignerRole = (userId, formData) => async (dispatch) => { // Removed 'navigate' from parameters
+  dispatch({ type: START_LOADING }); // Start loading state
+  dispatch({ type: CLEAR_ERROR }); // Clear any previous errors
+
+  try {
+    const { data } = await api.applyForDesignerRole(userId, formData); // Call your API
+    console.log("Action Success Data:", data);
+
+    dispatch({ type: AUTH, data }); // Update user data in Redux state (including new role)
+    dispatch({ type: END_LOADING }); // End loading state
+    return { success: true, message: "Your application has been submitted successfully!", data }; // Return success indicator
+  } catch (error) {
+    // handleError will dispatch SET_ERROR and END_LOADING
+    return handleError(dispatch, error, 'Failed to submit application. Please try again.');
   }
 };
