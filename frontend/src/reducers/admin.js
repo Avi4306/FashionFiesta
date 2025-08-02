@@ -21,13 +21,18 @@ import {
   FETCH_DESIGNER_APPLICATIONS,
   APPROVE_DESIGNER_APPLICATION,
   REJECT_DESIGNER_APPLICATION,
+  // New action types for donation management
+  FETCH_ADMIN_DONATIONS,
+  UPDATE_ADMIN_DONATION_STATUS,
+  DELETE_ADMIN_DONATION,
 } from '../constants/actionTypes';
 
 const initialState = {
   users: [],
   products: [],
   posts: [],
-  applications: [], // 🆕 Added for designer applications
+  applications: [], // Added for designer applications
+  donations: [], // 🆕 Added for donations
   // Pagination specific states for each resource
   usersPagination: {
     currentPage: 1,
@@ -44,6 +49,12 @@ const initialState = {
     totalPages: 1,
     totalItems: 0,
   },
+  // 🆕 Pagination state for donations
+  donationsPagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+  },
   error: null,
   isLoading: false,
 };
@@ -55,18 +66,13 @@ const admin = (state = initialState, action) => {
       return {
         ...state,
         isLoading: true,
-        // Optionally clear data when loading starts for a fresh fetch
-        // applications: [], // Uncomment if you want to clear applications on start loading
-        // users: [],
-        // products: [],
-        // posts: [],
         error: null
       };
     case END_ADMIN_LOADING:
       return { ...state, isLoading: false };
 
     case SET_ADMIN_ERROR:
-      return { ...state, error: action.payload, isLoading: false }; // Ensure loading is false on error
+      return { ...state, error: action.payload, isLoading: false };
     case CLEAR_ADMIN_ERROR:
       return { ...state, error: null };
 
@@ -162,17 +168,43 @@ const admin = (state = initialState, action) => {
     case FETCH_DESIGNER_APPLICATIONS:
       return {
         ...state,
-        applications: action.payload, // 🆕 Store the fetched applications
+        applications: action.payload,
         error: null,
       };
     case APPROVE_DESIGNER_APPLICATION:
     case REJECT_DESIGNER_APPLICATION:
       return {
         ...state,
-        // 🆕 Filter out the approved/rejected application from the list
         applications: state.applications.filter(
           (app) => app._id !== action.payload
         ),
+        error: null,
+      };
+    
+    // --- Donation Management Cases ---
+    case FETCH_ADMIN_DONATIONS:
+      return {
+        ...state,
+        donations: action.payload.donations,
+        donationsPagination: {
+          currentPage: action.payload.currentPage,
+          totalPages: action.payload.totalPages,
+          totalItems: action.payload.totalItems,
+        },
+        error: null,
+      };
+    case UPDATE_ADMIN_DONATION_STATUS:
+      return {
+        ...state,
+        donations: state.donations.map((donation) =>
+          donation._id === action.payload._id ? action.payload : donation
+        ),
+        error: null,
+      };
+    case DELETE_ADMIN_DONATION:
+      return {
+        ...state,
+        donations: state.donations.filter((donation) => donation._id !== action.payload),
         error: null,
       };
 

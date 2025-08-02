@@ -6,8 +6,9 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt'; // For User Managemen
 import Inventory2Icon from '@mui/icons-material/Inventory2'; // For Product Management
 import ArticleIcon from '@mui/icons-material/Article'; // For Post Management
 import DashboardIcon from '@mui/icons-material/Dashboard'; // Optional: for the dashboard title itself
-// 🆕 New Icon for Designer Applications
+// 🆕 New Icons for admin sections
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'; // For reviewing applications
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism'; // 🆕 For Donation Management
 
 export default function AdminDashboard() {
   return (
@@ -69,7 +70,7 @@ export default function AdminDashboard() {
           </Paper>
         </Grid>
 
-        {/* 🆕 Designer Applications Management Card */}
+        {/* Designer Applications Management Card */}
         <Grid item xs={12} sm={6} md={4}>
           <Paper elevation={3} sx={{ p: 3, borderRadius: '12px', transition: 'all 0.3s', '&:hover': { boxShadow: 6 } }}>
             <Link to="/admin/designer-applications" style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -86,7 +87,22 @@ export default function AdminDashboard() {
           </Paper>
         </Grid>
 
-        {/* Add more admin sections/cards as needed */}
+        {/* 🆕 Donation Management Card */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} sx={{ p: 3, borderRadius: '12px', transition: 'all 0.3s', '&:hover': { boxShadow: 6 } }}>
+            <Link to="/admin/donations" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <VolunteerActivismIcon sx={{ fontSize: 30, color: '#aa5a44', mr: 1.5 }} />
+                <Typography variant="h6" component="h2" sx={{ color: '#aa5a44' }}>
+                  Donation Management
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                View, manage, and update the status of clothing donations.
+              </Typography>
+            </Link>
+          </Paper>
+        </Grid>
       </Grid>
     </Box>
   );

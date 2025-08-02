@@ -13,6 +13,7 @@ import authRouter from './routes/authRoutes.js'
 import cartRouter from './routes/cartRoutes.js';
 import './config/cloudinary.js'
 import adminRouter from './routes/adminRoutes.js';
+import donationRouter from './routes/donationRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,7 @@ app.use('/products', productRouter)
 app.use('/auth', authRouter)
 app.use('/cart', cartRouter)
 app.use('/admin', adminRouter)
+app.use('/donations', donationRouter)
 
 
 app.listen(process.env.PORT, () => {
