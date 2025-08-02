@@ -13,12 +13,12 @@ import TrendingSection from './components/Categories/TrendingSection';
 import BlogSection from './components/Blog/Blog.jsx';
 import Designers from './components/Designer/Designers.jsx';
 import Footer from './components/Footer/Footer.jsx';
-
+import DesignerProfile from './components/DesignerProfile.jsx';
 import StyleDiaries from "./components/StyleDiaries/StyleDiaries.jsx";
 import AboutUs from "./components/AboutUs/AboutUs.jsx";
 import Auth from './components/Auth/Auth.jsx';
 import PostDetails from './components/StyleDiaries/Posts/PostDetails/PostDetails.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx'; // Your existing PrivateRoute
+import PrivateRoute from './components/PrivateRoute.jsx';
 import Profile from './components/User/Profile.jsx';
 import UserDetails from './components/User/UserDetails.jsx';
 import TrendingStyles from './components/TrendingStyles/TrendingStyles.jsx';
@@ -82,6 +82,7 @@ function App() {
           <Route path="/style-diaries" element={<StyleDiaries />} />
           <Route path="/style-diaries/search" element={<StyleDiaries />} />
           <Route path="/style-diaries/:id" element={<PostDetails />} />
+          <Route path="/designer/:id" element={<DesignerProfile />} />
 
           {/* About Us Route */}
           <Route path="/aboutus" element={<AboutUs />} />

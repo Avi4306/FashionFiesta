@@ -25,7 +25,6 @@
 .designer-container > h2 {
   font-family: 'Homemade Apple', cursive;
   font-size: 2.5rem;
-  margin-bottom: 1rem;
   color: #333;
 }
 
@@ -129,7 +128,6 @@
     blink 0.75s step-end infinite;
   font-family: 'Homemade Apple', cursive;
   font-size: 2.5rem;
-  margin-bottom: 1rem;
   color: #333;
   width: 0;                  /* Start with zero */
 }

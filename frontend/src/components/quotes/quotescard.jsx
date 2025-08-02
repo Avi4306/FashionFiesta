@@ -2,18 +2,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './quotescard.css'; // Custom CSS for styles, fonts, and animations
 
-const inspirationalQuotes = [
+const FashionQuotes = [
   {
     text: "Fashion is not something that exists in dresses only. Fashion is in the sky, in the street, fashion has to do with ideas, the way we live, what is happening.",
     author: "Coco Chanel",
-  },
-  {
-    text: "Creativity is intelligence having fun.",
-    author: "Albert Einstein",
-  },
-  {
-    text: "The greatest glory in living lies not in never falling, but in rising every time we fall.",
-    author: "Nelson Mandela",
   },
   {
     text: "To be irreplaceable, one must always be different.",
@@ -27,10 +19,74 @@ const inspirationalQuotes = [
     text: "Elegance is not standing out, but being remembered.",
     author: "Giorgio Armani",
   },
+  {
+    text: "Don't be into trends. Don't make fashion own you, but you decide what you are, what you want to express by the way you dress and the way to live.",
+    author: "Gianni Versace",
+  },
+  {
+    text: "Fashion is the armor to survive the reality of everyday life.",
+    author: "Bill Cunningham",
+  },
+  {
+    text: "Simplicity is the keynote of all true elegance.",
+    author: "Coco Chanel",
+  },
+  {
+    text: "You can have anything you want in life if you dress for it.",
+    author: "Edith Head",
+  },
+  {
+    text: "Fashion should be a form of escapism, and not a form of imprisonment.",
+    author: "Alexander McQueen",
+  },
+  {
+    text: "Clothes mean nothing until someone lives in them.",
+    author: "Marc Jacobs",
+  },
+  {
+    text: "The difference between style and fashion is quality.",
+    author: "Giorgio Armani",
+  },
+  {
+    text: "Fashion is about dreaming and making other people dream.",
+    author: "Donatella Versace",
+  },
+  {
+    text: "Trendy is the last stage before tacky.",
+    author: "Karl Lagerfeld",
+  },
+  {
+    text: "People will stare. Make it worth their while.",
+    author: "Harry Winston",
+  },
+  {
+    text: "Luxury is the ease of a T-shirt in a very expensive dress.",
+    author: "Karl Lagerfeld",
+  },
+  {
+    text: "Fashions fade, style is eternal.",
+    author: "Yves Saint Laurent",
+  },
+  {
+    text: "What you wear is how you present yourself to the world, especially today, when human contacts are so quick. Fashion is instant language.",
+    author: "Miuccia Prada",
+  },
+  {
+    text: "Fashion is very important. It is life-enhancing and, like everything that gives pleasure, it is worth doing well.",
+    author: "Vivienne Westwood",
+  },
+  {
+    text: "Style is something each of us already has, all we need to do is find it.",
+    author: "Diane von Furstenberg",
+  },
+  {
+    text: "I don't do fashion. I am fashion.",
+    author: "Coco Chanel",
+  },
 ];
 
 const QuotesSection = () => {
-  const randomQuote = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
+  const randomQuote = FashionQuotes[Math.floor(Math.random() * FashionQuotes.length)];
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 

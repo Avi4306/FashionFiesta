@@ -1,87 +1,29 @@
 import React, { useState } from "react";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/effect-coverflow";
-import "./Designers.css";
-import d1 from "../../assets/d1.png";
-import d2 from "../../assets/d2.png";
-import d3 from "../../assets/d3.png";
-import d4 from "../../assets/d4.png";
-import d5 from "../../assets/d5.png";
-import d6 from "../../assets/d6.png";
-import D7 from "../../assets/D7.png";
-import D8 from "../../assets/D8.png";
-const designers = [
-  {
-    name: "Aarav Mehta",
-    tagline: "An innovative streetwear specialist blending urban flair with contemporary textures.",
-    insta: "@aaravmehta.designs",
-    website: "www.aaravstreetstyle.com",
-    image: d2
-  },
-  {
-    name: "Ishita Kapoor",
-    tagline: "Her work revives the elegance of the past with a touch of modern simplicity.",
-    insta: "@ishitak",
-    website: "www.ishitakapoor.com",
-    image: d1
-  },
-  {
-    name: "Rhea Nair",
-    tagline: "Known for her graceful minimalism and precise tailoring.",
-    insta: "@rheanair.designs",
-    website: "www.rheanairlabel.com",
-    image: D8
-  },
-  {
-    name: "Dev Sharma",
-    tagline: "Fuses edgy streetwear with Indian craft for bold new expressions.",
-    insta: "@dev_shrma21",
-    website: "www.devcraft.com",
-    image: d4
-  },
-  {
-    name: "Kavya Malhotra",
-    tagline: "Brings boho luxury to life through earthy tones and dreamy silhouettes.",
-    insta: "@kavyaboho",
-    website: "www.kavyalux.com",
-    image: d3
-  },
-  {
-    name: "Reyansh Chatterjee",
-    tagline: "A rebel in couture, mixing sharp lines with glam detail.",
-    insta: "@reycouture",
-    website: "www.reyanshc.com",
-    image: D7
-  },
-  {
-    name: "Ishanvi Desai",
-    tagline: "Crafts haute couture pieces with exceptional hand embroidery.",
-    insta: "@ishanvihc",
-    website: "www.ishanvihc.com",
-    image: d6
-  },
-  {
-    name: "Niharika Ghosh",
-    tagline: "Her work bursts with color, vibrancy, and experimental layering.",
-    insta: "@niharika.art",
-    website: "www.ng-studio.com",
-    image: d5
-  }
-];
 
+import designers from "./DesignerData.jsx";
+import "./Designers.css"
 export default function DesignerSwiper() {
   const [activeIndex, setActiveIndex] = useState(0);
 
+  
+  const getDisplayWebsite = (url) => {
+    try {
+      
+      const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+      return new URL(fullUrl).hostname.replace('www.', '');
+    } catch (e) {
+      return url; // fallback for invalid URLs
+    }
+  };
+
   return (
     <div className="text-center py-12 bg-[#dcc5b2] designer-container">
-      {/* Designer Name at the Top */}
-      <h2 key={designers[activeIndex].name} className="typewriter">
+      <h2 key={designers[activeIndex].name} className="typewriter text-4xl font-bold text-[#3b3b3b]  h-18 p-12">
         {designers[activeIndex].name}
       </h2>
-
-      {/* Swiper Carousel */}
       <Swiper
         effect="coverflow"
         grabCursor={true}
@@ -101,7 +43,7 @@ export default function DesignerSwiper() {
           modifier: 1,
           slideShadows: false,
         }}
-        autoplay={{ delay: 15000, disableOnInteraction: false }}
+        autoplay={{ delay:4000, disableOnInteraction: false }}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
         speed={800}
         modules={[EffectCoverflow, Autoplay]}
@@ -110,30 +52,31 @@ export default function DesignerSwiper() {
         {designers.map((designer, index) => (
           <SwiperSlide key={index} className="designer-slide">
             <img
-              src={designer.image}
-              alt={designer.name}
+              src={designer.profileImage.url}
+              alt={designer.profileImage.alt}
               className="designer-image"
+              onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x500/ff0000/ffffff?text=Error'; }}
             />
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Designer Paragraph + Socials */}
-      <div className="designer-info animate-fade mt-6 text-[#3b3b3b]">
-        <p className="text-lg font-medium transition-all duration-700 ease-in-out">
+      
+      <div className="designer-info animate-fade mt-6 text-[#3b3b3b] max-w-xl mx-auto px-4">
+        <p className="text-lg font-medium transition-all duration-700 ease-in-out h-16">
           {designers[activeIndex].tagline}
         </p>
         <div className="mt-4 text-sm font-medium flex justify-center gap-8">
           <span className="hover:underline transition-opacity duration-700 opacity-80">
-            {designers[activeIndex].insta}
+            {designers[activeIndex].brandName}
           </span>
           <a
-            href={`https://${designers[activeIndex].website}`}
+            href={designers[activeIndex].portfolioLink}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline transition-opacity duration-700 opacity-80"
           >
-            {designers[activeIndex].website}
+            {getDisplayWebsite(designers[activeIndex].portfolioLink)}
           </a>
         </div>
       </div>
