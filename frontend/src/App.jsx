@@ -38,6 +38,10 @@ import AdminDesignerApplications from './components/Admin/AdminDesignerApplicati
 import ImageSearchForm from './components/ImageSearch.jsx';
 import { getCart } from './actions/cart';
 import ApplyDesignerForm from './components/User/ApplyDesignForm';
+import Products from './components/Products/Products.jsx';
+import DonateClothes from './components/Donations/DonateClothes.jsx'
+import MyDonations from './components/Donations/myDonations.jsx';
+import AdminDonations from './components/Admin/AdminDonationsManagemet.jsx';
 
 function App() {
   // Using useSelector to get authData for consistent role checking
@@ -96,6 +100,10 @@ function App() {
           <Route path="/products/trending" element={<TrendingStyles />} />
           <Route path="/products/:id" element={<ProductDetails />} />
           <Route path="/products/search" element={<SearchPage />} />
+          <Route path="/products/category/:category" element={<Products navigateOnCategoryChange={true} />} />
+          <Route path="/products/category" element={<Products navigateOnCategoryChange={true} />} />
+          <Route path="/donations/donate" element={<DonateClothes />} />
+          <Route path="/donations/your-donations" element={<MyDonations />} />
 
           {/* Cart Route */}
           <Route path="/cart" element={<CartPage />} />
@@ -120,6 +128,7 @@ function App() {
             <Route path="/admin/products" element={<AdminProductManagement />} />
             <Route path="/admin/posts" element={<AdminPostManagement />} />
             <Route path="/admin/designer-applications" element={<AdminDesignerApplications />} /> {/* 🆕 New route for designer applications */}
+            <Route path="/admin/donations" element={<AdminDonations />} /> {/* 🆕 New route for designer applications */}
           </Route>
 
           {/* Unauthorized Access Page */}

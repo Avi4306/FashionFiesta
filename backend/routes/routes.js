@@ -88,8 +88,8 @@ router.post('/search', upload.single('image'), async (req, res) => {
     if (error.response) {
       console.error('Response:', error.response.data);
     }
-    res.status(500).json({ error: 'Search failed' });
-  }
+    res.status(500).json({ error: 'Search failed' });
+  }
 });
 
 // const otpcache = {};

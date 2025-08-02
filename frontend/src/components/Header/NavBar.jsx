@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CiHome, CiSearch } from "react-icons/ci";
+import { CiHome, CiSearch, CiGift } from "react-icons/ci";
 import { PiShoppingCartThin } from "react-icons/pi";
 import { HiMenu, HiX } from "react-icons/hi";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -29,7 +29,7 @@ export default function NavBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredLink, setHoveredLink] = useState(null);
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1); // 🆕 New state for active suggestion
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
   // Get suggestions and loading state from Redux store
   const { suggestions, loading: suggestionsLoading } = useSelector((state) => state.search);
@@ -43,7 +43,7 @@ export default function NavBar() {
   const profileRef = useRef(null);
   const searchInputRef = useRef(null);
   const searchContainerRef = useRef(null);
-  const suggestionsListRef = useRef(null); // 🆕 Ref for the suggestions list
+  const suggestionsListRef = useRef(null);
 
   // Sync localStorage with Redux on load and handle token expiration
   useEffect(() => {
@@ -259,9 +259,9 @@ export default function NavBar() {
                 type="text"
                 placeholder="Search..."
                 className="bg-transparent w-full outline-none text-sm placeholder-gray-500 ml-2"
-                value={activeSuggestionIndex !== -1 && suggestions[activeSuggestionIndex] ? suggestions[activeSuggestionIndex] : searchQuery} // 🆕 Show active suggestion if highlighted
+                value={activeSuggestionIndex !== -1 && suggestions[activeSuggestionIndex] ? suggestions[activeSuggestionIndex] : searchQuery}
                 onChange={handleSearchChange}
-                onKeyDown={handleSearchSubmit} // Handles Enter, ArrowUp, ArrowDown
+                onKeyDown={handleSearchSubmit}
                 onFocus={() => {
                   setSearchActive(true);
                   if (searchQuery.trim()) {
@@ -286,7 +286,7 @@ export default function NavBar() {
               {/* Only show suggestions if search is active, there are suggestions, and not currently loading */}
               {isSearchActive && suggestions.length > 0 && !suggestionsLoading && (
                 <motion.div
-                  ref={suggestionsListRef} /* 🆕 Assign ref here */
+                  ref={suggestionsListRef}
                   className="absolute left-0 mt-2 w-full bg-white border border-[#F0E4D3] rounded-md shadow-lg z-30 max-h-60 overflow-y-auto"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -297,10 +297,10 @@ export default function NavBar() {
                     <div
                       key={index}
                       className={`px-4 py-2 text-sm text-gray-800 cursor-pointer ${
-                        index === activeSuggestionIndex ? "bg-[#e0d5c6]" : "hover:bg-[#e0d5c6]" // Highlight active suggestion
+                        index === activeSuggestionIndex ? "bg-[#e0d5c6]" : "hover:bg-[#e0d5c6]"
                       }`}
                       onMouseDown={(e) => {
-                        e.preventDefault(); // Prevent input from losing focus immediately
+                        e.preventDefault();
                         handleSuggestionClick(suggestion);
                       }}
                     >
@@ -320,7 +320,13 @@ export default function NavBar() {
 
           {/* Icons */}
           <div className="flex items-center gap-3 lg:gap-4 text-xl text-gray-800">
-            <motion.div whileHover={{ scale: 1.1, rotate: '-5deg' }}><Link to="/"><CiHome className="text-3xl" /></Link></motion.div>
+            <motion.div whileHover={{ scale: 1.1, rotate: '-5deg' }}>
+              <Link to="/"><CiHome className="text-3xl" /></Link>
+            </motion.div>
+            {/* ✅ Corrected Donations Icon */}
+            <motion.div whileHover={{ scale: 1.1, rotate: '-5deg' }}>
+              <Link to="/donations/donate"><CiGift className="text-3xl" /></Link>
+            </motion.div>
             <motion.div className="relative" whileHover={{ scale: 1.1, rotate: '5deg' }}>
               <Link to="/cart">
                 <PiShoppingCartThin className="text-3xl" />
@@ -366,7 +372,7 @@ export default function NavBar() {
                         {isAdmin && <Link to="/admin" onClick={() => setIsProfileOpen(false)} className="block w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-[#F0E4D3] rounded-md">Admin Panel</Link>}
                         <p className="w-full text-left block px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md cursor-pointer">Your Orders</p>
                         <p className="w-full text-left block px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md cursor-pointer">Return or Replace</p>
-                        <p className="w-full text-left block px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md cursor-pointer">Feedback</p>
+                        <Link to="/donations/your-donations" onClick={() => setIsProfileOpen(false)} className="block w-full text-left px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md">Your Donations</Link>
                         <Link to="/user/profile" onClick={() => setIsProfileOpen(false)} className="block w-full text-left px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md">My Profile</Link>
                         <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-[#44403c] hover:bg-[#F0E4D3] rounded-md">Logout</button>
                       </div>
@@ -397,6 +403,8 @@ export default function NavBar() {
             <Link to="/products/trending" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Trending Styles</Link>
             <Link to="/users/featured-designers" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Featured Designers</Link>
             <Link to="/style-diaries" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Style Diaries</Link>
+            {/* 🆕 New Mobile Donations Link */}
+            <Link to="/donations/donate" className="hover:text-[#aa5a44]" onClick={() => setIsMenuOpen(false)}>Donate</Link>
             {isAdmin && <Link to="/admin" className="hover:text-[#aa5a44] text-red-600 font-bold" onClick={() => setIsMenuOpen(false)}>Admin Panel</Link>}
             {user?.result && <button onClick={() => {handleLogout(); setIsMenuOpen(false);}} className="text-left font-semibold text-[#aa5a44]">Logout</button>}
           </motion.div>

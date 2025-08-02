@@ -17,7 +17,10 @@ import {
   updateAdminProduct,
   getDesignerApplications,
   approveDesignerApplication,
-  rejectDesignerApplication
+  rejectDesignerApplication,
+  getAllDonationsAdmin, // New: Controller to get all donations
+  updateDonationStatus, // New: Controller to update donation status
+  deleteDonationAdmin, // New: Controller to delete a donation
 } from '../controller/admin.controller.js';
 
 const adminRouter = express.Router();
@@ -48,5 +51,10 @@ adminRouter.patch('/posts/:id', updateAdminPost);
 adminRouter.get('/designer-applications', getDesignerApplications);
 adminRouter.post('/designer-applications/:id/approve', approveDesignerApplication);
 adminRouter.post('/designer-applications/:id/reject', rejectDesignerApplication);
+
+// Donation Management Routes
+adminRouter.get('/donations', getAllDonationsAdmin); // Get all donations
+adminRouter.patch('/donations/:id', updateDonationStatus); // Update a donation status
+adminRouter.delete('/donations/:id', deleteDonationAdmin); // Delete a donation
 
 export default adminRouter;

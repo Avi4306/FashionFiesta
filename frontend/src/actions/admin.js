@@ -23,6 +23,10 @@ import {
   FETCH_DESIGNER_APPLICATIONS,
   APPROVE_DESIGNER_APPLICATION,
   REJECT_DESIGNER_APPLICATION,
+  // New action types for donation management
+  FETCH_ADMIN_DONATIONS,
+  UPDATE_ADMIN_DONATION_STATUS,
+  DELETE_ADMIN_DONATION,
 } from '../constants/actionTypes';
 
 // Helper to handle dispatching success/error messages
@@ -40,6 +44,14 @@ const handleError = (dispatch, error, defaultMessage) => {
   dispatch({ type: SET_ADMIN_ERROR, payload: errorMessage });
   // You might want to dispatch a general UI notification here too (e.g., a toast message)
   return { success: false, message: errorMessage }; // Return failure status and message
+};
+
+/**
+ * Action creator to clear any admin-related error from the state.
+ * This is the function that was missing the export.
+ */
+export const clearAdminError = () => async (dispatch) => {
+  dispatch({ type: CLEAR_ADMIN_ERROR });
 };
 
 // --- User Management Actions ---
@@ -257,6 +269,56 @@ export const rejectDesignerApplication = (id, reason) => async (dispatch) => {
     return { success: true };
   } catch (error) {
     return handleError(dispatch, error, 'Failed to reject designer application.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+// --- Donation Management Actions ---
+
+/**
+ * Fetches all donations for the admin view.
+ */
+export const getAdminDonations = () => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    const { data } = await api.adminGetAllDonations();
+    return handleResponse(dispatch, FETCH_ADMIN_DONATIONS, data, 'All donations fetched successfully.');
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to fetch donations.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+/**
+ * Updates the status of a specific donation.
+ * @param {string} id - The ID of the donation to update.
+ * @param {string} status - The new status (e.g., 'Approved', 'Cancelled').
+ */
+export const updateAdminDonationStatus = (id, status) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    const { data } = await api.adminUpdateDonationStatus(id, { status });
+    return handleResponse(dispatch, UPDATE_ADMIN_DONATION_STATUS, data, `Donation status updated to ${status}.`);
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to update donation status.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+/**
+ * Deletes a specific donation.
+ * @param {string} id - The ID of the donation to delete.
+ */
+export const deleteAdminDonation = (id) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    await api.adminDeleteDonation(id);
+    return handleResponse(dispatch, DELETE_ADMIN_DONATION, id, 'Donation deleted successfully.');
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to delete donation.');
   } finally {
     dispatch({ type: END_ADMIN_LOADING });
   }

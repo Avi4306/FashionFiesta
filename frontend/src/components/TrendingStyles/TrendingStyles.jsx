@@ -104,7 +104,7 @@ const TrendingStyles = () => {
                 </Button>
             </Box>
 
-            <Products />
+            <Products navigateOnCategoryChange = {false} />
 
             <CreateProduct
                 isOpen={isCreateProductOpen}

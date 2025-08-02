@@ -5,7 +5,7 @@ import {auth} from '../middleware/auth.js'
 const productRouter = express.Router();
 
 // productRouter.get('/', getProducts);
-productRouter.get("/categories", getProducts);
+productRouter.get("/category", getProducts);
 productRouter.get("/categories/list", getCategories);
 productRouter.post('/', auth, createProduct);
 // By placing the search route first, Express will check for that specific path and handle it correctly. 

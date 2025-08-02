@@ -64,7 +64,7 @@ export const createProduct = (productData) => API.post('/products', productData)
 export const fetchCategories = () => API.get("/products/categories/list");
 
 export const fetchProducts = ({ category, page = 1, limit = 12, sort = "newest" }) =>
-  API.get("/products/categories", {
+  API.get("/products/category", {
     params: { category, page, limit, sort },
   });
   
@@ -112,3 +112,12 @@ export const applyForDesignerRole = (id, formData) => API.post(`/user/apply-desi
 export const fetchDesignerApplications = () => API.get('/admin/designer-applications');
 export const approveDesignerApplication = (id) => API.post(`/admin/designer-applications/${id}/approve`);
 export const rejectDesignerApplication = (id, data) => API.post(`/admin/designer-applications/${id}/reject`, data);
+
+export const createDonation = (donationData) => API.post('/donations', donationData);
+export const getMyDonations = () => API.get('/donations/your-donations');
+export const deleteDonation = (id) => API.delete(`/donations/${id}`);
+
+// New ADMIN API CALLS for Donations
+export const adminGetAllDonations = () => API.get('/admin/donations');
+export const adminUpdateDonationStatus = (id, statusData) => API.patch(`/admin/donations/${id}`, statusData);
+export const adminDeleteDonation = (id) => API.delete(`/admin/donations/${id}`);
