@@ -22,6 +22,9 @@ const app = express();
 app.use(bodyParser.json({limit: '30mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '30mb', extended: true}));
 app.use(cors()); // Enable CORS for all routes (should be above routes)
+app.use(cors({
+  origin: 'https://frontend-vatsal.com'
+}));
 app.use(express.json());
 app.use('/',router)
 app.use('/style-diaries', styleDiariesRouter)
