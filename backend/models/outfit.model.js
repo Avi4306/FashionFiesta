@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// Define the schema for an Outfit
 const outfitSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
@@ -18,15 +17,11 @@ const outfitSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  creatorName:{
+  creatorName: {
     type: String,
-    required:true
+    required: true,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 const Outfit = mongoose.model('Outfit', outfitSchema);
 export default Outfit;
