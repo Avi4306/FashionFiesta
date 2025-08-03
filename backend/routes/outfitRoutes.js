@@ -1,13 +1,13 @@
 import express from 'express';
-import { getOutfits, createOutfit, likeOutfit, deleteOutfit, getTopOutfits } from '../controller/outfit.controller.js';
+import { createOutfit, likeOutfit, deleteOutfit, getOtherOutfitsThisWeek, getTopOutfitsThisWeek } from '../controller/outfit.controller.js';
 import {auth} from '../middleware/auth.js'
 
 const outfitRouter = express.Router();
 
 // GET all outfits
-outfitRouter.get('/', getOutfits);
+outfitRouter.get('/', getOtherOutfitsThisWeek);
 
-outfitRouter.get('/top', getTopOutfits);
+outfitRouter.get('/top', getTopOutfitsThisWeek);
 // POST a new outfit
 outfitRouter.post('/', auth, createOutfit);
 

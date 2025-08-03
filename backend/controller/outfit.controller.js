@@ -1,33 +1,40 @@
 import Outfit from '../models/outfit.model.js';
 
 // Controller to get all outfits with pagination
-export const getOutfits = async (req, res) => {
+export const getOtherOutfitsThisWeek = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 8;
   const skip = (page - 1) * limit;
 
   try {
-    // Step 1: Get top 3 outfit IDs
-    const top3 = await Outfit.find()
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Step 1: Get top 3 IDs this week
+    const top3 = await Outfit.find({ createdAt: { $gte: startOfWeek } })
       .sort({ likes: -1 })
       .limit(3)
       .select('_id');
-    const top3Ids = top3.map(o => o._id.toString());
+    const top3Ids = top3.map((o) => o._id);
 
-    // Step 2: Exclude top 3 outfits in main query
-    const query = { _id: { $nin: top3Ids } };
+    // Step 2: Fetch rest
+    const query = {
+      createdAt: { $gte: startOfWeek },
+      _id: { $nin: top3Ids }
+    };
 
-    const totalOutfits = await Outfit.countDocuments(query);
-
+    const total = await Outfit.countDocuments(query);
     const outfits = await Outfit.find(query)
-      .sort({ createdAt: -1 }) // You may adjust this if needed
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     res.json({
       outfits,
-      totalPages: Math.ceil(totalOutfits / limit),
-      currentPage: page
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -101,10 +108,19 @@ export const deleteOutfit = async (req, res) => {
   }
 };
 
-export const getTopOutfits = async (req, res) => {
+export const getTopOutfitsThisWeek = async (req, res) => {
   try {
-    const topOutfits = await Outfit.find().sort({ likes: -1 }).limit(3);
-    res.status(200).json(topOutfits);
+    const now = new Date();
+
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const top3 = await Outfit.find({ createdAt: { $gte: startOfWeek } })
+      .sort({ likes: -1 })
+      .limit(3);
+
+    res.status(200).json(top3);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
