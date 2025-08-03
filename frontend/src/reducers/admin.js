@@ -25,6 +25,9 @@ import {
   FETCH_ADMIN_DONATIONS,
   UPDATE_ADMIN_DONATION_STATUS,
   DELETE_ADMIN_DONATION,
+  FETCH_ADMIN_OUTFITS,
+  DELETE_ADMIN_OUTFIT,
+  CREATE_ADMIN_OUTFIT,
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -57,6 +60,14 @@ const initialState = {
   },
   error: null,
   isLoading: false,
+
+  outfits: [],
+
+outfitsPagination: {
+  currentPage: 1,
+  totalPages: 1,
+  totalItems: 0,
+},
 };
 
 const admin = (state = initialState, action) => {
@@ -207,7 +218,30 @@ const admin = (state = initialState, action) => {
         donations: state.donations.filter((donation) => donation._id !== action.payload),
         error: null,
       };
+      case FETCH_ADMIN_OUTFITS:
+        return {
+          ...state,
+          outfits: action.payload.outfits,
+          outfitsPagination: {
+            currentPage: action.payload.currentPage,
+            totalPages: action.payload.totalPages,
+            totalItems: action.payload.totalItems,
+          },
+          error: null,
+        };
+      case CREATE_ADMIN_OUTFIT:
+        return {
+          ...state,
+          outfits: [action.payload, ...state.outfits],
+          error: null,
+        };
 
+      case DELETE_ADMIN_OUTFIT:
+        return {
+          ...state,
+          outfits: state.outfits.filter((outfit) => outfit._id !== action.payload),
+          error: null,
+        };
     default:
       return state;
   }

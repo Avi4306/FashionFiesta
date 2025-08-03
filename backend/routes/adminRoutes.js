@@ -20,7 +20,10 @@ import {
   rejectDesignerApplication,
   getAllDonationsAdmin, // New: Controller to get all donations
   updateDonationStatus, // New: Controller to update donation status
-  deleteDonationAdmin, // New: Controller to delete a donation
+  deleteDonationAdmin,
+  getAllOutfitsAdmin,
+  deleteOutfitAdmin, // New: Controller to delete a donation
+  createAdminOutfit
 } from '../controller/admin.controller.js';
 
 const adminRouter = express.Router();
@@ -56,5 +59,10 @@ adminRouter.post('/designer-applications/:id/reject', rejectDesignerApplication)
 adminRouter.get('/donations', getAllDonationsAdmin); // Get all donations
 adminRouter.patch('/donations/:id', updateDonationStatus); // Update a donation status
 adminRouter.delete('/donations/:id', deleteDonationAdmin); // Delete a donation
+
+// Outfit Management Routes
+adminRouter.get('/outfit-of-the-week', getAllOutfitsAdmin); // Get all outfits
+adminRouter.post('/outfit-of-the-week', createAdminOutfit);
+adminRouter.delete('/outfit-of-the-week/:id', deleteOutfitAdmin); // Delete an outfit
 
 export default adminRouter;

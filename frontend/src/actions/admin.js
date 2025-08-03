@@ -27,6 +27,9 @@ import {
   FETCH_ADMIN_DONATIONS,
   UPDATE_ADMIN_DONATION_STATUS,
   DELETE_ADMIN_DONATION,
+  FETCH_ADMIN_OUTFITS,
+  DELETE_ADMIN_OUTFIT,
+  CREATE_ADMIN_OUTFIT,
 } from '../constants/actionTypes';
 
 // Helper to handle dispatching success/error messages
@@ -178,6 +181,23 @@ export const getAdminPosts = (page = 1, limit = 10) => async (dispatch) => {
 
 export const createAdminPost = (postData) => async (dispatch) => {
   try {
+    let finalPostData = { ...postData };
+    
+        if (finalPostData.selectedFiles && finalPostData.selectedFiles.length > 0) {
+          // Create an array of promises for each image upload
+          const uploadPromises = finalPostData.selectedFiles.map((imageData) =>
+            api.uploadImage(imageData, "posts")
+          );
+    
+          // Wait for all image uploads to complete
+          const uploadedImages = await Promise.all(uploadPromises);
+    
+          // Replace the base64 images with the array of secure URLs
+          finalPostData = {
+            ...finalPostData,
+            selectedFiles: uploadedImages.map((res) => res.data.imageUrl),
+          };
+        }
     const { data } = await api.adminCreatePost(postData);
     return handleResponse(dispatch, CREATE_ADMIN_POST, data, 'Post created successfully.');
   } catch (error) {
@@ -319,6 +339,51 @@ export const deleteAdminDonation = (id) => async (dispatch) => {
     return handleResponse(dispatch, DELETE_ADMIN_DONATION, id, 'Donation deleted successfully.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to delete donation.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+export const getAdminOutfits = (page = 1, limit = 10) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    const { data } = await api.adminGetAllOutfits(page, limit);
+    return handleResponse(dispatch, FETCH_ADMIN_OUTFITS, data, 'Outfits fetched successfully.');
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to fetch outfits.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING });
+  }
+};
+
+export const createAdminOutfit = (outfitData) => async (dispatch) => {
+  try {
+    let finalData = { ...outfitData };
+
+    // Upload image if it's base64
+    if (finalData.selectedFile?.startsWith('data:image')) {
+      const uploadResponse = await api.uploadImage(finalData.selectedFile, 'outfits');
+      finalData.imageUrl = uploadResponse.data.imageUrl;
+    } else {
+      finalData.imageUrl = finalData.selectedFile; // Assume it's already a valid URL
+    }
+
+    // Remove local-only field before sending
+    delete finalData.selectedFile;
+    const { data } = await api.adminCreateOutfit(outfitData);
+    return handleResponse(dispatch, CREATE_ADMIN_OUTFIT, data, 'Outfit created successfully.');
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to create outfit.');
+  }
+};
+
+export const deleteAdminOutfit = (id) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING });
+  try {
+    await api.adminDeleteOutfit(id);
+    return handleResponse(dispatch, DELETE_ADMIN_OUTFIT, id, 'Outfit deleted successfully.');
+  } catch (error) {
+    return handleError(dispatch, error, 'Failed to delete outfit.');
   } finally {
     dispatch({ type: END_ADMIN_LOADING });
   }

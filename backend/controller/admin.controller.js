@@ -6,6 +6,8 @@ import Donation from '../models/donation.model.js'; // New: Import the Donation 
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs'; // Import bcrypt for password hashing
 import { sendEmail } from '../utils/sendEmail.js';
+import Outfit from '../models/outfit.model.js'; // Adjust the path as necessary
+
 
 // --- User Management ---
 export const getAllUsers = async (req, res) => {
@@ -179,7 +181,7 @@ export const deleteProductAdmin = async (req, res) => {
 
 export const createAdminProduct = async (req, res) => {
     const productData = req.body;
-    const { tags, selectedFile } = productData;
+    const { tags, selectedFile, name } = productData;
 
     try {
         let imageUrl = '';
@@ -190,11 +192,13 @@ export const createAdminProduct = async (req, res) => {
 
         const newProduct = new Product({
             ...productData,
+            title : name,
             creator: req.userId,
             creatorName: req.userName,
             images: imageUrl ? [imageUrl] : [],
-            tags: tags ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+            tags: tags
         });
+        delete newProduct.name
         await newProduct.save();
         res.status(201).json(newProduct);
     } catch (error) {
@@ -276,7 +280,8 @@ export const deletePostAdmin = async (req, res) => {
 
 export const createAdminPost = async (req, res) => {
     const postData = req.body;
-    const { tags, selectedFile } = postData;
+    console.log(postData)
+    const { tags, selectedFile, message } = postData;
 
     try {
         let imageUrl = '';
@@ -287,11 +292,13 @@ export const createAdminPost = async (req, res) => {
 
         const newPost = new Post({
             ...postData,
+            content : message,
             selectedFile: imageUrl,
             creator: req.userId,
             name: req.userName,
-            tags: tags ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+            tags
         });
+        delete newPost.message
         await newPost.save();
         res.status(201).json(newPost);
     } catch (error) {
@@ -531,6 +538,73 @@ export const deleteDonationAdmin = async (req, res) => {
 
         await donation.deleteOne();
         res.json({ message: 'Donation removed' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getAllOutfitsAdmin = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const totalOutfits = await Outfit.countDocuments();
+    const outfits = await Outfit.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      outfits,
+      totalPages: Math.ceil(totalOutfits / limit),
+      currentPage: page,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const createAdminOutfit = async (req, res) => {
+  try {
+    const { imageUrl, description, submittedBy, creatorName } = req.body;
+    console.log(req.body)
+
+    if (!imageUrl || !description || !submittedBy || !creatorName) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    const newOutfit = new Outfit({
+      imageUrl,
+      description,
+      submittedBy,
+      creatorName,
+      likes: [],
+    });
+
+    await newOutfit.save();
+    res.status(201).json(newOutfit);
+  } catch (error) {
+    console.error('Error creating outfit:', error);
+    res.status(500).json({ message: 'Failed to create outfit.' });
+  }
+};
+
+export const deleteOutfitAdmin = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ message: `No outfit found with ID: ${id}` });
+        }
+
+        const outfit = await Outfit.findById(id);
+        if (!outfit) {
+            return res.status(404).json({ message: 'Outfit not found' });
+        }
+
+        await outfit.deleteOne();
+        res.status(200).json({ message: 'Outfit deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

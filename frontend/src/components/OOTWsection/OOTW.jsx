@@ -1,7 +1,7 @@
 import React from "react";
 import "./OOTW.css"; 
 import OOTWCarousel from './OOTWCarousel'
-
+import { Link } from "react-router-dom";
 
 export default function OOTW() {
   return (
@@ -21,7 +21,7 @@ export default function OOTW() {
         </div>
         <p className="ootw-call">
           Get Featured! <br />
-          Join the Fiesta & <a href="#submit">Submit</a> Your Designs
+          Join the Fiesta & <Link to="/outfit-of-the-week">Submit</Link> Your Designs
         </p>
       </div>
 

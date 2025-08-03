@@ -128,3 +128,12 @@ export const deleteDonation = (id) => API.delete(`/donations/${id}`);
 export const adminGetAllDonations = () => API.get('/admin/donations');
 export const adminUpdateDonationStatus = (id, statusData) => API.patch(`/admin/donations/${id}`, statusData);
 export const adminDeleteDonation = (id) => API.delete(`/admin/donations/${id}`);
+
+export const adminGetAllOutfits = (page = 1, limit = 10) =>
+  API.get(`/admin/outfit-of-the-week?page=${page}&limit=${limit}`);
+
+export const adminCreateOutfit = (outfitData) =>
+  axios.post('/admin/outfit-of-the-week', outfitData);
+
+export const adminDeleteOutfit = (id) =>
+  API.delete(`/admin/outfit-of-the-week/${id}`);
