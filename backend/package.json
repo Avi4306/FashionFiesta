@@ -8,6 +8,7 @@
   "main": "index.js",
 "scripts": {
   "server": "nodemon backend/index.js",
+  "start": "node backend/index.js",
   "flask": "set PYTHONIOENCODING=utf-8 && python ../flask/scan_and_search/app.py",
   "dev": "concurrently --prefix name --names server,flask -c blue,green --cwd . \"npm:server\" \"npm:flask\""
 },
