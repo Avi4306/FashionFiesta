@@ -17,10 +17,13 @@ import {
   Package,
   Undo2,
 } from "lucide-react";
+import sssquiggly from '../../assets/sssquiggly.svg'
 
 const Footer = () => {
   return (
-    <div className="bg-[#FAF7F3] bg-[url('../../src/assets/sssquiggly.svg')] bg-no-repeat bg-top bg-cover pt-20 pb-6 px-4">
+    <div className="bg-[#FAF7F3] bg-no-repeat bg-top bg-cover pt-20 pb-6 px-4"
+    style={{ backgroundImage: `url(${sssquiggly})` }}
+    >
       <footer className="max-w-7xl mx-auto text-[#333] font-[Montserrat] bg-[#dcc5b2] pt-4 m-[4rem] mr-[4rem] ml-[4rem] p-[3rem] rounded-2xl shadow-2xl">
 
         {/* WRAPPER TO CENTER EVERYTHING */}

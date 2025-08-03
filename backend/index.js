@@ -23,11 +23,7 @@ app.use(bodyParser.json({limit: '30mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '30mb', extended: true}));
 app.use(cors()); // Enable CORS for all routes (should be above routes)
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  origin: "https://fashion-fiesta-gl17.vercel.app",
 }));
 app.use(express.json());
 app.use('/',router)

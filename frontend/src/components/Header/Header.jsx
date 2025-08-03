@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import "./Header.css";
+import Logo from '../../assets/Logo.png'
 
 // Animation variants for the letter-by-letter effect (no changes here)
 const sentenceVariant = {
@@ -48,7 +49,7 @@ export default function Header() {
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
       >
         <img
-          src="/src/assets/Logo.png"
+          src={Logo}
           alt="Logo"
           className="w-[70px] sm:w-[100px] md:w-[120px] lg:w-[140px] h-auto object-contain"
         />
