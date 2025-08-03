@@ -9,7 +9,10 @@
   "scripts": {
     "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\" \"npm:watch-images\"",
     "server": "nodemon backend/index.js",
-    "flask": "cd flask/scan_and_search && python app.py"
+    "flask": "cd flask/scan_and_search && python app.py",
+    "build": "cd frontend && npm install && npm run build",
+    "start": "node backend/index.js",
+    "install-all": "npm install && cd frontend && npm install"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
