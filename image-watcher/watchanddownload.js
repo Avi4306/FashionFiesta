@@ -3,11 +3,12 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const mongoURI = "mongodb+srv://fashionfiesta2056:WaEcjU10X78cr8Hs@fashion20.xabtcgd.mongodb.net/";
+const mongoURI = process.env.MONGO_URI;
 const dbName = "test";
 const collectionName = "products";
 const imageDir = path.join(__dirname, "../flask/scan_and_search/static/dataset_images");
