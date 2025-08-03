@@ -40,7 +40,7 @@ import { getCart } from './actions/cart';
 import ApplyDesignerForm from './components/User/ApplyDesignForm';
 import Products from './components/Products/Products.jsx';
 import DonateClothes from './components/Donations/DonateClothes.jsx'
-import MyDonations from './components/Donations/myDonations.jsx';
+import MyDonations from './components/Donations/MyDonations.jsx';
 import AdminDonations from './components/Admin/AdminDonationsManagemet.jsx';
 import OutfitOfTheWeek from './components/OutfitOfTheWeek/OutfitOfTheWeek.jsx';
 import AdminOutfitManagement from './components/Admin/AdminOutfitsManagement.jsx'
