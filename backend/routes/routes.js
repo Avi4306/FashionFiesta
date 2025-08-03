@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
+import os from 'os'
 import FormData from 'form-data';
 import { uploadImageToCloudinary } from '../controller/upload.js';
 import { getFeaturedDesigners } from '../controller/user.controller.js';
@@ -13,8 +14,9 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-const upload = multer({ dest: 'temp_uploads/' });
-
+const upload = multer({
+  dest: path.join(os.tmpdir(), 'uploads') // Use Vercel's writable /tmp
+});
 router.post('/upload', uploadImageToCloudinary);
 router.get('/users/featured-designers', getFeaturedDesigners)
 router.get('/suggestions', getSuggestions)
