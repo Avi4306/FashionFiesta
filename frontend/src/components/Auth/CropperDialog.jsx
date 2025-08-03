@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { Dialog, DialogActions, DialogContent, Button, Slider } from '@mui/material';
-import getCroppedImg from './cropImageUtils';
+import getCroppedImg from './CropImageutils';
 
 const CropperDialog = ({ imageSrc, onClose, onCropDone }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
