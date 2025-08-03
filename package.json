@@ -7,7 +7,7 @@
   "author": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\"",
+    "dev": "concurrently --prefix name \"npm:server\"",
     "server": "nodemon backend/index.js",
     "flask": "cd flask/scan_and_search && python app.py"
   },
