@@ -25,7 +25,7 @@ export default function OOTWCarousel() {
     <Swiper
       effect="cards"
       grabCursor
-      loop
+      loop={true}
       modules={[EffectCards, Autoplay]}
       autoplay={{ delay: 2000, disableOnInteraction: false, pauseOnMouseEnter: true }}
       speed={800}

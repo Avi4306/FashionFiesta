@@ -7,6 +7,7 @@
   "author": "",
   "main": "index.js",
   "scripts": {
+    "watch-images": "node image-watcher/watchAndDownload.js",
     "dev": "concurrently --prefix name \"npm:server\" \"npm:flask\" \"npm:watch-images\"",
     "server": "nodemon backend/index.js",
     "flask": "cd flask/scan_and_search && python app.py"
