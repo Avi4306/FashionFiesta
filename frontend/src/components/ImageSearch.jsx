@@ -40,9 +40,8 @@ function ImageSearchForm() {
         formData.append('image', selectedFile); // 'image' must match the field name in your Node.js backend (upload.single('image'))
 
         try {
-            // Adjust this URL to your Node.js backend's /search endpoint
-            // If your React app is on 3000 and Node.js on 5000, use http://localhost:5000/search
-            const response = await fetch('http://localhost:3000/search', { // Assuming Node.js runs on port 3000 as an example
+
+            const response = await fetch(`${import.meta.env.FLASK_URL}/search`, {
                 method: 'POST',
                 body: formData,
             });

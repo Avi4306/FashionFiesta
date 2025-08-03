@@ -33,7 +33,7 @@ router.post('/recommend/:id', async (req, res) => {
   console.log("Received ID from frontend:", id);
 
   try {
-    const response = await axios.post('http://localhost:5000/recommend', { _id: id });
+    const response = await axios.post(`${process.env.FLASK_URL}/recommend`, { _id: id });
     res.json(response.data);
   } catch (error) {
     console.error('Error calling Flask server:');
@@ -74,7 +74,7 @@ router.post('/search', upload.single('image'), async (req, res) => {
       contentType: req.file.mimetype
     });
      console.log("cheackpoint2")
-    const response = await axios.post('http://localhost:5000/search', form, {
+    const response = await axios.post(`${process.env.FLASK_URL}/search`, form, {
       headers: form.getHeaders(), // ✅ Don't manually set Content-Length unless needed
       maxBodyLength: Infinity
     });
