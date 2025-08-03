@@ -4,35 +4,34 @@ import { EffectCards, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-cards";
 import "./OOTWCarousel.css";
-
-import fashion1 from "../../assets/design1.jpeg";
-import fashion2 from "../../assets/design2.jpeg";
-import fashion3 from "../../assets/design3.jpeg";
+import { useSelector } from "react-redux";
 
 export default function OOTWCarousel() {
-  const slides = [
-    { img: fashion1, label: "Winner" },
-    { img: fashion2, label: "1st Runner up" },
-    { img: fashion3, label: "2nd Runner up" },
-    { img: fashion1, label: "Winner" },
-    { img: fashion2, label: "1st Runner up" },
-    { img: fashion3, label: "2nd Runner up" },
-    { img: fashion1, label: "Winner" },
-    { img: fashion2, label: "1st Runner up" },
-    { img: fashion3, label: "2nd Runner up" }
-  ];
+  const { topOutfits } = useSelector((state) => state.outfit);
+
+  const slideLabels = ["Winner", "1st Runner Up", "2nd Runner Up"];
+
+  // Filter out undefined or empty outfits
+  const validTopOutfits = topOutfits?.slice(0, 3).filter(Boolean) || [];
+
+  if (validTopOutfits.length === 0) return null;
+
+  const slides = validTopOutfits.map((outfit, index) => ({
+    img: outfit.imageUrl,
+    label: slideLabels[index] || "Top Outfit",
+  }));
 
   return (
     <Swiper
       effect="cards"
-      grabCursor={true}
-      loop={true}
+      grabCursor
+      loop
       modules={[EffectCards, Autoplay]}
-      autoplay={{ delay: 1500, disableOnInteraction: false, pauseOnMouseEnter: true }}
+      autoplay={{ delay: 2000, disableOnInteraction: false, pauseOnMouseEnter: true }}
       speed={800}
       className="ootw-swiper"
     >
-      {slides.concat(slides).map((slide, i) => (
+      {slides.map((slide, i) => (
         <SwiperSlide
           key={i}
           className="ootw-slide"

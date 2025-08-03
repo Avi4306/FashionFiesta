@@ -30,21 +30,35 @@ export const fetchOutfits = (page = 1, limit = 8) => async (dispatch) => {
 // ✅ Create Outfit
 export const createOutfit = (newOutfit) => async (dispatch) => {
   dispatch({ type: OUTFIT_LOADING });
-
   try {
-    const { data } = await api.createOutfit(newOutfit);
+    let finalOutfitData = { ...newOutfit };
+
+    if (finalOutfitData.image) {
+      const { data: uploadedImage } = await api.uploadImage(finalOutfitData.image, "outfits");
+      finalOutfitData = {
+        ...finalOutfitData,
+        imageUrl: uploadedImage.imageUrl,
+      };
+    }
+
+    delete finalOutfitData.image;
+
+    const { data } = await api.createOutfit(finalOutfitData);
     dispatch({ type: CREATE_OUTFIT, payload: data });
+
+    // ✅ Refetch top outfits after new submission
+    dispatch(fetchTopOutfits());
   } catch (error) {
     dispatch({ type: OUTFIT_ERROR, payload: error.message });
   }
 };
 
 // ❤️ Like an outfit
-export const likeOutfit = (id, userId) => async (dispatch) => {
-  dispatch({ type: OUTFIT_LOADING });
+export const likeOutfit = (id) => async (dispatch) => {
   try {
-    const { data } = await api.likeOutfit(id, userId);
+    const { data } = await api.likeOutfit(id);
     dispatch({ type: LIKE_OUTFIT, payload: data });
+    dispatch(fetchTopOutfits())
   } catch (error) {
     dispatch({ type: OUTFIT_ERROR, payload: error.message });
   }
@@ -64,7 +78,6 @@ export const deleteOutfit = (id) => async (dispatch) => {
 
 // Fetch top 3 outfits
 export const fetchTopOutfits = () => async (dispatch) => {
-  dispatch({ type: OUTFIT_LOADING });
   try {
     const { data } = await api.fetchTopOutfits();
     dispatch({ type: FETCH_TOP_OUTFITS, payload: data });

@@ -3,16 +3,26 @@ import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 
 export default function OutfitGallery({
   outfits,
+  topOutfits = [],
   user,
   handleLike,
   currentPage,
   setCurrentPage,
   pageSize
 }) {
-  const paginatedItems = outfits.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const totalPages = Math.ceil(outfits.length / pageSize);
+  // 🔍 Filter out top outfits by _id
+  const filteredOutfits = outfits.filter(
+    (outfit) => !topOutfits.some((top) => top._id === outfit._id)
+  );
 
-  if (outfits.length === 0) return null;
+  const paginatedItems = filteredOutfits.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const totalPages = Math.ceil(filteredOutfits.length / pageSize);
+
+  if (filteredOutfits.length === 0) return null;
 
   return (
     <>
@@ -28,10 +38,16 @@ export default function OutfitGallery({
             <h4 className="text-lg font-semibold text-[#aa5a44]">{outfit.title}</h4>
             <p className="text-sm text-gray-600 mt-1 line-clamp-2">{outfit.description}</p>
             <div className="flex items-center gap-2 mt-2">
-              <button onClick={() => handleLike(outfit._id)} className="text-xl">
-                {outfit.likes.includes(user?.result?._id)
-                  ? <AiFillHeart className="text-red-500" />
-                  : <AiOutlineHeart />}
+              <button
+                onClick={() => handleLike(outfit._id)}
+                className="text-xl focus:outline-none"
+                aria-label="Like outfit"
+              >
+                {outfit.likes.includes(user?.result?._id) ? (
+                  <AiFillHeart className="text-red-500" />
+                ) : (
+                  <AiOutlineHeart />
+                )}
               </button>
               <span>{outfit.likes.length} likes</span>
             </div>

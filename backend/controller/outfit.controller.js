@@ -7,9 +7,20 @@ export const getOutfits = async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
-    const totalOutfits = await Outfit.countDocuments();
-    const outfits = await Outfit.find()
-      .sort({ createdAt: -1 })
+    // Step 1: Get top 3 outfit IDs
+    const top3 = await Outfit.find()
+      .sort({ likes: -1 })
+      .limit(3)
+      .select('_id');
+    const top3Ids = top3.map(o => o._id.toString());
+
+    // Step 2: Exclude top 3 outfits in main query
+    const query = { _id: { $nin: top3Ids } };
+
+    const totalOutfits = await Outfit.countDocuments(query);
+
+    const outfits = await Outfit.find(query)
+      .sort({ createdAt: -1 }) // You may adjust this if needed
       .skip(skip)
       .limit(limit);
 
@@ -30,7 +41,8 @@ export const createOutfit = async (req, res) => {
     imageUrl,
     description,
     likes: [],
-    submittedBy: 'anonymous_user', // You would typically get this from an authenticated user
+    submittedBy: req.userId, // You would typically get this from an authenticated user
+    creatorName: req.userName
   });
 
   try {
@@ -49,16 +61,16 @@ export const likeOutfit = async (req, res) => {
       return res.status(404).json({ message: 'Outfit not found' });
     }
 
-    const { userId } = req.body;
-    const isLiked = outfit.likes.includes(userId);
+    const userId = req.userId;
+    const isLiked = outfit.likes.some(id => id.toString() === userId.toString());
 
     let updatedLikes;
     if (isLiked) {
-      updatedLikes = outfit.likes.filter(id => id !== userId);
+      updatedLikes = outfit.likes.filter(id => id.toString() !== userId.toString());
     } else {
       updatedLikes = [...outfit.likes, userId];
     }
-    
+
     outfit.likes = updatedLikes;
     const updatedOutfit = await outfit.save();
     res.json(updatedOutfit);
@@ -71,12 +83,18 @@ export const likeOutfit = async (req, res) => {
 // Controller to delete an outfit by its ID
 export const deleteOutfit = async (req, res) => {
   try {
-    const deletedOutfit = await Outfit.findByIdAndDelete(req.params.id);
-    
-    if (!deletedOutfit) {
+    const outfit = await Outfit.findById(req.params.id);
+
+    if (!outfit) {
       return res.status(404).json({ message: 'Outfit not found' });
     }
-    
+    // Ensure only the owner can delete
+    if (outfit.submittedBy.toString() !== req.userId.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to delete this outfit' });
+    }
+
+    await Outfit.findByIdAndDelete(req.params.id);
+
     res.json({ message: 'Outfit deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });

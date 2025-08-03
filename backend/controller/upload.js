@@ -11,7 +11,7 @@ export const uploadImageToCloudinary = async (req, res) => {
         }
         
         // Use a whitelist to ensure only valid folder names are used
-        const validFolders = ["posts", "products"];
+        const validFolders = ["posts", "products", 'outfits', 'users', 'donation'];
         if (!validFolders.includes(folderName)) {
             return res.status(400).json({ message: "Invalid folder name provided." });
         }

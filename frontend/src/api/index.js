@@ -10,11 +10,11 @@ API.interceptors.request.use((req) => {
     return req;
 });
 
-export const fetchOutfits = (page = 1, limit = 8) => API.get(`/outfits?page=${page}&limit=${limit}`);
-export const fetchTopOutfits = () => API.get('/outfits/top');
-export const createOutfit = (newOutfit) => API.post('/outfits', newOutfit);
-export const likeOutfit = (id, userId) => API.patch(`/outfits/${id}/like`, { userId });
-export const deleteOutfit = (id) => API.delete(`/outfits/${id}`);
+export const fetchOutfits = (page = 1, limit = 8) => API.get(`/outfit-of-the-week?page=${page}&limit=${limit}`);
+export const fetchTopOutfits = () => API.get('/outfit-of-the-week/top');
+export const createOutfit = (newOutfit) => API.post('/outfit-of-the-week', newOutfit);
+export const likeOutfit = (id) => API.patch(`/outfit-of-the-week/${id}/like`);
+export const deleteOutfit = (id) => API.delete(`/outfit-of-the-week/${id}`);
 
 export const fetchPosts = (currentPage) => API.get(`/style-diaries?page=${currentPage}`);
 

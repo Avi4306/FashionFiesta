@@ -55,17 +55,21 @@ const outfitReducer = (state = initialState, action) => {
         outfits: state.outfits.map((outfit) =>
           outfit._id === action.payload._id ? action.payload : outfit
         ),
+        topOutfits: state.topOutfits.map((outfit) =>
+          outfit._id === action.payload._id ? action.payload : outfit
+        ),
         loading: false,
         error: null,
       };
 
     case DELETE_OUTFIT:
-      return {
-        ...state,
-        outfits: state.outfits.filter((outfit) => outfit._id !== action.payload),
-        loading: false,
-        error: null,
-      };
+  return {
+    ...state,
+    outfits: state.outfits.filter((outfit) => outfit._id !== action.payload),
+    topOutfits: state.topOutfits.filter((outfit) => outfit._id !== action.payload),
+    loading: false,
+    error: null,
+  };
 
     case OUTFIT_ERROR:
       return {

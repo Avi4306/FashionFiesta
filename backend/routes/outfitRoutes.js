@@ -1,5 +1,6 @@
 import express from 'express';
 import { getOutfits, createOutfit, likeOutfit, deleteOutfit, getTopOutfits } from '../controller/outfit.controller.js';
+import {auth} from '../middleware/auth.js'
 
 const outfitRouter = express.Router();
 
@@ -8,11 +9,11 @@ outfitRouter.get('/', getOutfits);
 
 outfitRouter.get('/top', getTopOutfits);
 // POST a new outfit
-outfitRouter.post('/', createOutfit);
+outfitRouter.post('/', auth, createOutfit);
 
 // PATCH to like an outfit
-outfitRouter.patch('/:id/like', likeOutfit);
+outfitRouter.patch('/:id/like',auth, likeOutfit);
 
-outfitRouter.delete('/:id', deleteOutfit);
+outfitRouter.delete('/:id',auth, deleteOutfit);
 
 export default outfitRouter;

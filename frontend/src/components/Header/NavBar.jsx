@@ -21,6 +21,7 @@ const navLinks = [
   { name: "Trending Styles", path: "/products/trending" },
   { name: "Featured Designers", path: "/users/featured-designers" },
   { name: "Style Diaries", path: "/style-diaries" },
+  { name: "Outfit of The Week", path: "/outfit-of-the-week" },
 ];
 
 export default function NavBar() {
