@@ -26,16 +26,34 @@ import {
 export const submitDonation = (donationData) => async (dispatch) => {
   try {
     dispatch({ type: SUBMIT_DONATION_REQUEST });
-    const { data } = await api.createDonation(donationData);
+
+    let finalDonationData = { ...donationData };
+
+    if (finalDonationData.photos && finalDonationData.photos.length > 0) {
+      // Create an array of promises for each image upload
+      const uploadPromises = finalDonationData.photos.map((imageData) =>
+        api.uploadImage(imageData, "donation")
+      );
+
+      // Wait for all image uploads to complete
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      // Replace the base64 images with the array of secure URLs
+      finalDonationData = {
+        ...finalDonationData,
+        photos: uploadedImages.map((res) => res.data.imageUrl),
+      };
+    }
+
+    const { data } = await api.createDonation(finalDonationData);
+
     dispatch({ type: SUBMIT_DONATION_SUCCESS, payload: data });
   } catch (error) {
     console.error("Error submitting donation:", error);
     dispatch({
       type: SUBMIT_DONATION_FAIL,
       payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+        error.response?.data?.message || error.message,
     });
   }
 };

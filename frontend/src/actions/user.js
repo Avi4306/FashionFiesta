@@ -26,9 +26,18 @@ export const getUserProfileData = (id) => async (dispatch) => {
       dispatch({ type: END_LOADING });
     }
 }
+
 export const updateProfile = (id, formData) => async (dispatch) => {
   try {
-    const { data } = await api.updateUser(id, formData);
+    let finalFormData = { ...formData };
+
+    // Upload image to Cloudinary if it's a base64 string
+    if (finalFormData.profilePhoto && finalFormData.profilePhoto.startsWith('data:')) {
+      const { data: uploaded } = await api.uploadImage(finalFormData.profilePhoto, "users");
+      finalFormData.profilePhoto = uploaded.imageUrl;
+    }
+
+    const { data } = await api.updateUser(id, finalFormData);
 
     const updatedUser = {
       result: data,

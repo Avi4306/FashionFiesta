@@ -42,6 +42,7 @@ import Products from './components/Products/Products.jsx';
 import DonateClothes from './components/Donations/DonateClothes.jsx'
 import MyDonations from './components/Donations/myDonations.jsx';
 import AdminDonations from './components/Admin/AdminDonationsManagemet.jsx';
+import OutfitOfTheWeek from './components/OutfitOfTheWeek/OutfitOfTheWeek.jsx';
 
 function App() {
   // Using useSelector to get authData for consistent role checking
@@ -111,6 +112,8 @@ function App() {
 
           {/* Featured Designers Route */}
           <Route path="/users/featured-designers" element={<FeaturedDesigners />} />
+
+          <Route path="/outfit-of-the-week" element={<OutfitOfTheWeek />} />
 
           {/* Image Search Route */}
           <Route path='/search' element={<ImageSearchForm />} />

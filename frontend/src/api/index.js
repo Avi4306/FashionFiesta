@@ -2,12 +2,19 @@ import axios from 'axios';
 
 const API = axios.create({ baseURL: 'http://localhost:3000' });
 
+// Request interceptor to attach the auth token to every request
 API.interceptors.request.use((req) => {
   if (localStorage.getItem('profile')) {
     req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('profile')).token}`;
   }
     return req;
 });
+
+export const fetchOutfits = (page = 1, limit = 8) => API.get(`/outfit-of-the-week?page=${page}&limit=${limit}`);
+export const fetchTopOutfits = () => API.get('/outfit-of-the-week/top');
+export const createOutfit = (newOutfit) => API.post('/outfit-of-the-week', newOutfit);
+export const likeOutfit = (id) => API.patch(`/outfit-of-the-week/${id}/like`);
+export const deleteOutfit = (id) => API.delete(`/outfit-of-the-week/${id}`);
 
 export const fetchPosts = (currentPage) => API.get(`/style-diaries?page=${currentPage}`);
 

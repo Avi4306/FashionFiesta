@@ -37,3 +37,5 @@ coverage/
 
 # Optional: ignore local database dumps
 dump/
+
+flask/venv/
