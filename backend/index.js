@@ -14,6 +14,7 @@ import cartRouter from './routes/cartRoutes.js';
 import './config/cloudinary.js'
 import adminRouter from './routes/adminRoutes.js';
 import donationRouter from './routes/donationRoutes.js';
+import outfitRouter from './routes/outfitRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -30,6 +31,7 @@ app.use('/auth', authRouter)
 app.use('/cart', cartRouter)
 app.use('/admin', adminRouter)
 app.use('/donations', donationRouter)
+app.use('/outfit-of-the-week', outfitRouter)
 
 
 app.listen(process.env.PORT, () => {

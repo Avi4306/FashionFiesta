@@ -5,7 +5,9 @@ import TC3 from "../../assets/TC3.jpeg";
 import TC1 from "../../assets/TC1.jpeg";
 import TC2 from "../../assets/TC2.jpeg";
 import TC4 from "../../assets/TC4.jpg";
+import { useNavigate } from "react-router-dom";
 export default function TrendingSection() {
+  const navigate = useNavigate()
   return (
     <div
       className="w-full min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 py-8"
@@ -20,24 +22,28 @@ export default function TrendingSection() {
               text="Kid's Section"
               col="col-span-2"
               row="row-span-3"
+              onClick={() => navigate("products/category/Kids")}
             />
             <Card
               img={TC1}
               text="Women's Clothing"
               col="col-span-2 col-start-3"
               row="row-span-5"
+              onClick={() => navigate("products/category/Women")}
             />
             <Card
               img={TC4}
               text="Accessories"
               col="col-span-2 col-start-3 row-start-6"
               row="row-span-3"
+              onClick={() => navigate("products/category/Accessories")}
             />
             <Card
               img={TC2}
               text="Men's Apparel"
               col="col-span-2 row-start-4"
               row="row-span-5"
+              onClick={() => navigate("products/category/Men")}
             />
           </div>
         </div>
@@ -60,10 +66,11 @@ export default function TrendingSection() {
   );
 }
 
-function Card({ img, text, col, row }) {
+function Card({ img, text, col, row, onClick }) {
   return (
     <div
-      className={`${col} ${row} bg-white rounded-xl shadow-lg overflow-hidden relative group`}
+      className={`${col} ${row} bg-white rounded-xl shadow-lg overflow-hidden relative group cursor-pointer`}
+      onClick={onClick}
     >
       <img
         src={img}

@@ -7,5 +7,6 @@ import cart from './cart.js'
 import admin from './admin.js';
 import search from './search.js';
 import {donationSubmission, donationList} from './donation.js';
+import outfit from './outfit.js';
 
-export default combineReducers({posts, auth, user, productsData, cart, admin, search, donationSubmission, donationList}); //posts : posts
+export default combineReducers({posts, auth, user, productsData, cart, admin, search, donationSubmission, donationList, outfit}); //posts : posts
