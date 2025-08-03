@@ -41,7 +41,7 @@ app.use('/donations', donationRouter)
 app.use('/outfit-of-the-week', outfitRouter)
 
 
-app.listen(process.env.PORT, () => {
-    connectDB();
+app.listen(process.env.PORT, async () => {
+    await connectDB();
   console.log(`Server is running on port http://localhost:${process.env.PORT || 3000}`);
 });
