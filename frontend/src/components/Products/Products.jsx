@@ -7,15 +7,23 @@ import Pagination from "../Pagination/Pagination";
 import ProductCardSkeleton from "./Product/ProductCardSkeleton";
 import { FaCheckCircle } from "react-icons/fa";
 import { addToCart } from "../../actions/cart";
+import { useLocation } from "react-router-dom";
 
 const Products = ({ navigateOnCategoryChange = true }) => {
-  const { category } = useParams();
+  const { category: urlCategory } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const pathname = location.pathname;
+  // Remove trailing slash if any (optional cleanup)
+  const basePath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 
   const page = parseInt(searchParams.get("page")) || 1;
   const sort = searchParams.get("sort") || "newest";
+
+  // Use a state variable to manage the current category
+  const [currentCategory, setCurrentCategory] = useState(urlCategory || "All");
 
   const { products, isLoading, totalPages, currentPage, totalProducts, reFetchTrigger } = useSelector(
     (state) => state.productsData
@@ -30,10 +38,15 @@ const Products = ({ navigateOnCategoryChange = true }) => {
     setTimeout(() => setShowAddToCartSuccess(false), 2500);
   };
 
+  // Sync internal state with URL changes
+  useEffect(() => {
+    setCurrentCategory(urlCategory || "All");
+  }, [urlCategory]);
+
   // Fetch products when filters change
   useEffect(() => {
-    dispatch(getProducts(category, page, sort));
-  }, [dispatch, category, page, sort, reFetchTrigger]);
+    dispatch(getProducts(currentCategory === "All" ? "" : currentCategory, page, sort));
+  }, [dispatch, currentCategory, page, sort, reFetchTrigger]);
 
   const handlePageChange = (newPage) => {
     setSearchParams({ sort, page: newPage });
@@ -44,22 +57,22 @@ const Products = ({ navigateOnCategoryChange = true }) => {
   };
 
   const handleCategoryChange = (e) => {
-  const selected = e.target.value;
-  const newCategory = selected === "All" ? "" : selected;
+    const selected = e.target.value;
+    setCurrentCategory(selected); // Update the local state
+    
+    setSearchParams({ sort, page: 1 });
 
-  setSearchParams({ sort, page: 1 });
-
-  if (navigateOnCategoryChange) {
-    if (newCategory) {
-      navigate(`/category/${newCategory}`);
+    if (navigateOnCategoryChange) {
+      if (selected !== "All") {
+        navigate(`/products/category/${selected}`);
+      } else {
+        navigate(`/products/category`);
+      }
     } else {
-      navigate(`/category`);
+      // In this case, the useEffect will handle the product fetch
+      // based on the new `currentCategory` state.
     }
-  } else {
-    // Just trigger fetch manually by updating URL param
-    dispatch(getProducts(newCategory, 1, sort));
-  }
-};
+  };
 
   const availableCategories = ["All", "Men", "Women", "Kids", "Accessories"];
 
@@ -70,13 +83,13 @@ const Products = ({ navigateOnCategoryChange = true }) => {
     <div className="p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <h2 className="text-2xl font-bold text-gray-800">
-          {category ? `Products in ${category}` : "All Products"} ({totalProducts})
+          {currentCategory && currentCategory !== "All" ? `Products in ${formatCategoryLabel(currentCategory)}` : "All Products"} ({totalProducts})
         </h2>
 
         <div className="flex gap-4 flex-wrap">
           {/* Category Filter */}
           <select
-            value={category || "All"}
+            value={currentCategory}
             onChange={handleCategoryChange}
             className="border px-3 py-2 rounded-md"
           >
@@ -124,7 +137,7 @@ const Products = ({ navigateOnCategoryChange = true }) => {
 
           {totalPages > 1 && (
             <div className="mt-8 flex justify-center">
-              <Pagination page={currentPage} count={totalPages} onChange={handlePageChange} />
+              <Pagination page={currentPage} count={totalPages} onChange={handlePageChange} basePath={basePath}/>
             </div>
           )}
         </>
