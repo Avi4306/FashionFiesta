@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCards, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-cards";
 import "./OOTWCarousel.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTopOutfits } from "../../actions/outfit";
 
 export default function OOTWCarousel() {
+  const dispatch = useDispatch()
+  useEffect(() => {
+      dispatch(fetchTopOutfits());
+    }, [dispatch]);
   const { topOutfits } = useSelector((state) => state.outfit);
 
   const slideLabels = ["Winner", "1st Runner Up", "2nd Runner Up"];
