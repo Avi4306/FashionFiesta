@@ -61,9 +61,9 @@ export default function UserPostsPage() {
             >
               {/* Fixed height container for the image */}
               <div className="h-40 w-full overflow-hidden">
-                {post.image ? (
+                {post.selectedFiles ? (
                   <img 
-                    src={post.image} 
+                    src={post.selectedFiles?.[0]} 
                     alt={post.title} 
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300" 
                   />

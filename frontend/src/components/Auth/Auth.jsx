@@ -11,6 +11,35 @@ import { Typography, Button, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { PersonOutline, MailOutline, LockOutlined } from '@mui/icons-material';
 
+// Custom hook to get the window size and detect if the screen is mobile
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+
+  useEffect(() => {
+    // Handler to call on window resize
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+    
+    // Remove event listener on cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty array ensures that effect is only run on mount and unmount
+
+  return windowSize;
+};
+
 // Define regex patterns outside the component so they are not recreated on every render
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?!.*\s).{8,}$/;
@@ -45,8 +74,7 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, ha
   </div>
 );
 
-
-export default function Auth() {
+const Auth = () => {
   const initialState = {
     firstName: '',
     lastName: '',
@@ -69,6 +97,8 @@ export default function Auth() {
   const { error } = useSelector((state) => state.auth);
 
   const [validationErrors, setValidationErrors] = useState({});
+  const { width } = useWindowSize(); // Get window size
+  const isMobile = width < 768; // Define mobile breakpoint
 
   useEffect(() => {
     return () => dispatch({ type: CLEAR_ERROR });
@@ -206,15 +236,17 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center font-sans p-4 bg-[#FAF7F3]">
-      <div className="relative w-full max-w-4xl min-h-[600px] rounded-2xl shadow-2xl overflow-hidden flex bg-[#FAF7F3]">
-        <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
+      <div className="relative w-full max-w-4xl md:min-h-[600px] rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row bg-[#FAF7F3]">
+        
+        {/* Sign Up Form */}
+        <div className={`w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center ${isMobile && !isSignUp ? 'hidden' : ''}`}>
           <AnimatePresence>
             {isSignUp && (
               <motion.div
                 key="signup-form"
-                initial={{ opacity: 0, x: -50 }}
+                initial={{ opacity: 0, x: isMobile ? 0 : -50 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
+                exit={{ opacity: 0, x: isMobile ? 0 : -50 }}
                 transition={{ ...spring, duration: 0.5 }}
                 className="w-full"
               >
@@ -236,9 +268,9 @@ export default function Auth() {
                     <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: 'none' }} id="profile-upload" />
                     <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
                       {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" style={{ width: 80, height: 80, borderRadius: '50%',marginLeft:'8.5rem',marginBottom: '1rem' }} />
+                        <img src={imagePreview} alt="Preview" style={{ width: 80, height: 80, borderRadius: '50%', marginLeft: '8.5rem', marginBottom: '1rem' }} />
                       ) : (
-                        <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff',marginLeft:'8.5rem',marginBottom: '1rem' }}>
+                        <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff', marginLeft: '8.5rem', marginBottom: '1rem' }}>
                           <PersonOutline />
                         </div>
                       )}
@@ -300,14 +332,14 @@ export default function Auth() {
         </div>
 
         {/* Sign In Form */}
-        <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
+        <div className={`w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center ${isMobile && isSignUp ? 'hidden' : ''}`}>
           <AnimatePresence>
             {!isSignUp && (
               <motion.div
                 key="signin-form"
-                initial={{ opacity: 0, x: 50 }}
+                initial={{ opacity: 0, x: isMobile ? 0 : 50 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 50 }}
+                exit={{ opacity: 0, x: isMobile ? 0 : 50 }}
                 transition={{ ...spring, duration: 0.5 }}
                 className="w-full"
               >
@@ -333,9 +365,9 @@ export default function Auth() {
 
         {/* Overlay */}
         <motion.div
-          className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
+          className="absolute top-0 md:left-0 w-full h-1/2 md:h-full md:w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
           style={{ backgroundColor: '#DCC5B2' }}
-          animate={{ x: isSignUp ? '100%' : '0%' }}
+          animate={isMobile ? { y: isSignUp ? '100%' : '0%', x: 0 } : { x: isSignUp ? '100%' : '0%', y: 0 }}
           transition={spring}
         >
           <AnimatePresence mode="wait">
@@ -358,7 +390,10 @@ export default function Auth() {
             )}
           </AnimatePresence>
         </motion.div>
+
       </div>
     </div>
   );
 }
+
+export default Auth;
