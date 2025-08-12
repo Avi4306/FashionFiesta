@@ -2,7 +2,7 @@ import React from "react";
 import { Pagination, PaginationItem } from "@mui/material";
 import { Link, useSearchParams } from "react-router-dom";
 
-const Paginate = ({ page, count }) => {
+const Paginate = ({ page, count, basePath = "" }) => {
   const [searchParams] = useSearchParams();
 
   return (
@@ -16,20 +16,16 @@ const Paginate = ({ page, count }) => {
         mb: 4,
       }}
       renderItem={(item) => {
-        // Create a new URLSearchParams object from the current ones
         const newSearchParams = new URLSearchParams(searchParams);
-        
-        // Update the 'page' parameter for the current item
         newSearchParams.set("page", item.page);
-        
-        // Use the updated search parameters to create the full URL
-        const linkTo = `/products/trending?${newSearchParams.toString()}`;
+
+        const linkTo = `${basePath}?${newSearchParams.toString()}`;
 
         return (
           <PaginationItem
             {...item}
             component={Link}
-            to={linkTo} // Use the dynamically created link here
+            to={linkTo}
             sx={{
               borderRadius: "8px",
               minWidth: "36px",
@@ -54,4 +50,4 @@ const Paginate = ({ page, count }) => {
   );
 };
 
-export default Paginate;
+export default Paginate

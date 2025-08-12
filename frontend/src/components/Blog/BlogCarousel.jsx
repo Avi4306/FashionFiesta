@@ -11,7 +11,7 @@ import "swiper/css/pagination";
 import { Heart, MessageCircle, Bookmark } from "lucide-react";
 
 // Images
-import blog1 from "../../assets/street_wear.jpeg";
+import blog1 from "../../assets/Street_wear.jpeg";
 import blog2 from "../../assets/vintage.jpeg";
 import blog3 from "../../assets/minimalist.jpeg";
 import blog4 from "../../assets/vibrant.jpeg";

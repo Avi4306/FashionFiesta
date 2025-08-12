@@ -5,13 +5,14 @@ import TC3 from "../../assets/TC3.jpeg";
 import TC1 from "../../assets/TC1.jpeg";
 import TC2 from "../../assets/TC2.jpeg";
 import TC4 from "../../assets/TC4.jpg";
+import TSbg from "../../assets/TSbg.png"
 import { useNavigate } from "react-router-dom";
 export default function TrendingSection() {
   const navigate = useNavigate()
   return (
     <div
       className="w-full min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4 py-8"
-      style={{ backgroundImage: 'url("./src/assets/TSbg.png")' }}
+      style={{ backgroundImage: `url(${TSbg})` }}
     >
       <div className="w-full max-w-7xl bg-[#dcc5b2] rounded-2xl shadow-xl flex flex-col md:flex-row overflow-hidden">
         {/* Left: Cards Grid */}

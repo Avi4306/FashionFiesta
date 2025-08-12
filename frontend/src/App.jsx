@@ -40,9 +40,10 @@ import { getCart } from './actions/cart';
 import ApplyDesignerForm from './components/User/ApplyDesignForm';
 import Products from './components/Products/Products.jsx';
 import DonateClothes from './components/Donations/DonateClothes.jsx'
-import MyDonations from './components/Donations/myDonations.jsx';
+import MyDonations from './components/Donations/MyDonations.jsx';
 import AdminDonations from './components/Admin/AdminDonationsManagemet.jsx';
 import OutfitOfTheWeek from './components/OutfitOfTheWeek/OutfitOfTheWeek.jsx';
+import AdminOutfitManagement from './components/Admin/AdminOutfitsManagement.jsx'
 
 function App() {
   // Using useSelector to get authData for consistent role checking
@@ -131,8 +132,9 @@ function App() {
             <Route path="/admin/users" element={<AdminUserManagement />} />
             <Route path="/admin/products" element={<AdminProductManagement />} />
             <Route path="/admin/posts" element={<AdminPostManagement />} />
-            <Route path="/admin/designer-applications" element={<AdminDesignerApplications />} /> {/* 🆕 New route for designer applications */}
-            <Route path="/admin/donations" element={<AdminDonations />} /> {/* 🆕 New route for designer applications */}
+            <Route path="/admin/designer-applications" element={<AdminDesignerApplications />} /> 
+            <Route path="/admin/donations" element={<AdminDonations />} /> 
+            <Route path="/admin/outfit-of-the-week" element={<AdminOutfitManagement />} /> 
           </Route>
 
           {/* Unauthorized Access Page */}

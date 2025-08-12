@@ -22,6 +22,9 @@ const app = express();
 app.use(bodyParser.json({limit: '30mb', extended: true}));
 app.use(bodyParser.urlencoded({limit: '30mb', extended: true}));
 app.use(cors()); // Enable CORS for all routes (should be above routes)
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+}));
 app.use(express.json());
 app.use('/',router)
 app.use('/style-diaries', styleDiariesRouter)
@@ -34,7 +37,7 @@ app.use('/donations', donationRouter)
 app.use('/outfit-of-the-week', outfitRouter)
 
 
-app.listen(process.env.PORT, () => {
-    connectDB();
+app.listen(process.env.PORT, async () => {
+    await connectDB();
   console.log(`Server is running on port http://localhost:${process.env.PORT || 3000}`);
 });

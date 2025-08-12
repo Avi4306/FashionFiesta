@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
+import os from 'os'
 import FormData from 'form-data';
 import { uploadImageToCloudinary } from '../controller/upload.js';
 import { getFeaturedDesigners } from '../controller/user.controller.js';
@@ -13,8 +14,9 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-const upload = multer({ dest: 'temp_uploads/' });
-
+const upload = multer({
+  dest: path.join(os.tmpdir(), 'uploads') // Use Vercel's writable /tmp
+});
 router.post('/upload', uploadImageToCloudinary);
 router.get('/users/featured-designers', getFeaturedDesigners)
 router.get('/suggestions', getSuggestions)
@@ -33,7 +35,7 @@ router.post('/recommend/:id', async (req, res) => {
   console.log("Received ID from frontend:", id);
 
   try {
-    const response = await axios.post('http://localhost:5000/recommend', { _id: id });
+    const response = await axios.post(`${process.env.FLASK_URL}/recommend`, { _id: id });
     res.json(response.data);
   } catch (error) {
     console.error('Error calling Flask server:');
@@ -74,7 +76,7 @@ router.post('/search', upload.single('image'), async (req, res) => {
       contentType: req.file.mimetype
     });
      console.log("cheackpoint2")
-    const response = await axios.post('http://localhost:5000/search', form, {
+    const response = await axios.post(`${process.env.FLASK_URL}/search`, form, {
       headers: form.getHeaders(), // ✅ Don't manually set Content-Length unless needed
       maxBodyLength: Infinity
     });

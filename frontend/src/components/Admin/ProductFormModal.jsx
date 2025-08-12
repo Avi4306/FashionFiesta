@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux'; // No longer need useSelector here
+import { useDispatch } from 'react-redux';
 import { FaTimes } from 'react-icons/fa';
 
-// Modified to accept initialProductData as a prop
 const ProductFormModal = ({ productId, onClose, createProduct, updateProduct, initialProductData }) => {
   const dispatch = useDispatch();
 
@@ -13,24 +12,21 @@ const ProductFormModal = ({ productId, onClose, createProduct, updateProduct, in
     category: '',
     tags: '', // Comma-separated
     selectedFile: '', // Main product image
-    // You might have more fields like sizes, colors, stock, multiple images, etc.
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Use initialProductData prop to pre-fill the form when editing
     if (productId && initialProductData) {
       setFormData({
-        name: initialProductData.name,
-        description: initialProductData.description,
-        price: initialProductData.price,
-        category: initialProductData.category,
+        name: initialProductData.name || '',
+        description: initialProductData.description || '',
+        price: initialProductData.price || '',
+        category: initialProductData.category || '',
         tags: initialProductData.tags ? initialProductData.tags.join(', ') : '',
-        selectedFile: initialProductData.images && initialProductData.images.length > 0 ? initialProductData.images[0] : '', // Assuming 'images' is an array and we take the first one
+        selectedFile: initialProductData.images && initialProductData.images.length > 0 ? initialProductData.images[0] : '',
       });
     } else {
-      // Reset form for new product
       setFormData({
         name: '',
         description: '',
@@ -41,11 +37,10 @@ const ProductFormModal = ({ productId, onClose, createProduct, updateProduct, in
       });
     }
     setError(null);
-  }, [productId, initialProductData]); // Depend on initialProductData instead of existingProduct from store
+  }, [productId, initialProductData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Special handling for price to ensure it's a number
     setFormData({ ...formData, [name]: name === 'price' ? parseFloat(value) || '' : value });
   };
 
@@ -78,18 +73,20 @@ const ProductFormModal = ({ productId, onClose, createProduct, updateProduct, in
     }
 
     if (result.success) {
-      onClose();
+      onClose(true, productId ? 'Product updated successfully.' : 'Product created successfully.'); // Pass success and message
     } else {
       setError(result.message || 'An error occurred. Please try again.');
+      onClose(false, result.message || 'An error occurred. Please try again.'); // Pass error and message
     }
     setSubmitting(false);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#faf7f3] p-8 rounded-lg shadow-2xl w-full max-w-lg relative">
+      <div className="bg-[#faf7f3] p-8 rounded-lg shadow-2xl w-full max-w-lg relative
+                  max-h-[90vh] overflow-y-auto"> {/* Added max-h and overflow-y-auto */}
         <button
-          onClick={onClose}
+          onClick={() => onClose(false)}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-xl"
         >
           <FaTimes />
@@ -176,7 +173,7 @@ const ProductFormModal = ({ productId, onClose, createProduct, updateProduct, in
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => onClose(false)}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
             >
               Cancel

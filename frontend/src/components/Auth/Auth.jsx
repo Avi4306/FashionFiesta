@@ -11,6 +11,35 @@ import { Typography, Button, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { PersonOutline, MailOutline, LockOutlined } from '@mui/icons-material';
 
+// Custom hook to get the window size and detect if the screen is mobile
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+
+  useEffect(() => {
+    // Handler to call on window resize
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+    
+    // Remove event listener on cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty array ensures that effect is only run on mount and unmount
+
+  return windowSize;
+};
+
 // Define regex patterns outside the component so they are not recreated on every render
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?!.*\s).{8,}$/;
@@ -45,8 +74,7 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, ha
   </div>
 );
 
-
-export default function Auth() {
+const Auth = () => {
   const initialState = {
     firstName: '',
     lastName: '',
@@ -69,6 +97,8 @@ export default function Auth() {
   const { error } = useSelector((state) => state.auth);
 
   const [validationErrors, setValidationErrors] = useState({});
+  const { width } = useWindowSize(); // Get window size
+  const isMobile = width < 768; // Define mobile breakpoint
 
   useEffect(() => {
     return () => dispatch({ type: CLEAR_ERROR });
@@ -375,3 +405,5 @@ export default function Auth() {
     </div>
   );
 }
+
+export default Auth;
