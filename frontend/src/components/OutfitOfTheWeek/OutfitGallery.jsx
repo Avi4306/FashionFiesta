@@ -39,7 +39,7 @@ export default function OutfitGallery({
             <p className="text-sm text-gray-600 mt-1 line-clamp-2">{outfit.description}</p>
             <div className="flex items-center gap-2 mt-2">
               <button
-                onClick={() => handleLike(outfit._id)}
+                onClick={() => handleLike(outfit)}
                 className="text-xl focus:outline-none"
                 aria-label="Like outfit"
               >

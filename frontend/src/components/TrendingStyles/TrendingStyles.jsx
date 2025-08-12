@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Button, Box, Typography, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import MuiAlert from '@mui/material/Alert'; // For a styled Snackbar
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { useSelector } from 'react-redux'; // Import useSelector
+import MuiAlert from '@mui/material/Alert';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import Categories from './Categories/Categories';
 import Products from '../Products/Products';
@@ -15,17 +15,17 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 const TrendingStyles = () => {
-    const navigate = useNavigate(); // Initialize useNavigate
-    const profile = JSON.parse(localStorage.getItem("profile")); // Get user profile from localStorage
-    const userId = profile?.result?._id || profile?.result?.sub; // Determine userId
-
+    const navigate = useNavigate();
+    const profile = JSON.parse(localStorage.getItem("profile"));
+    const userId = profile?.result?._id || profile?.result?.sub;
+    const role = profile?.result?.role; // Role is already being extracted correctly
     const [isCreateProductOpen, setIsCreateProductOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
-    const [openSnackbar, setOpenSnackbar] = useState(false); // State for Snackbar visibility
-    const [snackbarMessage, setSnackbarMessage] = useState(""); // State for Snackbar message
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
     const handleOpenCreateProduct = () => {
-        if (!userId) { // Check if user is not logged in
+        if (!userId) {
             setSnackbarMessage("Please sign in to create a product.");
             setOpenSnackbar(true);
         } else {
@@ -49,62 +49,68 @@ const TrendingStyles = () => {
         <div>
             <Categories />
 
-            <Box
-                sx={{
-                    position: 'fixed',
-                    bottom: 30,
-                    right: 100,
-                    zIndex: 1000,
-                }}
-            >
-                <Button
-                    variant="contained"
-                    
-                    onClick={handleOpenCreateProduct}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
+            {/*
+                Conditional rendering: The 'Add New Product' button will
+                only be rendered if the user's role is not 'customer'.
+                The check 'role &&' prevents errors if the role is not yet defined.
+            */}
+            {role && role !== 'customer' && (
+                <Box
                     sx={{
-                        transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), padding 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                        display: 'flex',
-                        backgroundColor: '#ccb5a2',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        overflow: 'hidden',
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '50%',
-                        padding: '0 12px',
-                        minWidth: '48px',
-                        '&:hover': {
-                            width: '250px',
-                            borderRadius: '48px',
-                            padding: '6px 16px',
-                        },
+                        position: 'fixed',
+                        bottom: 30,
+                        right: 100,
+                        zIndex: 1000,
                     }}
                 >
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                        marginRight: '8px',
-                    }}>
-                        <AddIcon />
-                    </Box>
-                    <Typography
-                        variant="button"
+                    <Button
+                        variant="contained"
+                        onClick={handleOpenCreateProduct}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
                         sx={{
-                            whiteSpace: 'nowrap',
-                            opacity: isHovering ? 1 : 0,
-                            marginLeft: isHovering ? '0px' : '-200px',
+                            transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1), padding 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                            display: 'flex',
+                            backgroundColor: '#ccb5a2',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            overflow: 'hidden',
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            padding: '0 12px',
+                            minWidth: '48px',
+                            '&:hover': {
+                                width: '250px',
+                                borderRadius: '48px',
+                                padding: '6px 16px',
+                            },
                         }}
                     >
-                        Add New Product
-                    </Typography>
-                </Button>
-            </Box>
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%',
+                            marginRight: '8px',
+                        }}>
+                            <AddIcon />
+                        </Box>
+                        <Typography
+                            variant="button"
+                            sx={{
+                                whiteSpace: 'nowrap',
+                                opacity: isHovering ? 1 : 0,
+                                marginLeft: isHovering ? '0px' : '-200px',
+                            }}
+                        >
+                            Add New Product
+                        </Typography>
+                    </Button>
+                </Box>
+            )}
 
-            <Products navigateOnCategoryChange = {false} />
+            <Products navigateOnCategoryChange={false} />
 
             <CreateProduct
                 isOpen={isCreateProductOpen}
@@ -129,7 +135,7 @@ const TrendingStyles = () => {
                         size="small"
                         onClick={() => {
                             setOpenSnackbar(false);
-                            navigate('/auth'); // Navigate to auth page
+                            navigate('/auth');
                         }}
                     >
                         SIGN IN

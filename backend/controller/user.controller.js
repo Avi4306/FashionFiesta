@@ -176,7 +176,7 @@ export const deleteUser = async (req, res) => {
 
     // Ensure the user trying to delete is the owner of the account
     // req.userId is set by the 'auth' middleware
-    if (req.userId !== user._id.toString()) {
+    if (req.userId.toString() !== user._id.toString()) {
       return res.status(403).json({ message: 'You are not authorized to delete this account.' });
     }
 

@@ -58,7 +58,6 @@ const userSchema = new mongoose.Schema({
   authProvider: { type: String, default: "local" },
   password: {
     type: String,
-    required: true,
     // Regex for a strong password: at least 8 characters, with at least one uppercase, one lowercase, one number, and one special character.
     match: [
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?!.*\s).{8,}$/,
