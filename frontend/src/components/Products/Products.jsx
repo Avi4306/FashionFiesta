@@ -8,6 +8,7 @@ import ProductCardSkeleton from "./Product/ProductCardSkeleton";
 import { FaCheckCircle } from "react-icons/fa";
 import { addToCart } from "../../actions/cart";
 
+
 const Products = ({ navigateOnCategoryChange = true }) => {
   const { category } = useParams();
   const dispatch = useDispatch();

@@ -6,7 +6,7 @@ import 'swiper/css/effect-flip';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Rudra from '../../assets/Rudra.jpg'
-// import Avi from '../../assets/Avi.jpg'
+import Avi from '../../assets/Avi.jpg'
 import Vishva from '../../assets/Vishva.jpg';
 import Manthan from '../../assets/Manthan.jpg';
 
@@ -28,7 +28,7 @@ export default function AboutUs(){
   >
     <SwiperSlide>
       <img
-        src={Rudra}
+        src={Avi}
         className="w-full h-full object-cover rounded-xl"
         alt="Avi Patel"
       />

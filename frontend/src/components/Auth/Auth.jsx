@@ -78,11 +78,9 @@ export default function Auth() {
     let error = '';
     if (name === 'email') {
       if (!value) error = 'Email is required.';
-      // Apply regex check only if in sign-up mode
       else if (isSignUp && !emailRegex.test(value)) error = 'Invalid email format.';
     } else if (name === 'password') {
       if (!value) error = 'Password is required.';
-      // Apply regex check only if in sign-up mode
       else if (isSignUp && !passwordRegex.test(value)) {
         error = 'Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.';
       }
@@ -124,13 +122,11 @@ export default function Auth() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Immediately clear the error for the field as soon as the user starts typing again
     setValidationErrors((prev) => ({ ...prev, [name]: '' }));
     setFormData({ ...formData, [name]: value });
     dispatch({ type: CLEAR_ERROR });
   };
   
-  // New blur handler to trigger validation when an input loses focus
   const handleBlur = (e) => {
     const { name, value } = e.target;
     validateField(name, value);
@@ -141,11 +137,7 @@ export default function Auth() {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     dispatch({ type: CLEAR_ERROR });
-
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     try {
       await dispatch(sendSignupOtp(formData.email));
       setOtpStep(true);
@@ -157,7 +149,6 @@ export default function Auth() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch({ type: CLEAR_ERROR });
-
     if (isSignUp) {
       if (otpStep) {
         try {
@@ -169,9 +160,7 @@ export default function Auth() {
         }
       }
     } else {
-      if (!validateForm()) {
-        return;
-      }
+      if (!validateForm()) return;
       dispatch(login(formData, navigate));
     }
   };
@@ -190,7 +179,6 @@ export default function Auth() {
     if (!token) return;
     const decoded = jwtDecode(token);
     const { name, email, picture } = decoded;
-
     try {
       dispatch(googleLogin({ name, email, picture }, navigate));
     } catch (error) {
@@ -204,160 +192,185 @@ export default function Auth() {
 
   const spring = { type: "spring", stiffness: 260, damping: 30 };
 
+  // Reusable form components to keep the main return block DRY
+  const SignUpForm = () => (
+    <>
+      <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
+      <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
+      <form onSubmit={otpStep ? handleSubmit : handleSendOtp} className="w-full">
+        {openCropper && (
+          <CropperDialog
+            imageSrc={cropSrc}
+            onClose={() => setOpenCropper(false)}
+            onCropDone={(croppedImage) => {
+              setFormData({ ...formData, profilePhoto: croppedImage });
+              setImagePreview(croppedImage);
+              setOpenCropper(false);
+            }}
+          />
+        )}
+        <div className="flex flex-col items-center mb-4">
+          <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: 'none' }} id="profile-upload" />
+          <label htmlFor="profile-upload" className="cursor-pointer text-center">
+            {imagePreview ? (
+              <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-full mx-auto mb-2 object-cover" />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center mx-auto mb-2">
+                <PersonOutline style={{ fontSize: '2.5rem', color: '#fff' }} />
+              </div>
+            )}
+            <Typography variant="body2" color="primary">{imagePreview ? 'Change Photo' : 'Upload Profile Photo'}</Typography>
+          </label>
+          {imagePreview && (
+            <Button size="small" color="secondary" onClick={() => {
+              setImagePreview('');
+              setFormData({ ...formData, profilePhoto: '' });
+            }} style={{ marginTop: '0.5rem' }}>
+              Remove Photo
+            </Button>
+          )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Input name="firstName" placeholder="First Name" icon={<PersonOutline />} value={formData.firstName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.firstName} />
+          <Input name="lastName" placeholder="Last Name" icon={<PersonOutline />} value={formData.lastName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.lastName} />
+        </div>
+        <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
+        <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
+        <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockOutlined />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.confirmPassword} />
+        {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
+
+        <div className="text-center">
+          {otpStep ? (
+            <div className="text-center mt-6">
+              <h3 className="text-lg font-semibold mb-2">Enter the OTP sent to your email</h3>
+              <input type="text" name="otp" placeholder="Enter OTP" value={formData.otp} onChange={handleChange} className="w-48 px-3 py-2 border border-gray-300 rounded focus:outline-none" />
+              <button className="mt-4 w-48 py-2 rounded-full bg-black text-white font-semibold" type="submit">Verify OTP</button>
+            </div>
+          ) : (
+            <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>SIGN UP</button>
+          )}
+        </div>
+        <div className="mt-4 flex justify-center">
+          <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
+        </div>
+      </form>
+    </>
+  );
+
+  const SignInForm = () => (
+    <>
+      <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
+      <p className="text-black mb-6 text-sm text-center">or use your account</p>
+      <form onSubmit={handleSubmit} className="w-full">
+        <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
+        <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
+        {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
+        <div className="text-center">
+          <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>SIGN IN</button>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
+        </div>
+      </form>
+    </>
+  );
+
   return (
     <div className="min-h-screen flex items-center justify-center font-sans p-4 bg-[#FAF7F3]">
-      <div className="relative w-full max-w-4xl min-h-[600px] rounded-2xl shadow-2xl overflow-hidden flex bg-[#FAF7F3]">
-        <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
-          <AnimatePresence>
-            {isSignUp && (
-              <motion.div
-                key="signup-form"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ ...spring, duration: 0.5 }}
-                className="w-full"
-              >
-                <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
-                <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
-                <form onSubmit={otpStep ? handleSubmit : handleSendOtp}>
-                  {openCropper && (
-                    <CropperDialog
-                      imageSrc={cropSrc}
-                      onClose={() => setOpenCropper(false)}
-                      onCropDone={(croppedImage) => {
-                        setFormData({ ...formData, profilePhoto: croppedImage });
-                        setImagePreview(croppedImage);
-                        setOpenCropper(false);
-                      }}
-                    />
-                  )}
-                  <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: 'none' }} id="profile-upload" />
-                    <label htmlFor="profile-upload" style={{ cursor: 'pointer' }}>
-                      {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" style={{ width: 80, height: 80, borderRadius: '50%',marginLeft:'8.5rem',marginBottom: '1rem' }} />
-                      ) : (
-                        <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff',marginLeft:'8.5rem',marginBottom: '1rem' }}>
-                          <PersonOutline />
-                        </div>
-                      )}
-                      <Typography variant="body2" color="primary">{imagePreview ? 'Change Photo' : 'Upload Profile Photo'}</Typography>
-                    </label>
-                    {imagePreview && (
-                      <Button size="small" color="secondary" onClick={() => {
-                        setImagePreview('');
-                        setFormData({ ...formData, profilePhoto: '' });
-                      }} style={{ marginTop: '0.5rem' }}>
-                        Remove Photo
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Input name="firstName" placeholder="First Name" icon={<PersonOutline />} value={formData.firstName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.firstName} />
-                    <Input name="lastName" placeholder="Last Name" icon={<PersonOutline />} value={formData.lastName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.lastName} />
-                  </div>
-                  <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
-                  <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockOutlined />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.confirmPassword} />
-                  {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
-
-                  <div className="text-center">
-                    {otpStep && (
-                      <div className="text-center mt-6">
-                        <h3 className="text-lg font-semibold mb-2">Enter the OTP sent to your email</h3>
-                        <input
-                          type="text"
-                          name="otp"
-                          placeholder="Enter OTP"
-                          value={formData.otp}
-                          onChange={handleChange}
-                          className="w-48 px-3 py-2 border border-gray-300 rounded focus:outline-none"
-                        />
-                        <button
-                          className="mt-4 w-48 py-2 rounded-full bg-black text-white font-semibold"
-                          type="submit"
-                        >
-                          Verify OTP
-                        </button>
-                      </div>
-                    )}
-                    {!otpStep && (
-                      <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
-                        SIGN UP
-                      </button>
-                    )}
-                  </div>
-                  <div className="mt-4 flex justify-center">
-                    <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
-                  </div>
-                </form>
-
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Sign In Form */}
-        <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
-          <AnimatePresence>
-            {!isSignUp && (
-              <motion.div
-                key="signin-form"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 50 }}
-                transition={{ ...spring, duration: 0.5 }}
-                className="w-full"
-              >
-                <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
-                <p className="text-black mb-6 text-sm text-center">or use your account</p>
-                <form onSubmit={handleSubmit}>
-                  <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
-                  {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
-                  <div className="text-center">
-                    <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>
-                      SIGN IN
-                    </button>
-                  </div>
-                  <div className="mt-4 flex justify-center">
-                    <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
-                  </div>
-                </form>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Overlay */}
-        <motion.div
-          className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
-          style={{ backgroundColor: '#DCC5B2' }}
-          animate={{ x: isSignUp ? '100%' : '0%' }}
-          transition={spring}
-        >
+      {/* Main container for the auth card */}
+      <div className="w-full max-w-sm lg:max-w-4xl rounded-2xl shadow-2xl overflow-hidden bg-[#FAF7F3]">
+        
+        {/* Mobile Layout: Stacked view */}
+        <div className="lg:hidden">
           <AnimatePresence mode="wait">
-            {isSignUp ? (
-              <motion.div key="overlay-signup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
-                <h2 className="text-3xl font-bold mb-2">Hello, Friend!</h2>
-                <p className="mb-8">Enter your personal details and start your journey with us</p>
-                <button onClick={switchMode} className="w-48 border-2 border-black py-3 px-6 rounded-full hover:bg-black hover:text-[#DCC5B2] transition-all font-bold">
-                  SIGN IN?
+            <motion.div
+              key={isSignUp ? 'signup-mobile' : 'signin-mobile'}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="p-8">
+                {isSignUp ? <SignUpForm /> : <SignInForm />}
+              </div>
+              <div className="p-8 bg-[#DCC5B2] text-center text-black">
+                <h2 className="text-2xl font-bold mb-2">{isSignUp ? 'Welcome Back!' : 'Hello, Friend!'}</h2>
+                <p className="mb-4 text-sm">{isSignUp ? 'To keep connected with us please login with your personal info' : 'Enter your personal details and start your journey with us'}</p>
+                <button onClick={switchMode} className="w-48 border-2 border-black py-2 px-6 rounded-full hover:bg-black hover:text-[#DCC5B2] transition-all font-bold">
+                  {isSignUp ? 'SIGN IN' : 'SIGN UP'}
                 </button>
-              </motion.div>
-            ) : (
-              <motion.div key="overlay-signin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
-                <h2 className="text-3xl font-bold mb-2">Welcome Back!</h2>
-                <p className="mb-8">To keep connected with us please login with your personal info</p>
-                <button onClick={switchMode} className="w-48 border-2 border-black py-3 px-6 rounded-full hover:bg-black hover:text-[#DCC5B2] transition-all font-bold">
-                  SIGN UP?
-                </button>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
           </AnimatePresence>
-        </motion.div>
+        </div>
+
+        {/* Desktop Layout: Side-by-side view with sliding overlay */}
+        <div className="hidden lg:flex relative w-full min-h-[600px]">
+          {/* Sign Up Form Container */}
+          <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
+            <AnimatePresence>
+              {isSignUp && (
+                <motion.div
+                  key="signup-form-desktop"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ ...spring, duration: 0.5 }}
+                  className="w-full"
+                >
+                  <SignUpForm />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Sign In Form Container */}
+          <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
+            <AnimatePresence>
+              {!isSignUp && (
+                <motion.div
+                  key="signin-form-desktop"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 50 }}
+                  transition={{ ...spring, duration: 0.5 }}
+                  className="w-full"
+                >
+                  <SignInForm />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Sliding Overlay for Desktop */}
+          <motion.div
+            className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
+            style={{ backgroundColor: '#DCC5B2' }}
+            animate={{ x: isSignUp ? '100%' : '0%' }}
+            transition={spring}
+          >
+            <AnimatePresence mode="wait">
+              {isSignUp ? (
+                <motion.div key="overlay-signup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
+                  <h2 className="text-3xl font-bold mb-2">Hello, Friend!</h2>
+                  <p className="mb-8">Enter your personal details and start your journey with us</p>
+                  <button onClick={switchMode} className="w-48 border-2 border-black py-3 px-6 rounded-full hover:bg-black hover:text-[#DCC5B2] transition-all font-bold">
+                    SIGN IN
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div key="overlay-signin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
+                  <h2 className="text-3xl font-bold mb-2">Welcome Back!</h2>
+                  <p className="mb-8">To keep connected with us please login with your personal info</p>
+                  <button onClick={switchMode} className="w-48 border-2 border-black py-3 px-6 rounded-full hover:bg-black hover:text-[#DCC5B2] transition-all font-bold">
+                    SIGN UP
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
