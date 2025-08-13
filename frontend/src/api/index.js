@@ -100,6 +100,7 @@ export const adminCreateUser = (userData) => API.post('/admin/users', userData);
 export const adminUpdateUserRole = (id, roleData) => API.patch(`/admin/users/${id}/role`, roleData);
 export const adminUpdateUserPassword = (id, passwordData) => API.patch(`/admin/users/${id}/password`, passwordData);
 export const adminDeleteUser = (id) => API.delete(`/admin/users/${id}`);
+export const adminVerifyUser = (id) => API.patch(`/admin/users/${id}/verify`);
 
 export const adminGetAllProducts = (page = 1, limit = 10) => API.get(`/admin/products?page=${page}&limit=${limit}`);
 export const adminCreateProduct = (productData) => API.post('/admin/products', productData);

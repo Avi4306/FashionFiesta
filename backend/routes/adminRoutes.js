@@ -23,7 +23,8 @@ import {
   deleteDonationAdmin,
   getAllOutfitsAdmin,
   deleteOutfitAdmin, // New: Controller to delete a donation
-  createAdminOutfit
+  createAdminOutfit,
+  verifyUser
 } from '../controller/admin.controller.js';
 
 const adminRouter = express.Router();
@@ -38,6 +39,7 @@ adminRouter.post('/users', createAdminUser); // Route to create new user (admin 
 adminRouter.patch('/users/:id/role', updateUserRole); // Update user's role
 adminRouter.patch('/users/:id/password', updateAdminUserPassword); // Update user's password
 adminRouter.delete('/users/:id', deleteUser); // Delete user
+adminRouter.patch('/users/:id/verify', verifyUser);
 
 // Product Management Routes
 adminRouter.get('/products', getAllProductsAdmin);

@@ -5,7 +5,8 @@ import {
   createAdminUser,
   updateAdminUserRole,
   updateAdminUserPassword,
-  deleteAdminUser
+  deleteAdminUser,
+  verifyAdminUser
 } from '../../actions/admin';
 import { Typography, Box, Snackbar, Alert } from '@mui/material';
 import ConfirmationModal from './ConfirmationModal.jsx';
@@ -69,6 +70,10 @@ export default function AdminUserManagement() {
   // Create / password update
   const [isCreatingOrUpdating, setIsCreatingOrUpdating] = useState(false);
 
+  // Track verifying state
+  const [verifyingUserId, setVerifyingUserId] = useState(null);
+  const [verifiedUsers, setVerifiedUsers] = useState(new Set());
+
   useEffect(() => {
     dispatch(getAdminUsers(currentPage, usersPerPage));
   }, [dispatch, currentPage, usersPerPage]);
@@ -79,7 +84,8 @@ export default function AdminUserManagement() {
   };
 
   // Role change handlers
-  const handleRoleChangeClick = (userId, newRole) => {
+  const handleRoleChangeClick = (userId, newRole, currentRole) => {
+    if (newRole === currentRole) return; // Prevent opening modal for same role
     setRoleChangeUserId(userId);
     setNewRoleToSet(newRole);
     setShowConfirmRoleModal(true);
@@ -109,6 +115,25 @@ export default function AdminUserManagement() {
     setShowConfirmRoleModal(false);
     setRoleChangeUserId(null);
     setNewRoleToSet('');
+  };
+
+  // Verify designer
+  const handleVerifyDesigner = async (userId) => {
+    setVerifyingUserId(userId);
+    const result = await dispatch(verifyAdminUser(userId));
+    setVerifyingUserId(null);
+
+    if (result.success) {
+      setSnackbarMessage("Designer verified successfully.");
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      setVerifiedUsers((prev) => new Set(prev).add(userId));
+      dispatch(getAdminUsers(currentPage, usersPerPage));
+    } else {
+      setSnackbarMessage(result.message || "Failed to verify designer.");
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
   };
 
   // Deletion handlers
@@ -198,16 +223,14 @@ export default function AdminUserManagement() {
     const buttons = [];
     const totalPages = usersPagination.totalPages;
     const maxButtonsToShow = 5;
+    const half = Math.floor(maxButtonsToShow / 2);
 
     if (totalPages <= maxButtonsToShow) {
       for (let i = 1; i <= totalPages; i++) buttons.push(i);
     } else {
       buttons.push(1);
-      let startPage = Math.max(2, currentPage - Math.floor(maxButtonsToShow / 2) + 1);
-      let endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxButtonsToShow / 2) - 1);
-
-      if (currentPage < maxButtonsToShow - 1) endPage = maxButtonsToShow - 1;
-      if (currentPage > totalPages - (maxButtonsToShow - 2)) startPage = totalPages - (maxButtonsToShow - 2);
+      let startPage = Math.max(2, currentPage - half);
+      let endPage = Math.min(totalPages - 1, currentPage + half);
 
       if (startPage > 2) buttons.push('...');
       for (let i = startPage; i <= endPage; i++) buttons.push(i);
@@ -287,7 +310,7 @@ export default function AdminUserManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading && users.length === 0 ? (
+            {isLoading ? (
               Array.from({ length: usersPerPage }).map((_, index) => <UserSkeletonRow key={index} />)
             ) : noUsersOnCurrentPage ? (
               <tr>
@@ -304,7 +327,7 @@ export default function AdminUserManagement() {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     <select
                       value={user.role}
-                      onChange={(e) => handleRoleChangeClick(user._id, e.target.value)}
+                      onChange={(e) => handleRoleChangeClick(user._id, e.target.value, user.role)}
                       disabled={
                         isDeleting ||
                         isCreatingOrUpdating ||
@@ -319,6 +342,28 @@ export default function AdminUserManagement() {
                     </select>
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
+                    {user.role === "designer" && user.designerDetails?.verified === false && (
+                      <button
+                        onClick={async () => {
+                          setVerifyingUserId(user._id);
+                          await dispatch(verifyAdminUser(user._id)); // don't check result
+                          dispatch(getAdminUsers(currentPage, usersPerPage)); // refresh so button disappears
+                          setVerifyingUserId(null);
+                          setSnackbarMessage("Designer verified successfully.");
+                          setSnackbarSeverity("success");
+                          setSnackbarOpen(true);
+                        }}
+                        className="text-green-600 hover:text-green-900 mr-3"
+                        disabled={
+                          verifyingUserId === user._id ||
+                          isCreatingOrUpdating ||
+                          isDeleting ||
+                          isRoleUpdating
+                        }
+                      >
+                        {verifyingUserId === user._id ? "Verifying..." : "Verify"}
+                      </button>
+                    )}
                     <button
                       onClick={() => handleOpenPasswordModal(user._id)}
                       className="text-[#aa5a44] hover:text-[#8b4837] mr-3"
@@ -394,7 +439,7 @@ export default function AdminUserManagement() {
           message={`Are you sure you want to change this user's role to "${newRoleToSet}"?`}
           onConfirm={handleConfirmRoleChange}
           onCancel={handleCancelRoleChange}
-          text = {'Change Role'}
+          text={'Change Role'}
         />
       )}
 
@@ -404,7 +449,7 @@ export default function AdminUserManagement() {
           message="Are you sure you want to delete this user? This action cannot be undone."
           onConfirm={handleConfirmDeleteUser}
           onCancel={handleCancelDeleteUser}
-          text = {'Delete'}
+          text={'Delete'}
         />
       )}
 

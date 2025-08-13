@@ -28,6 +28,7 @@ import {
   FETCH_ADMIN_OUTFITS,
   DELETE_ADMIN_OUTFIT,
   CREATE_ADMIN_OUTFIT,
+  VERIFY_ADMIN_USER
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -103,6 +104,14 @@ const admin = (state = initialState, action) => {
       return { ...state, users: [...state.users, action.payload], error: null };
     case UPDATE_ADMIN_USER_ROLE:
     case UPDATE_ADMIN_USER_PASSWORD:
+      return {
+        ...state,
+        users: state.users.map((user) =>
+          user._id === action.payload._id ? action.payload : user
+        ),
+        error: null,
+      };
+    case VERIFY_ADMIN_USER:
       return {
         ...state,
         users: state.users.map((user) =>

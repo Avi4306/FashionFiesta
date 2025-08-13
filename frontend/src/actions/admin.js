@@ -19,6 +19,7 @@ import {
   AUTH,
   START_ADMIN_LOADING,
   END_ADMIN_LOADING,
+  VERIFY_ADMIN_USER,
   // New action types for designer applications
   FETCH_DESIGNER_APPLICATIONS,
   APPROVE_DESIGNER_APPLICATION,
@@ -99,6 +100,18 @@ export const updateAdminUserRole = (id, role) => async (dispatch, getState) => {
     return { success: true, data };
   } catch (error) {
     return handleError(dispatch, error, 'Failed to update user role.');
+  }
+};
+
+export const verifyAdminUser = (userId, designerDetails) => async (dispatch) => {
+  dispatch({ type: START_ADMIN_LOADING }); // Show loading in UI
+  try {
+    const { data } = await api.adminVerifyUser(userId, designerDetails);
+    handleResponse(dispatch, VERIFY_ADMIN_USER, data, 'Designer verified successfully.');
+  } catch (error) {
+    handleError(dispatch, error, 'Failed to verify designer.');
+  } finally {
+    dispatch({ type: END_ADMIN_LOADING }); // Stop loading
   }
 };
 
