@@ -67,7 +67,7 @@ try:
     df = pd.DataFrame(data)
 except Exception as e:
     print(f"[ERROR] Failed to load text dataset: {e}")
-    df = pd.DataFrame(columns=['_id', 'title', 'brand', 'price', 'ratings', 'imageURL'])
+    df = pd.DataFrame(columns=['_id', 'title', 'brand', 'price', 'ratings', 'images'])
 
 # Extract _id from MongoDB format
 def get_clean_id(val):
@@ -161,7 +161,7 @@ def recommend():
             'brand': item.get('brand'),
             'price': item.get('price'),
             'ratings': item.get('ratings'),
-            'image': item.get('imageURL')[0] if isinstance(item.get('imageURL'), list) else '',
+            'image': item.get('images')[0] if isinstance(item.get('images'), list) else '',
             'similarity': round(float(score), 3)
         })
 

@@ -48,6 +48,7 @@ export const createOutfit = (newOutfit) => async (dispatch) => {
 
     // ✅ Refetch top outfits after new submission
     dispatch(fetchTopOutfits());
+    dispatch(fetchOutfits());
   } catch (error) {
     dispatch({ type: OUTFIT_ERROR, payload: error.message });
   }
@@ -59,6 +60,7 @@ export const likeOutfit = (id) => async (dispatch) => {
     const { data } = await api.likeOutfit(id);
     dispatch({ type: LIKE_OUTFIT, payload: data });
     dispatch(fetchTopOutfits())
+    dispatch(fetchOutfits())
   } catch (error) {
     dispatch({ type: OUTFIT_ERROR, payload: error.message });
   }
@@ -70,6 +72,8 @@ export const deleteOutfit = (id) => async (dispatch) => {
   try {
     await api.deleteOutfit(id);
     dispatch({ type: DELETE_OUTFIT, payload: id });
+    dispatch(fetchTopOutfits())
+    dispatch(fetchOutfits())
   } catch (error) {
     dispatch({ type: OUTFIT_ERROR, payload: error.message });
   }

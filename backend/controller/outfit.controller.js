@@ -1,6 +1,7 @@
 import Outfit from '../models/outfit.model.js';
+import mongoose from 'mongoose';
 
-// Controller to get all outfits with pagination
+// Controller to get other outfits this week (excluding top 3)
 export const getOtherOutfitsThisWeek = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 8;
@@ -9,27 +10,34 @@ export const getOtherOutfitsThisWeek = async (req, res) => {
   try {
     const now = new Date();
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
     startOfWeek.setHours(0, 0, 0, 0);
 
-    // Step 1: Get top 3 IDs this week
-    const top3 = await Outfit.find({ createdAt: { $gte: startOfWeek } })
-      .sort({ likes: -1 })
-      .limit(3)
-      .select('_id');
-    const top3Ids = top3.map((o) => o._id);
+    // Step 1: Get top 3 IDs by likes count
+    const top3 = await Outfit.aggregate([
+      { $match: { createdAt: { $gte: startOfWeek } } },
+      { $addFields: { likesCount: { $size: "$likes" } } },
+      { $sort: { likesCount: -1 } },
+      { $limit: 3 },
+      { $project: { _id: 1 } }
+    ]);
+    const top3Ids = top3.map(o => o._id);
 
-    // Step 2: Fetch rest
+    // Step 2: Fetch rest (other outfits)
     const query = {
       createdAt: { $gte: startOfWeek },
       _id: { $nin: top3Ids }
     };
 
     const total = await Outfit.countDocuments(query);
-    const outfits = await Outfit.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+
+    const outfits = await Outfit.aggregate([
+      { $match: query },
+      { $addFields: { likesCount: { $size: "$likes" } } },
+      { $sort: { likesCount: -1, createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    ]);
 
     res.json({
       outfits,
@@ -48,7 +56,7 @@ export const createOutfit = async (req, res) => {
     imageUrl,
     description,
     likes: [],
-    submittedBy: req.userId, // You would typically get this from an authenticated user
+    submittedBy: req.userId,
     creatorName: req.userName
   });
 
@@ -95,30 +103,31 @@ export const deleteOutfit = async (req, res) => {
     if (!outfit) {
       return res.status(404).json({ message: 'Outfit not found' });
     }
-    // Ensure only the owner can delete
     if (outfit.submittedBy.toString() !== req.userId.toString()) {
       return res.status(403).json({ message: 'You are not authorized to delete this outfit' });
     }
 
     await Outfit.findByIdAndDelete(req.params.id);
-
     res.json({ message: 'Outfit deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+// Controller to get top outfits this week
 export const getTopOutfitsThisWeek = async (req, res) => {
   try {
     const now = new Date();
-
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const top3 = await Outfit.find({ createdAt: { $gte: startOfWeek } })
-      .sort({ likes: -1 })
-      .limit(3);
+    const top3 = await Outfit.aggregate([
+      { $match: { createdAt: { $gte: startOfWeek } } },
+      { $addFields: { likesCount: { $size: "$likes" } } },
+      { $sort: { likesCount: -1 } },
+      { $limit: 3 }
+    ]);
 
     res.status(200).json(top3);
   } catch (err) {

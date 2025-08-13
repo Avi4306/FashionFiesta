@@ -62,7 +62,7 @@ export default function OutfitOfTheWeek() {
             return;
         }
 
-        if (outfit.submittedBy === user?.result?._id) {
+        if (outfit.submittedBy === user?.result?._id || user?.result?.sub) {
             showSnackbar("You can't like your own outfit.", 'error');
             return;
         }
@@ -70,15 +70,13 @@ export default function OutfitOfTheWeek() {
         // The key change: re-fetch the data after liking to update the UI
         try {
             await dispatch(likeOutfit(outfit._id));
-            await dispatch(fetchOutfits(currentPage, pageSize));
-            await dispatch(fetchTopOutfits());
         } catch (error) {
             showSnackbar("Failed to like the outfit. Please try again.", 'error');
         }
     };
 
     const confirmDelete = (outfit) => {
-        if (!user || (outfit.submittedBy !== user?.result?._id)) {
+        if (!user || (outfit.submittedBy !== user?.result?._id || user?.result?.sub)) {
             showSnackbar("You can't delete someone else's outfit.", 'error');
             return;
         }

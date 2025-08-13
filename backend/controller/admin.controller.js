@@ -280,8 +280,7 @@ export const deletePostAdmin = async (req, res) => {
 
 export const createAdminPost = async (req, res) => {
     const postData = req.body;
-    console.log(postData)
-    const { tags, selectedFile, message } = postData;
+    const { tags, selectedFile} = postData;
 
     try {
         let imageUrl = '';
@@ -292,7 +291,6 @@ export const createAdminPost = async (req, res) => {
 
         const newPost = new Post({
             ...postData,
-            content : message,
             selectedFile: imageUrl,
             creator: req.userId,
             name: req.userName,
@@ -316,25 +314,49 @@ export const updateAdminPost = async (req, res) => {
             return res.status(404).json({ message: `No post with id: ${id}` });
         }
 
-        let imageUrl = '';
-        if (selectedFile && selectedFile.startsWith('data:image')) {
-            console.log("Simulating image re-upload for post...");
-            imageUrl = selectedFile;
-        } else if (selectedFile) {
-            imageUrl = selectedFile;
+        let imageUrls = [];
+
+        if (Array.isArray(selectedFile)) {
+            // Process each image in the array
+            imageUrls = selectedFile.map(file => {
+                if (typeof file === 'string' && file.startsWith('data:image')) {
+                    console.log("Simulating image re-upload for base64 image...");
+                    return file; // You could replace with actual upload logic
+                } else if (typeof file === 'string') {
+                    return file; // Already a URL
+                }
+                return null; // Ignore invalid entries
+            }).filter(Boolean); // Remove nulls
+        } else if (typeof selectedFile === 'string') {
+            // Single image as a string
+            imageUrls = [selectedFile];
         }
+
+        const normalizeTags = (t) =>
+            Array.isArray(t)
+                ? t.map(tag => String(tag).trim()).filter(Boolean)
+                : String(t ?? '')
+                    .split(',')
+                    .map(tag => tag.trim())
+                    .filter(Boolean);
 
         const updatedFields = {
             ...rest,
-            tags: tags ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
-            ...(imageUrl && { selectedFile: imageUrl }),
+            ...(tags !== undefined ? { tags: normalizeTags(tags) } : {}),
+            ...(imageUrls.length ? { selectedFile: imageUrls } : {}),
             updatedAt: new Date(),
         };
 
-        const updatedPost = await Post.findByIdAndUpdate(id, updatedFields, { new: true, runValidators: true });
+        const updatedPost = await Post.findByIdAndUpdate(
+            id,
+            updatedFields,
+            { new: true, runValidators: true }
+        );
+
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found.' });
         }
+
         res.status(200).json(updatedPost);
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -1,10 +1,11 @@
 import { Button } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import React from 'react';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 
 export default function Top3Outfits({ topOutfits, user, handleLike, handleDelete }) {
   if (!topOutfits || topOutfits.length === 0) return null;
-  const userId = user?.result?._id;
+  const userId = user?.result?._id || user?.result?.sub;
 
   const renderLikeButton = (outfit) => (
     <button
@@ -43,13 +44,15 @@ export default function Top3Outfits({ topOutfits, user, handleLike, handleDelete
             <div className="flex items-center gap-2 mt-4">
               {renderLikeButton(topOutfits[0])}
               <span className="text-sm">{topOutfits[0].likes?.length ?? 0} likes</span>
-              {user?.result?._id === topOutfits[0].submittedBy && (
+              {(user?.result?._id === topOutfits[0].submittedBy  || user?.result?._sub === topOutfits[0].submittedBy) && (
                 <Button
+                  onClick={() => handleDelete(topOutfits[0])}
                   variant="outlined"
                   color="error"
                   size="small"
-                  onClick={() => handleDelete(topOutfits[0])}
-                  sx={{ mt: 1 }}
+                  startIcon={<DeleteIcon />}
+                  sx={{ mt: 1, borderColor: '#ef4444' }}
+                  className="hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
                 >
                   Delete
                 </Button>
@@ -81,13 +84,15 @@ export default function Top3Outfits({ topOutfits, user, handleLike, handleDelete
             <div className="flex items-center gap-2">
               {renderLikeButton(outfit)}
               <span className="text-sm">{outfit.likes?.length ?? 0} likes</span>
-              {user?.result?._id === outfit.submittedBy && (
+              {(user?.result?._id === outfit.submittedBy  || user?.result?._sub === outfit.submittedBy) && (
                 <Button
+                  onClick={() => handleDelete(outfit)}
                   variant="outlined"
                   color="error"
                   size="small"
-                  onClick={() => handleDelete(outfit)}
-                  sx={{ mt: 1 }}
+                  startIcon={<DeleteIcon />}
+                  sx={{ mt: 1, borderColor: '#ef4444' }}
+                  className="hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
                 >
                   Delete
                 </Button>

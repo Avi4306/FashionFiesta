@@ -12,7 +12,8 @@
     "flask": "cd flask/scan_and_search && python app.py",
     "build": "cd frontend && npm install && npm run build",
     "start": "node backend/index.js",
-    "install-all": "npm install && cd frontend && npm install"
+    "install-all": "npm install && cd frontend && npm install",
+    "watch-images": "node image-watcher/watchAndDownload.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

@@ -1,11 +1,14 @@
 import React from 'react';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
+import { Button } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function OutfitGallery({
   outfits,
   topOutfits = [],
   user,
   handleLike,
+  handleDelete,
   currentPage,
   setCurrentPage,
   pageSize
@@ -37,13 +40,16 @@ export default function OutfitGallery({
             />
             <h4 className="text-lg font-semibold text-[#aa5a44]">{outfit.title}</h4>
             <p className="text-sm text-gray-600 mt-1 line-clamp-2">{outfit.description}</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Submitted by: <span className="font-medium">{outfit.creatorName}</span>
+            </p>
             <div className="flex items-center gap-2 mt-2">
               <button
                 onClick={() => handleLike(outfit)}
                 className="text-xl focus:outline-none"
                 aria-label="Like outfit"
               >
-                {outfit.likes.includes(user?.result?._id) ? (
+                {outfit.likes.includes(user?.result?._id || user?.result?._sub) ? (
                   <AiFillHeart className="text-red-500" />
                 ) : (
                   <AiOutlineHeart />
@@ -51,6 +57,19 @@ export default function OutfitGallery({
               </button>
               <span>{outfit.likes.length} likes</span>
             </div>
+            {(user?.result?._id === outfit.submittedBy || user?.result?._sub === outfit.submittedBy) && (
+              <Button
+                onClick={() => handleDelete(outfit)}
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<DeleteIcon />}
+                sx={{ mt: 1, borderColor: '#ef4444' }}
+                className="hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
+              >
+                Delete
+              </Button>
+            )}
           </div>
         ))}
       </div>

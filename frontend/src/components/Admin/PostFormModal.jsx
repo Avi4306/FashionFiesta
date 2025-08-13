@@ -1,51 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux'; // No longer need useSelector here
-import { FaTimes } from 'react-icons/fa'; // For a close icon
+import { useDispatch } from 'react-redux';
+import { FaTimes } from 'react-icons/fa';
 
-// Modified to accept initialPostData as a prop
 const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostData }) => {
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     title: '',
-    message: '',
-    tags: '', // Will be comma-separated string
-    selectedFile: '', // For image upload base64
+    content: '',
+    tags: '',
+    selectedFile: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Use initialPostData prop to pre-fill the form when editing
     if (postId && initialPostData) {
       setFormData({
-        title: initialPostData.title,
-        message: initialPostData.message,
+        title: initialPostData.title || '',
+        content: initialPostData.content || '',
         tags: initialPostData.tags ? initialPostData.tags.join(', ') : '',
-        selectedFile: initialPostData.selectedFile || '', // Pre-fill if image exists
+        selectedFile: initialPostData.selectedFiles || '',
       });
     } else {
-      // Reset form for new post
       setFormData({
         title: '',
-        message: '',
+        content: '',
         tags: '',
         selectedFile: '',
       });
     }
-    setError(null); // Clear errors on modal open/ID change
-  }, [postId, initialPostData]); // Depend on initialPostData instead of existingPost from store
+    setError(null);
+  }, [postId, initialPostData]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, selectedFile: reader.result });
+        setFormData(prev => ({
+          ...prev,
+          selectedFile: reader.result,
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -57,8 +60,7 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostDat
     setError(null);
 
     const postData = {
-      ...formData,
-      tags: formData.tags.split(',').map((tag) => tag.trim()).filter(Boolean), // Convert tags string to array
+      ...formData
     };
 
     let result;
@@ -68,27 +70,33 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostDat
       result = await dispatch(createPost(postData));
     }
 
-    if (result.success) {
-      onClose(); // Close modal on success
+    if (result?.success) {
+      onClose(true, postId ? 'Post updated successfully.' : 'Post created successfully.');
     } else {
-      setError(result.message || 'An error occurred. Please try again.');
+      const errMsg = result?.content || 'An error occurred. Please try again.';
+      setError(errMsg);
+      onClose(false, errMsg);
     }
+
     setSubmitting(false);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#faf7f3] p-8 rounded-lg shadow-2xl w-full max-w-lg relative">
+      <div className="bg-[#faf7f3] p-8 rounded-lg shadow-2xl w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
         <button
-          onClick={onClose}
+          onClick={() => onClose(false)}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-xl"
         >
           <FaTimes />
         </button>
+
         <h3 className="text-2xl font-bold mb-6 text-[#44403c]">
           {postId ? 'Edit Post' : 'Create New Post'}
         </h3>
+
         {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -102,18 +110,20 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostDat
               required
             />
           </div>
+
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700">Content</label>
             <textarea
-              name="message"
-              id="message"
-              value={formData.message}
+              name="content"
+              id="content"
+              value={formData.content}
               onChange={handleChange}
               rows="5"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-white text-gray-900 focus:ring-[#aa5a44] focus:border-[#aa5a44]"
               required
             ></textarea>
           </div>
+
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags (comma-separated)</label>
             <input
@@ -123,8 +133,10 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostDat
               value={formData.tags}
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-white text-gray-900 focus:ring-[#aa5a44] focus:border-[#aa5a44]"
+              required
             />
           </div>
+
           <div>
             <label htmlFor="selectedFile" className="block text-sm font-medium text-gray-700">Image</label>
             <input
@@ -134,15 +146,21 @@ const PostFormModal = ({ postId, onClose, createPost, updatePost, initialPostDat
               accept="image/*"
               onChange={handleFileChange}
               className="mt-1 block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#F0E4D3] file:text-[#44403c] hover:file:bg-[#e0d4c3]"
+              required
             />
             {formData.selectedFile && (
-              <img src={formData.selectedFile} alt="Preview" className="mt-2 h-24 w-24 object-cover rounded-md" />
+              <img
+                src={formData.selectedFile}
+                alt="Preview"
+                className="mt-2 h-24 w-24 object-cover rounded-md"
+              />
             )}
           </div>
+
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => onClose(false)}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
             >
               Cancel
