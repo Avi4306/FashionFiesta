@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
 CORS(app)
 
-print("[OK] Running correct app.py in flask/scan_and_search")
+print("[OK] Running correct appeddd.py in flask/scan_and_search")
 
 # Paths
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
@@ -142,30 +142,114 @@ def search():
 @app.route('/recommend', methods=['POST'])
 def recommend():
     print("[DEBUG] /recommend route triggered")
-    data = request.get_json()
-    item_id = str(data.get('_id'))
+    try:
+        data = request.get_json()
+        print(f"[DEBUG] Received data: {data}")
+        
+        if not data:
+            return jsonify({'error': 'No JSON data received'}), 400
+            
+        item_id = str(data.get('_id'))
+        print(f"[DEBUG] Looking for item_id: {item_id}")
+        
+        if item_id not in id_to_index:
+            print(f"[ERROR] Item {item_id} not found in index")
+            available_ids = list(id_to_index.keys())[:5]
+            print(f"[DEBUG] Available IDs (first 5): {available_ids}")
+            return jsonify({'error': f'Item {item_id} not found'}), 404
 
-    if item_id not in id_to_index:
-        return jsonify({'error': 'Item not found'}), 404
+        idx = id_to_index[item_id]
+        print(f"[DEBUG] Found index: {idx}")
+        
+        # Check if cosine_sim is properly initialized
+        if cosine_sim is None or len(cosine_sim) == 0:
+            print("[ERROR] Cosine similarity matrix is empty")
+            return jsonify({'error': 'Recommendation system not initialized'}), 500
+            
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]
+        print(f"[DEBUG] Found {len(sim_scores)} similar items")
 
-    idx = id_to_index[item_id]
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]
+        recommendations = []
+        for i, score in sim_scores:
+            try:
+                item = df.iloc[i]
+                print(f"[DEBUG] Processing item at index {i}")
+                
+                # Safely handle different image field names
+                image_url = ''
+                try:
+                    if 'images' in item and pd.notna(item['images']):
+                        images_val = item['images']
+                        if isinstance(images_val, list) and len(images_val) > 0:
+                            image_url = str(images_val[0])
+                        elif isinstance(images_val, str) and images_val.strip():
+                            # Handle string representation of list
+                            if images_val.startswith('[') and images_val.endswith(']'):
+                                try:
+                                    import ast
+                                    images_list = ast.literal_eval(images_val)
+                                    if isinstance(images_list, list) and len(images_list) > 0:
+                                        image_url = str(images_list[0])
+                                except:
+                                    pass
+                            else:
+                                image_url = str(images_val)
+                    elif 'imageURL' in item and pd.notna(item['imageURL']):
+                        imageurl_val = item['imageURL']
+                        if isinstance(imageurl_val, list) and len(imageurl_val) > 0:
+                            image_url = str(imageurl_val[0])
+                        elif isinstance(imageurl_val, str) and imageurl_val.strip():
+                            image_url = str(imageurl_val)
+                except Exception as img_error:
+                    print(f"[WARN] Error processing image for item {i}: {img_error}")
+                    image_url = ''
+                
+                # Safely get rating
+                rating = 0
+                try:
+                    if 'rating' in item and pd.notna(item['rating']):
+                        rating = float(item['rating'])
+                    elif 'ratings' in item and pd.notna(item['ratings']):
+                        rating = float(item['ratings'])
+                except (ValueError, TypeError):
+                    rating = 0
+                
+                # Safely get price
+                price = 0
+                try:
+                    if 'price' in item and pd.notna(item['price']):
+                        price = float(item['price'])
+                except (ValueError, TypeError):
+                    price = 0
+                
+                recommendation = {
+                    '_id': str(item.get('_id', '')),
+                    'title': str(item.get('title', 'Unknown Title')),
+                    'brand': str(item.get('brand', 'Unknown Brand')),
+                    'price': price,
+                    'rating': rating,
+                    'image': image_url,
+                    'similarity': round(float(score), 3)
+                }
+                
+                recommendations.append(recommendation)
+                print(f"[DEBUG] Added recommendation: {recommendation['_id']} - {recommendation['title']}")
+                
+            except Exception as item_error:
+                print(f"[ERROR] Error processing item at index {i}: {item_error}")
+                import traceback
+                print(f"[ERROR] Traceback: {traceback.format_exc()}")
+                continue
 
-    recommendations = []
-    for i, score in sim_scores:
-        item = df.iloc[i]
-        recommendations.append({
-            '_id': item.get('_id'),
-            'title': item.get('title'),
-            'brand': item.get('brand'),
-            'price': item.get('price'),
-            'ratings': item.get('ratings'),
-            'image': item.get('images')[0] if isinstance(item.get('images'), list) else '',
-            'similarity': round(float(score), 3)
-        })
-
-    return jsonify({'recommended': recommendations})
+        print(f"[DEBUG] Returning {len(recommendations)} recommendations")
+        return jsonify({'recommended': recommendations})
+        
+    except Exception as e:
+        print(f"[ERROR] Unexpected error in recommend route: {e}")
+        import traceback
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

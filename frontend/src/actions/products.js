@@ -152,19 +152,49 @@ export const addReview = (id, reviewData) => async (dispatch) => {
     }
 };
 
+// products.js action file
 export const fetchRecommendations = (id) => async (dispatch) => {
   try {
-    dispatch({ type: START_LOADING });
-    // Assuming your api.js has a post method configured
-    const { data } = await api.recommendProduct(id);
-
-    // This will dispatch the recommended products to your reducer
-    dispatch({ type: FETCH_RECOMMENDATIONS, payload: data });
+    console.log('[DEBUG] Fetching recommendations for ID:', id);
+    dispatch({ type: 'RECOMMENDATION_LOADING_START' });
     
-    dispatch({ type: END_LOADING });
+    // Make the API call to Flask backend
+    const response = await fetch('http://127.0.0.1:5000/recommend', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ _id: id }),
+    });
+
+    console.log('[DEBUG] Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[ERROR] Response error:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('[DEBUG] Received recommendations data:', data);
+    
+    if (!data.recommended) {
+      throw new Error('No recommendations found in response');
+    }
+    
+    // Dispatch success action
+    dispatch({ 
+      type: 'FETCH_RECOMMENDATIONS_SUCCESS', 
+      payload: data.recommended 
+    });
+    
   } catch (error) {
-    console.error('Frontend error fetching recommendations:', error);
-    // You might want to dispatch an error action here as well
-    dispatch({ type: END_LOADING });
+    console.error('[ERROR] Frontend error fetching recommendations:', error);
+    dispatch({ 
+      type: 'FETCH_RECOMMENDATIONS_ERROR', 
+      payload: error.message 
+    });
+  } finally {
+    dispatch({ type: 'RECOMMENDATION_LOADING_END' });
   }
 };

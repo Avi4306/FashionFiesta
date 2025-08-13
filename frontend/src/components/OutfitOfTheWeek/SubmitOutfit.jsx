@@ -74,7 +74,7 @@ export default function SubmitOutfit({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900 bg-opacity-70">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4   backdrop-blur-[2px] bg-opacity-50">
       <div className="relative w-full max-w-lg mx-auto bg-[#faf7f3] rounded-3xl shadow-xl p-8 sm:p-10">
         <IconButton
           aria-label="close"

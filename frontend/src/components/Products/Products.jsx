@@ -9,6 +9,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { addToCart } from "../../actions/cart";
 import { useLocation } from "react-router-dom";
 
+
 const Products = ({ navigateOnCategoryChange = true }) => {
   const { category: urlCategory } = useParams();
   const dispatch = useDispatch();
