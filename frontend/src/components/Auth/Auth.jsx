@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,41 +11,12 @@ import { Typography, Button, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { PersonOutline, MailOutline, LockOutlined } from '@mui/icons-material';
 
-// Custom hook to get the window size and detect if the screen is mobile
-const useWindowSize = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: undefined,
-    height: undefined,
-  });
-
-  useEffect(() => {
-    // Handler to call on window resize
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-    
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-    
-    // Call handler right away so state gets updated with initial window size
-    handleResize();
-    
-    // Remove event listener on cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); // Empty array ensures that effect is only run on mount and unmount
-
-  return windowSize;
-};
-
 // Define regex patterns outside the component so they are not recreated on every render
-const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?!.*\s).{8,}$/;
+const emailRegex = /^\w+([.-]?\w+)@\w+([.-]?\w+)(\.\w{2,3})+$/;
+const passwordRegex = /^(?=.\d)(?=.[a-z])(?=.[A-Z])(?=.[!@#$%^&])(?!.\s).{8,}$/;
 
-// Input component with error display
-const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword, onBlur, error }) => (
+// Memoized Input component to prevent re-renders if props are unchanged.
+const Input = React.memo(({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword, onBlur, error }) => (
   <div className="relative w-full mb-4">
     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">{icon}</div>
     <input
@@ -54,7 +25,7 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, ha
       placeholder={placeholder}
       value={value}
       onChange={handleChange}
-      onBlur={onBlur} // Added onBlur event handler
+      onBlur={onBlur}
       className={`w-full pl-10 pr-12 py-2 border rounded-lg focus:outline-none focus:ring-2 ${error ? 'border-red-500 focus:ring-red-200' : 'border-[#D5D0B8] focus:ring-[#DCC5B2]'}`}
       style={{
         backgroundColor: '#F0E4D3',
@@ -72,9 +43,126 @@ const Input = ({ name, type = 'text', placeholder, icon, value, handleChange, ha
     )}
     {error && <p className="text-red-500 text-xs mt-1 absolute -bottom-4 left-0">{error}</p>}
   </div>
-);
+));
 
-const Auth = () => {
+// Extracted and Memoized SignUpForm component
+const SignUpForm = React.memo(({
+  formData,
+  handleSendOtp,
+  handleSubmit,
+  otpStep,
+  openCropper,
+  cropSrc,
+  setOpenCropper,
+  setFormData,
+  imagePreview,
+  setImagePreview,
+  handleImageChange,
+  handleChange,
+  handleBlur,
+  validationErrors,
+  showPassword,
+  handleShowPassword,
+  error,
+  googleSuccess,
+  googleFailure
+}) => (
+  <>
+    <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
+    <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
+    <form onSubmit={otpStep ? handleSubmit : handleSendOtp} className="w-full">
+      {openCropper && (
+        <CropperDialog
+          imageSrc={cropSrc}
+          onClose={() => setOpenCropper(false)}
+          onCropDone={(croppedImage) => {
+            setFormData({ ...formData, profilePhoto: croppedImage });
+            setImagePreview(croppedImage);
+            setOpenCropper(false);
+          }}
+        />
+      )}
+      <div className="flex flex-col items-center mb-4">
+        <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: 'none' }} id="profile-upload" />
+        <label htmlFor="profile-upload" className="cursor-pointer text-center">
+          {imagePreview ? (
+            <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-full mx-auto mb-2 object-cover" />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center mx-auto mb-2">
+              <PersonOutline style={{ fontSize: '2.5rem', color: '#fff' }} />
+            </div>
+          )}
+          <Typography variant="body2" color="primary">{imagePreview ? 'Change Photo' : 'Upload Profile Photo'}</Typography>
+        </label>
+        {imagePreview && (
+          <Button size="small" color="secondary" onClick={() => {
+            setImagePreview('');
+            setFormData({ ...formData, profilePhoto: '' });
+          }} style={{ marginTop: '0.5rem' }}>
+            Remove Photo
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Input name="firstName" placeholder="First Name" icon={<PersonOutline />} value={formData.firstName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.firstName} />
+        <Input name="lastName" placeholder="Last Name" icon={<PersonOutline />} value={formData.lastName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.lastName} />
+      </div>
+      <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
+      <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
+      <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockOutlined />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.confirmPassword} />
+      {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
+
+      <div className="text-center">
+        {otpStep ? (
+          <div className="text-center mt-6">
+            <h3 className="text-lg font-semibold mb-2">Enter the OTP sent to your email</h3>
+            <input type="text" name="otp" placeholder="Enter OTP" value={formData.otp} onChange={handleChange} className="w-48 px-3 py-2 border border-gray-300 rounded focus:outline-none" />
+            <button className="mt-4 w-48 py-2 rounded-full bg-black text-white font-semibold" type="submit">Verify OTP</button>
+          </div>
+        ) : (
+          <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>SIGN UP</button>
+        )}
+      </div>
+      <div className="mt-4 flex justify-center">
+        <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
+      </div>
+    </form>
+  </>
+));
+
+// Extracted and Memoized SignInForm component
+const SignInForm = React.memo(({
+  formData,
+  handleSubmit,
+  handleChange,
+  handleBlur,
+  validationErrors,
+  showPassword,
+  handleShowPassword,
+  error,
+  googleSuccess,
+  googleFailure
+}) => (
+  <>
+    <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
+    <p className="text-black mb-6 text-sm text-center">or use your account</p>
+    <form onSubmit={handleSubmit} className="w-full">
+      <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
+      <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
+      {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
+      <div className="text-center">
+        <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>SIGN IN</button>
+      </div>
+      <div className="mt-4 flex justify-center">
+        <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
+      </div>
+    </form>
+  </>
+));
+
+
+export default function Auth() {
   const initialState = {
     firstName: '',
     lastName: '',
@@ -95,16 +183,13 @@ const Auth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { error } = useSelector((state) => state.auth);
-
   const [validationErrors, setValidationErrors] = useState({});
-  const { width } = useWindowSize(); // Get window size
-  const isMobile = width < 768; // Define mobile breakpoint
 
   useEffect(() => {
     return () => dispatch({ type: CLEAR_ERROR });
   }, [dispatch]);
 
-  const validateField = (name, value) => {
+  const validateField = useCallback((name, value) => {
     let error = '';
     if (name === 'email') {
       if (!value) error = 'Email is required.';
@@ -124,47 +209,45 @@ const Auth = () => {
     }
     setValidationErrors((prev) => ({ ...prev, [name]: error }));
     return error === '';
-  };
+  }, [isSignUp, formData.password]);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     let isValid = true;
     const fieldsToValidate = isSignUp ? ['firstName', 'lastName', 'email', 'password', 'confirmPassword'] : ['email', 'password'];
-    
     fieldsToValidate.forEach(field => {
       if (!validateField(field, formData[field])) {
         isValid = false;
       }
     });
     return isValid;
-  };
+  }, [isSignUp, formData, validateField]);
 
-  const handleImageChange = (e) => {
+  const handleImageChange = useCallback((e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () => {
       setCropSrc(reader.result);
       setOpenCropper(true);
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setValidationErrors((prev) => ({ ...prev, [name]: '' }));
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
     dispatch({ type: CLEAR_ERROR });
-  };
+  }, [dispatch]);
   
-  const handleBlur = (e) => {
+  const handleBlur = useCallback((e) => {
     const { name, value } = e.target;
     validateField(name, value);
-  };
+  }, [validateField]);
 
-  const handleShowPassword = () => setShowPassword((prev) => !prev);
+  const handleShowPassword = useCallback(() => setShowPassword((prev) => !prev), []);
 
-  const handleSendOtp = async (e) => {
+  const handleSendOtp = useCallback(async (e) => {
     e.preventDefault();
     dispatch({ type: CLEAR_ERROR });
     if (!validateForm()) return;
@@ -174,9 +257,9 @@ const Auth = () => {
     } catch (err) {
       console.error("Error sending OTP:", err);
     }
-  };
+  }, [dispatch, formData.email, validateForm]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     dispatch({ type: CLEAR_ERROR });
     if (isSignUp) {
@@ -193,18 +276,18 @@ const Auth = () => {
       if (!validateForm()) return;
       dispatch(login(formData, navigate));
     }
-  };
+  }, [dispatch, formData, isSignUp, navigate, otpStep, validateForm]);
 
-  const switchMode = () => {
+  const switchMode = useCallback(() => {
     dispatch({ type: CLEAR_ERROR });
     setIsSignUp((prev) => !prev);
     setShowPassword(false);
     setFormData(initialState);
     setOtpStep(false);
     setValidationErrors({});
-  };
+  }, [dispatch]);
 
-  const googleSuccess = async (res) => {
+  const googleSuccess = useCallback(async (res) => {
     const token = res?.credential;
     if (!token) return;
     const decoded = jwtDecode(token);
@@ -214,104 +297,21 @@ const Auth = () => {
     } catch (error) {
       console.error("Google Login Failed:", error);
     }
-  };
+  }, [dispatch, navigate]);
 
-  const googleFailure = (err) => {
+  const googleFailure = useCallback((err) => {
     console.error("Google Sign In failed:", err);
-  };
+  }, []);
 
   const spring = { type: "spring", stiffness: 260, damping: 30 };
 
-  // Reusable form components to keep the main return block DRY
-  const SignUpForm = () => (
-    <>
-      <h2 className="text-3xl font-bold text-black mb-2 text-center">Create Account</h2>
-      <p className="text-black mb-6 text-sm text-center">or use your email for registration</p>
-      <form onSubmit={otpStep ? handleSubmit : handleSendOtp} className="w-full">
-        {openCropper && (
-          <CropperDialog
-            imageSrc={cropSrc}
-            onClose={() => setOpenCropper(false)}
-            onCropDone={(croppedImage) => {
-              setFormData({ ...formData, profilePhoto: croppedImage });
-              setImagePreview(croppedImage);
-              setOpenCropper(false);
-            }}
-          />
-        )}
-        <div className="flex flex-col items-center mb-4">
-          <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: 'none' }} id="profile-upload" />
-          <label htmlFor="profile-upload" className="cursor-pointer text-center">
-            {imagePreview ? (
-              <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-full mx-auto mb-2 object-cover" />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center mx-auto mb-2">
-                <PersonOutline style={{ fontSize: '2.5rem', color: '#fff' }} />
-              </div>
-            )}
-            <Typography variant="body2" color="primary">{imagePreview ? 'Change Photo' : 'Upload Profile Photo'}</Typography>
-          </label>
-          {imagePreview && (
-            <Button size="small" color="secondary" onClick={() => {
-              setImagePreview('');
-              setFormData({ ...formData, profilePhoto: '' });
-            }} style={{ marginTop: '0.5rem' }}>
-              Remove Photo
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Input name="firstName" placeholder="First Name" icon={<PersonOutline />} value={formData.firstName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.firstName} />
-          <Input name="lastName" placeholder="Last Name" icon={<PersonOutline />} value={formData.lastName} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.lastName} />
-        </div>
-        <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
-        <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
-        <Input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" icon={<LockOutlined />} value={formData.confirmPassword} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.confirmPassword} />
-        {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
-
-        <div className="text-center">
-          {otpStep ? (
-            <div className="text-center mt-6">
-              <h3 className="text-lg font-semibold mb-2">Enter the OTP sent to your email</h3>
-              <input type="text" name="otp" placeholder="Enter OTP" value={formData.otp} onChange={handleChange} className="w-48 px-3 py-2 border border-gray-300 rounded focus:outline-none" />
-              <button className="mt-4 w-48 py-2 rounded-full bg-black text-white font-semibold" type="submit">Verify OTP</button>
-            </div>
-          ) : (
-            <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>SIGN UP</button>
-          )}
-        </div>
-        <div className="mt-4 flex justify-center">
-          <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
-        </div>
-      </form>
-    </>
-  );
-
-  const SignInForm = () => (
-    <>
-      <h2 className="text-3xl font-bold text-black mb-2 text-center">Sign In</h2>
-      <p className="text-black mb-6 text-sm text-center">or use your account</p>
-      <form onSubmit={handleSubmit} className="w-full">
-        <Input name="email" type="email" placeholder="Email" icon={<MailOutline />} value={formData.email} handleChange={handleChange} onBlur={handleBlur} error={validationErrors.email} />
-        <Input name="password" type={showPassword ? "text" : "password"} placeholder="Password" icon={<LockOutlined />} value={formData.password} handleChange={handleChange} handleShowPassword={handleShowPassword} onBlur={handleBlur} error={validationErrors.password} />
-        {error && <p className="text-red-600 text-sm mt-2 text-center">{error}</p>}
-        <div className="text-center">
-          <button type="submit" className="w-48 mt-4 font-bold py-3 px-6 rounded-full shadow-lg hover:scale-105 transition-transform" style={{ backgroundColor: '#DCC5B2', color: '#FAF7F3' }}>SIGN IN</button>
-        </div>
-        <div className="mt-4 flex justify-center">
-          <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
-        </div>
-      </form>
-    </>
-  );
+  const signUpFormProps = { formData, handleSendOtp, handleSubmit, otpStep, openCropper, cropSrc, setOpenCropper, setFormData, imagePreview, setImagePreview, handleImageChange, handleChange, handleBlur, validationErrors, showPassword, handleShowPassword, error, googleSuccess, googleFailure };
+  const signInFormProps = { formData, handleSubmit, handleChange, handleBlur, validationErrors, showPassword, handleShowPassword, error, googleSuccess, googleFailure };
 
   return (
     <div className="min-h-screen flex items-center justify-center font-sans p-4 bg-[#FAF7F3]">
-      {/* Main container for the auth card */}
       <div className="w-full max-w-sm lg:max-w-4xl rounded-2xl shadow-2xl overflow-hidden bg-[#FAF7F3]">
         
-        {/* Mobile Layout: Stacked view */}
         <div className="lg:hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -322,11 +322,11 @@ const Auth = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="p-8">
-                {isSignUp ? <SignUpForm /> : <SignInForm />}
+                {isSignUp ? <SignUpForm {...signUpFormProps} /> : <SignInForm {...signInFormProps} />}
               </div>
               <div className="p-8 bg-[#DCC5B2] text-center text-black">
                 <h2 className="text-2xl font-bold mb-2">{isSignUp ? 'Welcome Back!' : 'Hello, Friend!'}</h2>
-                <p className="mb-4 text-sm">{isSignUp ? 'To keep connected with us please login with your personal info' : 'Enter your personal details and start your journey with us'}</p>
+                <p className="mb-4 text-sm">{isSignUp ? 'To keep connected with us please login' : 'Enter your details and start your journey'}</p>
                 <button onClick={switchMode} className="w-48 border-2 border-black py-2 px-6 rounded-full hover:bg-black hover:text-[#DCC5B2] transition-all font-bold">
                   {isSignUp ? 'SIGN IN' : 'SIGN UP'}
                 </button>
@@ -335,9 +335,7 @@ const Auth = () => {
           </AnimatePresence>
         </div>
 
-        {/* Desktop Layout: Side-by-side view with sliding overlay */}
         <div className="hidden lg:flex relative w-full min-h-[600px]">
-          {/* Sign Up Form Container */}
           <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
             <AnimatePresence>
               {isSignUp && (
@@ -349,13 +347,12 @@ const Auth = () => {
                   transition={{ ...spring, duration: 0.5 }}
                   className="w-full"
                 >
-                  <SignUpForm />
+                  <SignUpForm {...signUpFormProps} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Sign In Form Container */}
           <div className="w-1/2 p-8 sm:p-12 flex flex-col justify-center items-center">
             <AnimatePresence>
               {!isSignUp && (
@@ -367,13 +364,12 @@ const Auth = () => {
                   transition={{ ...spring, duration: 0.5 }}
                   className="w-full"
                 >
-                  <SignInForm />
+                  <SignInForm {...signInFormProps} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Sliding Overlay for Desktop */}
           <motion.div
             className="absolute top-0 left-0 h-full w-1/2 flex flex-col items-center justify-center text-center p-8 z-30 text-black"
             style={{ backgroundColor: '#DCC5B2' }}
@@ -405,5 +401,3 @@ const Auth = () => {
     </div>
   );
 }
-
-export default Auth;
