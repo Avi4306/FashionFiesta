@@ -146,7 +146,7 @@ export default function CartPage() {
             <span>₹{subtotal.toFixed(2)}</span>
           </div>
           <button
-            onClick={() => navigate('/checkout')}
+            onClick={() => navigate('/')}
             className="w-full mt-6 px-6 py-3 rounded-full bg-[#DCC5B2] text-white font-semibold hover:bg-opacity-90"
           >
             Proceed to Checkout
