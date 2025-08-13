@@ -61,7 +61,7 @@ const ProductHeader = ({ title, brand, category, user, creator, onShare, onDelet
                         <span className="font-semibold text-[#5a4e46] ml-1">
                             {creator.name || 'Unknown Creator'}
                         </span>
-                        {creator.role && (
+                        {creator.role  && creator.role !== 'customer' &&  (
                             <span className="ml-2 rounded-full bg-[#dfd0b8] px-2 py-0.5 text-xs font-medium text-[#5a4e46] capitalize">
                                 {creator.role}
                             </span>
@@ -169,7 +169,7 @@ export default function ProductDetails() {
 
   const handleBuyNow = () => {
     dispatch(addToCart(product, quantity));
-    navigate("/checkout");
+    navigate("/cart");
   };
 
   const handleConfirmDelete = () => {

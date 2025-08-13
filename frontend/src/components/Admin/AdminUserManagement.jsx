@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAdminUsers, createAdminUser, updateAdminUserRole, updateAdminUserPassword, deleteAdminUser } from '../../actions/admin';
-import { Typography, Button, Box, Snackbar, Alert } from '@mui/material'; // Keep MUI components for Snackbar/Alert
-import ConfirmationModal from './ConfirmationModal.jsx'; // Assuming this component is available
-import UserFormModal from './UserFormModal.jsx'; // New modal for user creation/password update
+import {
+  getAdminUsers,
+  createAdminUser,
+  updateAdminUserRole,
+  updateAdminUserPassword,
+  deleteAdminUser
+} from '../../actions/admin';
+import { Typography, Box, Snackbar, Alert } from '@mui/material';
+import ConfirmationModal from './ConfirmationModal.jsx';
+import UserFormModal from './UserFormModal.jsx';
 
 // Skeleton row component for users
 const UserSkeletonRow = () => (
@@ -35,30 +41,33 @@ export default function AdminUserManagement() {
   const authData = useSelector((state) => state.auth.authData);
   const currentUserId = authData?.result?._id;
 
+  // Snackbar states
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
+  // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedUserIdForPassword, setSelectedUserIdForPassword] = useState(null);
 
-  // State for pagination
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(10); // Consistent with other admin pages
+  const [usersPerPage] = useState(10);
 
-  // State for role change confirmation modal
+  // Role change
   const [showConfirmRoleModal, setShowConfirmRoleModal] = useState(false);
   const [roleChangeUserId, setRoleChangeUserId] = useState(null);
   const [newRoleToSet, setNewRoleToSet] = useState('');
+  const [isRoleUpdating, setIsRoleUpdating] = useState(false);
 
-  // State for delete confirmation modal
+  // Deletion
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [userToDeleteId, setUserToDeleteId] = useState(null);
-
-  // Local loading states for individual operations
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isCreatingOrUpdating, setIsCreatingOrUpdating] = useState(false); // Used for both create and password update modals
+
+  // Create / password update
+  const [isCreatingOrUpdating, setIsCreatingOrUpdating] = useState(false);
 
   useEffect(() => {
     dispatch(getAdminUsers(currentPage, usersPerPage));
@@ -69,25 +78,23 @@ export default function AdminUserManagement() {
     setSnackbarOpen(false);
   };
 
-  // Handler to open role change confirmation modal
+  // Role change handlers
   const handleRoleChangeClick = (userId, newRole) => {
     setRoleChangeUserId(userId);
     setNewRoleToSet(newRole);
     setShowConfirmRoleModal(true);
   };
 
-  // Handler for confirming role change
   const handleConfirmRoleChange = async () => {
     setShowConfirmRoleModal(false);
-    setIsCreatingOrUpdating(true); // Indicate an operation is ongoing
+    setIsRoleUpdating(true);
     const result = await dispatch(updateAdminUserRole(roleChangeUserId, newRoleToSet));
-    setIsCreatingOrUpdating(false);
+    setIsRoleUpdating(false);
 
     if (result.success) {
       setSnackbarMessage(`User role updated to ${newRoleToSet}.`);
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
-      // Re-fetch current page to ensure data consistency after update
       dispatch(getAdminUsers(currentPage, usersPerPage));
     } else {
       setSnackbarMessage(result.message || 'Failed to update role.');
@@ -98,14 +105,13 @@ export default function AdminUserManagement() {
     setNewRoleToSet('');
   };
 
-  // Handler for canceling role change
   const handleCancelRoleChange = () => {
     setShowConfirmRoleModal(false);
     setRoleChangeUserId(null);
     setNewRoleToSet('');
   };
 
-  // Handler to open delete confirmation modal
+  // Deletion handlers
   const handleDeleteUserClick = (userId) => {
     if (userId === currentUserId) {
       setSnackbarMessage("You cannot delete your own account from here.");
@@ -117,19 +123,17 @@ export default function AdminUserManagement() {
     setShowConfirmDeleteModal(true);
   };
 
-  // Handler for confirming user deletion
   const handleConfirmDeleteUser = async () => {
     setShowConfirmDeleteModal(false);
-    setIsDeleting(true); // Start deleting loading
+    setIsDeleting(true);
     const result = await dispatch(deleteAdminUser(userToDeleteId));
-    setIsDeleting(false); // End deleting loading
+    setIsDeleting(false);
     setUserToDeleteId(null);
 
     if (result.success) {
       setSnackbarMessage("User deleted successfully.");
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
-      // Re-fetch current page to ensure data consistency after deletion
       setTimeout(() => {
         dispatch(getAdminUsers(currentPage, usersPerPage));
       }, 100);
@@ -140,17 +144,13 @@ export default function AdminUserManagement() {
     }
   };
 
-  // Handler for canceling user deletion
   const handleCancelDeleteUser = () => {
     setShowConfirmDeleteModal(false);
     setUserToDeleteId(null);
   };
 
-  // --- Modal Handlers ---
-  const handleOpenCreateModal = () => {
-    setIsCreateModalOpen(true);
-  };
-
+  // Modal open/close
+  const handleOpenCreateModal = () => setIsCreateModalOpen(true);
   const handleOpenPasswordModal = (userId) => {
     setSelectedUserIdForPassword(userId);
     setIsPasswordModalOpen(true);
@@ -158,13 +158,13 @@ export default function AdminUserManagement() {
 
   const handleCloseCreateModal = (operationSuccess = false, message = '') => {
     setIsCreateModalOpen(false);
-    setIsCreatingOrUpdating(false); // Reset local loading state from modal
+    setIsCreatingOrUpdating(false);
     if (operationSuccess) {
       setSnackbarMessage(message);
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
-      setCurrentPage(1); // Go to the first page after creation
-      dispatch(getAdminUsers(1, usersPerPage)); // Re-fetch first page
+      setCurrentPage(1);
+      dispatch(getAdminUsers(1, usersPerPage));
     } else if (message) {
       setSnackbarMessage(message);
       setSnackbarSeverity('error');
@@ -175,7 +175,7 @@ export default function AdminUserManagement() {
   const handleClosePasswordModal = (operationSuccess = false, message = '') => {
     setIsPasswordModalOpen(false);
     setSelectedUserIdForPassword(null);
-    setIsCreatingOrUpdating(false); // Reset local loading state from modal
+    setIsCreatingOrUpdating(false);
     if (operationSuccess) {
       setSnackbarMessage(message);
       setSnackbarSeverity('success');
@@ -187,64 +187,52 @@ export default function AdminUserManagement() {
     }
   };
 
+  // Pagination
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= usersPagination.totalPages) {
       setCurrentPage(newPage);
     }
   };
 
-  // Function to render pagination buttons
   const renderPaginationButtons = () => {
     const buttons = [];
     const totalPages = usersPagination.totalPages;
-    const maxButtonsToShow = 5; // Max number of page buttons to display directly
+    const maxButtonsToShow = 5;
 
     if (totalPages <= maxButtonsToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(i);
-      }
+      for (let i = 1; i <= totalPages; i++) buttons.push(i);
     } else {
-      // Always show first page
       buttons.push(1);
-
-      // Logic for showing ellipsis and a range of pages around current page
       let startPage = Math.max(2, currentPage - Math.floor(maxButtonsToShow / 2) + 1);
       let endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxButtonsToShow / 2) - 1);
 
-      if (currentPage < maxButtonsToShow - 1) {
-        endPage = maxButtonsToShow - 1;
-      }
-      if (currentPage > totalPages - (maxButtonsToShow - 2)) {
-        startPage = totalPages - (maxButtonsToShow - 2);
-      }
+      if (currentPage < maxButtonsToShow - 1) endPage = maxButtonsToShow - 1;
+      if (currentPage > totalPages - (maxButtonsToShow - 2)) startPage = totalPages - (maxButtonsToShow - 2);
 
-      if (startPage > 2) {
-        buttons.push('...'); // Ellipsis
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        buttons.push(i);
-      }
-
-      if (endPage < totalPages - 1) {
-        buttons.push('...'); // Ellipsis
-      }
-
-      // Always show last page
-      if (totalPages > 1) {
-        buttons.push(totalPages);
-      }
+      if (startPage > 2) buttons.push('...');
+      for (let i = startPage; i <= endPage; i++) buttons.push(i);
+      if (endPage < totalPages - 1) buttons.push('...');
+      if (totalPages > 1) buttons.push(totalPages);
     }
 
     return buttons.map((pageNumber, index) => (
       <button
-        key={index} // Using index as key for ellipsis, otherwise pageNumber is better
+        key={index}
         onClick={() => typeof pageNumber === 'number' && handlePageChange(pageNumber)}
-        disabled={typeof pageNumber !== 'number' || currentPage === pageNumber || isLoading || isDeleting || isCreatingOrUpdating}
+        disabled={
+          typeof pageNumber !== 'number' ||
+          currentPage === pageNumber ||
+          isLoading ||
+          isDeleting ||
+          isCreatingOrUpdating ||
+          isRoleUpdating
+        }
         className={`px-3 py-1 rounded-md transition-colors
-          ${typeof pageNumber !== 'number' ? 'text-gray-500 cursor-default' :
-            currentPage === pageNumber ? 'bg-[#aa5a44] text-white' :
-            'bg-gray-200 text-gray-700 hover:bg-gray-300'}
+          ${typeof pageNumber !== 'number'
+            ? 'text-gray-500 cursor-default'
+            : currentPage === pageNumber
+            ? 'bg-[#aa5a44] text-white'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
           disabled:opacity-50`}
       >
         {pageNumber}
@@ -252,8 +240,6 @@ export default function AdminUserManagement() {
     ));
   };
 
-
-  // Differentiate between no users at all and no users on the current page
   const noUsersFound = users.length === 0 && usersPagination.totalItems === 0 && !isLoading;
   const noUsersOnCurrentPage = users.length === 0 && usersPagination.totalItems > 0 && !isLoading;
 
@@ -281,69 +267,50 @@ export default function AdminUserManagement() {
         <button
           onClick={handleOpenCreateModal}
           className="px-4 py-2 bg-[#aa5a44] text-white rounded-md hover:bg-[#8b4837] transition-colors"
-          disabled={isCreatingOrUpdating || isDeleting} // Disable while other ops are active
+          disabled={isCreatingOrUpdating || isDeleting || isRoleUpdating}
         >
           {isCreatingOrUpdating ? 'Creating...' : 'Create New User'}
         </button>
       </div>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading && users.length === 0 ? ( // Show skeleton rows if loading and no users are currently displayed
-              Array.from({ length: usersPerPage }).map((_, index) => (
-                <UserSkeletonRow key={index} />
-              ))
-            ) : noUsersOnCurrentPage ? ( // Show "No users on this page" if applicable
+            {isLoading && users.length === 0 ? (
+              Array.from({ length: usersPerPage }).map((_, index) => <UserSkeletonRow key={index} />)
+            ) : noUsersOnCurrentPage ? (
               <tr>
-                <td colSpan="5" className="px-6 py-4 whitespace-nowrap text-center text-gray-600">
+                <td colSpan="5" className="px-6 py-4 text-center text-gray-600">
                   No users found on this page. Try navigating to another page.
                 </td>
               </tr>
-            ) : ( // Otherwise, render the users
+            ) : (
               users.map((user) => (
                 <tr key={user._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {user._id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {/* Using a simple select for role change, triggers confirmation modal */}
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{user._id}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{user.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
                     <select
                       value={user.role}
                       onChange={(e) => handleRoleChangeClick(user._id, e.target.value)}
+                      disabled={
+                        isDeleting ||
+                        isCreatingOrUpdating ||
+                        (isRoleUpdating && roleChangeUserId === user._id)
+                      }
                       className="block w-full border border-gray-300 rounded-md shadow-sm p-1 bg-white text-gray-900 focus:ring-[#aa5a44] focus:border-[#aa5a44] text-sm"
-                      disabled={isCreatingOrUpdating || isDeleting} // Disable while other ops are active
                     >
                       <option value="customer">Customer</option>
                       <option value="pending_designer">Pending Designer</option>
@@ -351,18 +318,23 @@ export default function AdminUserManagement() {
                       <option value="admin">Admin</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 text-right text-sm font-medium">
                     <button
                       onClick={() => handleOpenPasswordModal(user._id)}
                       className="text-[#aa5a44] hover:text-[#8b4837] mr-3"
-                      disabled={isCreatingOrUpdating || isDeleting} // Disable while other ops are active
+                      disabled={isCreatingOrUpdating || isDeleting || isRoleUpdating}
                     >
                       Set Password
                     </button>
                     <button
                       onClick={() => handleDeleteUserClick(user._id)}
                       className="text-red-600 hover:text-red-900"
-                      disabled={user._id === currentUserId || isCreatingOrUpdating || isDeleting} // Disable delete for current user or during other ops
+                      disabled={
+                        user._id === currentUserId ||
+                        isDeleting ||
+                        isCreatingOrUpdating ||
+                        isRoleUpdating
+                      }
                     >
                       {isDeleting && userToDeleteId === user._id ? 'Deleting...' : 'Delete'}
                     </button>
@@ -379,17 +351,15 @@ export default function AdminUserManagement() {
         <div className="flex justify-center items-center mt-6 space-x-2">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1 || isLoading || isDeleting || isCreatingOrUpdating}
+            disabled={currentPage === 1 || isLoading || isDeleting || isCreatingOrUpdating || isRoleUpdating}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
           >
             Previous
           </button>
-
           {renderPaginationButtons()}
-
           <button
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === usersPagination.totalPages || isLoading || isDeleting || isCreatingOrUpdating}
+            disabled={currentPage === usersPagination.totalPages || isLoading || isDeleting || isCreatingOrUpdating || isRoleUpdating}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
           >
             Next
@@ -418,21 +388,23 @@ export default function AdminUserManagement() {
         />
       )}
 
-      {/* Confirmation Modal for Role Change */}
+      {/* Role Change Confirmation */}
       {showConfirmRoleModal && (
         <ConfirmationModal
           message={`Are you sure you want to change this user's role to "${newRoleToSet}"?`}
           onConfirm={handleConfirmRoleChange}
           onCancel={handleCancelRoleChange}
+          text = {'Change Role'}
         />
       )}
 
-      {/* Confirmation Modal for User Deletion */}
+      {/* Delete Confirmation */}
       {showConfirmDeleteModal && (
         <ConfirmationModal
           message="Are you sure you want to delete this user? This action cannot be undone."
           onConfirm={handleConfirmDeleteUser}
           onCancel={handleCancelDeleteUser}
+          text = {'Delete'}
         />
       )}
 

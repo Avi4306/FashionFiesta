@@ -4,8 +4,10 @@ import jwt from 'jsonwebtoken';
 import User from '../models/users.models.js'; // Ensure this path is correct: users.models.js or User.js
 import Post from '../models/posts.models.js';
 import Product from '../models/products.models.js';
+import Cart from '../models/cart.model.js';
 import Otp from '../models/otp.models.js';
 import { sendOtpEmail } from '../utils/sendEmail.js';
+import Outfit from '../models/outfit.model.js';
 
 // Helper function to generate JWT token
 const generateToken = (user) =>
@@ -190,6 +192,7 @@ export const deleteUser = async (req, res) => {
     // Delete associated posts and products
     await Post.deleteMany({ creator: user._id });
     await Product.deleteMany({ creator: user._id });
+    await Outfit.deleteMany({ submittedBy: user._id });
     await User.findByIdAndDelete(user._id); // Delete the user account itself
 
     res.status(200).json({ message: 'Account and associated data deleted successfully.' });

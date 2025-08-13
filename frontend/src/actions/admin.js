@@ -37,7 +37,6 @@ const handleResponse = (dispatch, type, payload, successMessage) => {
   dispatch({ type: CLEAR_ADMIN_ERROR });
   dispatch({ type, payload });
   // You might want to dispatch a general UI notification here too (e.g., a toast message)
-  console.log(successMessage);
   return { success: true, data: payload }; // Return success status and data for component feedback
 };
 
@@ -61,9 +60,7 @@ export const clearAdminError = () => async (dispatch) => {
 export const getAdminUsers = (page = 1, limit = 10) => async (dispatch) => {
   dispatch({ type: START_ADMIN_LOADING }); // Dispatch loading start
   try {
-    console.log("Fetching users with page:", page, "limit:", limit);
     const { data } = await api.adminGetAllUsers(page, limit);
-    console.log(data)
     return handleResponse(dispatch, FETCH_ADMIN_USERS, data, 'Users fetched successfully with pagination.');
   } catch (error) {
     return handleError(dispatch, error, 'Failed to fetch users.');
@@ -97,7 +94,6 @@ export const updateAdminUserRole = (id, role) => async (dispatch, getState) => {
       };
 
       dispatch({ type: AUTH, data: updatedAuthDataForCurrentUser });
-      console.log("Logged-in user's role updated in Redux auth state and localStorage.");
     }
 
     return { success: true, data };
@@ -128,7 +124,6 @@ export const deleteAdminUser = (id) => async (dispatch) => {
 export const getAdminProducts = (page = 1, limit = 10) => async (dispatch) => {
   dispatch({ type: START_ADMIN_LOADING }); // Dispatch loading start
   try {
-    console.log("Fetching products with page:", page, "limit:", limit);
     const { data } = await api.adminGetAllProducts(page, limit);
     return handleResponse(dispatch, FETCH_ADMIN_PRODUCTS, data, 'Products fetched successfully with pagination.');
   } catch (error) {
@@ -169,7 +164,6 @@ export const deleteAdminProduct = (id) => async (dispatch) => {
 export const getAdminPosts = (page = 1, limit = 10) => async (dispatch) => {
   dispatch({ type: START_ADMIN_LOADING }); // Dispatch loading start
   try {
-    console.log("Fetching posts with page:", page, "limit:", limit);
     const { data } = await api.adminGetAllPosts(page, limit);
     return handleResponse(dispatch, FETCH_ADMIN_POSTS, data, 'Posts fetched successfully with pagination.');
   } catch (error) {

@@ -134,7 +134,9 @@ export const deleteUser = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(404).json({ message: `No user with id: ${id}` });
         }
-
+        await Post.deleteMany({ creator: id });
+        await Product.deleteMany({ creator: id });
+        await Outfit.deleteMany({ submittedBy: id });
         await User.findByIdAndDelete(id);
         res.status(200).json({ message: 'User deleted successfully.' });
     } catch (error) {
