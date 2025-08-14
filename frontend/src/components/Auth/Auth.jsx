@@ -13,7 +13,7 @@ import { PersonOutline, MailOutline, LockOutlined } from '@mui/icons-material';
 
 // Define regex patterns outside the component so they are not recreated on every render
 const emailRegex = /^\w+([.-]?\w+)@\w+([.-]?\w+)(\.\w{2,3})+$/;
-const passwordRegex = /^(?=.\d)(?=.[a-z])(?=.[A-Z])(?=.[!@#$%^&])(?!.\s).{8,}$/;
+const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&])(?!.*\s).{8,}$/;
 
 // Memoized Input component to prevent re-renders if props are unchanged.
 const Input = React.memo(({ name, type = 'text', placeholder, icon, value, handleChange, handleShowPassword, onBlur, error }) => (
